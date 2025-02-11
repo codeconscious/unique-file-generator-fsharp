@@ -3,7 +3,7 @@ namespace UniqueFileGenerator.Console
 open System
 
 module ArgValidation =
-    type ParsedArgs = { FileCount: uint; Flags: Map<string, string> }
+    type ParsedArgs = { FileCount: int; Flags: Map<string, string> }
 
     let private supportedFlags =
         [
@@ -32,7 +32,7 @@ module ArgValidation =
             flags |> Seq.exists (fun f -> not(supportedFlags |> List.contains f))
 
         match args with
-        | a when a.FileCount < 1u ->
+        | a when a.FileCount < 1 ->
             Error "File count must be one or greater."
         | a when a.Flags.Keys |> hasMalformedFlag ->
             Error "Malformed flag(s) found. Each flag must start with a single hyphen (\"-\")."
@@ -49,7 +49,7 @@ module ArgValidation =
         |> Array.map (fun x -> (x[0], x[1]))
 
     let private tryParseNumber (input: string) =
-        match UInt32.TryParse(input.Replace(", ", String.Empty)) with
+        match Int32.TryParse(input.Replace(", ", String.Empty)) with
         | true, value -> Ok value
         | false, _ -> Error "File count must be one or greater."
 

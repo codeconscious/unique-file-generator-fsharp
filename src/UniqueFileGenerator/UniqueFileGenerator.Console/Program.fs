@@ -20,10 +20,16 @@ module Main =
         let validatedArgs = ArgValidation.startValidation args
 
         match validatedArgs with
+        | Ok a ->
+            StringGenerator.generateMultiple 128 a.FileCount
+                |> Array.iter (fun x ->
+                    x |> printColor (Some ConsoleColor.Cyan))
+            StringGenerator.generateGuids a.FileCount
+                |> Array.iter (fun x ->
+                    x |> printColor (Some ConsoleColor.Blue))
+            $"Done after %s{watch.ElapsedFriendly}" |> printColor None
+            0
         | Error e ->
             e |> printColor (Some ConsoleColor.Red)
             Help.printInstructions() |> ignore
             1
-        | Ok _ ->
-            $"Done after %s{watch.ElapsedFriendly}" |> printColor None
-            0

@@ -9,6 +9,7 @@
     <ItemGroup>
         <Compile Include="ArgParser.fs" />
         <Compile Include="Help.fs" />
+        <Compile Include="StringGenerator.fs" />
         <Compile Include="Program.fs"/>
     </ItemGroup>
 
