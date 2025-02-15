@@ -1,6 +1,7 @@
 ﻿namespace UniqueFileGenerator.Console
 
 open System
+open System.Threading
 
 module Printing =
     let printColor color msg =
@@ -46,6 +47,18 @@ module Main =
         | Some e -> fun fileName -> $"%s{fileName}.%s{e}"
         | None -> id
 
+    let private generateContent sizeInBytes fallback =
+        match sizeInBytes with
+        | None -> fallback
+        | Some s -> StringGenerator.generateSingle s
+
+    let private sleep (ms: int option) f =
+        match ms with
+        | None -> f
+        | Some i ->
+            Thread.Sleep i
+            f
+
     [<EntryPoint>]
     let main args =
         let watch = Startwatch.Library.Watch()
@@ -59,7 +72,9 @@ module Main =
 
             StringGenerator.generateMultiple 10 a.FileCount
                 |> Array.map (fun x -> x |> processText)
-                |> Array.map (fun f -> createFile a.Options.OutputDirectory f "content")
+                |> Array.map (fun f ->
+                    let content = generateContent a.Options.Size f
+                    sleep a.Options.Delay <| (createFile a.Options.OutputDirectory f content))
                 |> Array.iter (fun x ->
                     match x with
                     | Ok f -> $"OK: %s{f}" |> printColor None
