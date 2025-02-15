@@ -14,16 +14,21 @@ module Printing =
 module IO =
     open System.IO
 
+    // let directoryExists dir =
+    //     match Directory.Exists(dir) with
+    //     | true -> Ok dir
+    //     | false -> Error $"Directory \"{dir}\" does not exist."
+
     let createFile directory fileName (contents: string) =
-        try
-            if not <| Directory.Exists(directory)
-            then Error $"Subdirectory \"%s{directory}\" does not exist."
-            else
-                let path = Path.Combine(directory, fileName)
+        match directory with
+        | None -> Error "A directory must be supplied."
+        | Some d ->
+            try
+                let path = Path.Combine(d, fileName)
                 File.WriteAllText(path, contents)
                 Ok fileName
-        with
-            | e -> Error $"%s{e.Message}"
+            with
+                | e -> Error $"%s{e.Message}"
 
 module Main =
     open ArgValidation
@@ -44,7 +49,7 @@ module Main =
     [<EntryPoint>]
     let main args =
         let watch = Startwatch.Library.Watch()
-        let validatedArgs = ArgValidation.validate args
+        let validatedArgs = validate args
 
         match validatedArgs with
         | Ok a ->
@@ -52,19 +57,13 @@ module Main =
             let pre = prepend a
             let processText = ext >> pre
 
-            StringGenerator.generateMultiple 128 a.FileCount
-            |> Array.map (fun x -> x |> processText)
-            |> Array.map (fun f -> createFile a.Options.OutputDirectory f "content")
-            |> Array.iter (fun x ->
-                match x with
-                | Ok f -> $"OK: %s{f}" |> printColor None
-                | Error e -> $"Error: %s{e}" |> printColor (Some(ConsoleColor.Red)))
-
-            // StringGenerator.generateGuids a.FileCount
-            //     |> Array.iter (fun x ->
-            //         x
-            //         |> textProcessing
-            //         |> printColor (Some ConsoleColor.Blue))
+            StringGenerator.generateMultiple 10 a.FileCount
+                |> Array.map (fun x -> x |> processText)
+                |> Array.map (fun f -> createFile a.Options.OutputDirectory f "content")
+                |> Array.iter (fun x ->
+                    match x with
+                    | Ok f -> $"OK: %s{f}" |> printColor None
+                    | Error e -> $"Error: %s{e}" |> printColor (Some(ConsoleColor.Red)))
 
             $"Done after %s{watch.ElapsedFriendly}" |> printColor None
             0
