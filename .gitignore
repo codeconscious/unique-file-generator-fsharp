@@ -1,3 +1,6 @@
+# Ignore the default output folder
+output/
+
 .vscode/
 *.profraw
 .DS_Store

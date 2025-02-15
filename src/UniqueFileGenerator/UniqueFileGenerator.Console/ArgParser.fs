@@ -6,7 +6,7 @@ module ArgValidation =
     type Options =
         { Prefix: string option
           Extension: string option
-          OutputDirectory: string option
+          OutputDirectory: string
           Size: int option
           Delay: int option }
 
@@ -19,6 +19,8 @@ module ArgValidation =
     let outputDirectoryFlag = "-o"
     let sizeFlag = "-s"
     let delayFlag = "-d"
+
+    let defaultOutputDirectory = "output"
 
     let supportedFlags =
         [ prefixFlag
@@ -97,17 +99,25 @@ module ArgValidation =
             Ok {
                 Prefix =          o |> extractValue prefixFlag
                 Extension =       o |> extractValue extensionFlag
-                OutputDirectory = o |> extractValue outputDirectoryFlag
+                OutputDirectory = match o |> extractValue outputDirectoryFlag with
+                                  | Some d -> d
+                                  | None -> defaultOutputDirectory
                 Size =            o |> extractValue sizeFlag
                                     |> Option.bind tryParseInt
                 Delay =           o |> extractValue delayFlag
                                     |> Option.bind tryParseInt
             }
 
+    let confirmDirectoryExists dir =
+        match System.IO.Directory.Exists(dir) with
+        | true -> Ok dir
+        | false -> Error $"Directory \"%s{dir}\" does not exist."
+
     let validate (args: string array) =
         result {
             let! args' = verifyArgCount args
             let! fileCount = verifyFileCount args'
             let! options = parseOptions args'
+            let! _ = confirmDirectoryExists options.OutputDirectory
             return { FileCount = fileCount; Options = options }
         }
