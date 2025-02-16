@@ -15,17 +15,17 @@ module ArgValidation =
         { FileCount: int
           Options: Options }
 
-    let prefixFlag = "-p"
-    let nameBaseCharCountFlag = "-b"
-    let extensionFlag = "-e"
-    let outputDirectoryFlag = "-o"
-    let sizeFlag = "-s"
-    let delayFlag = "-d"
+    let private prefixFlag = "-p"
+    let private nameBaseCharCountFlag = "-b"
+    let private extensionFlag = "-e"
+    let private outputDirectoryFlag = "-o"
+    let private sizeFlag = "-s"
+    let private delayFlag = "-d"
 
-    let defaultOutputDirectory = "output"
-    let defaultNameBaseCharCount = 256
+    let private defaultOutputDirectory = "output"
+    let private defaultNameBaseCharCount = 256
 
-    let supportedFlags =
+    let private supportedFlags =
         [ prefixFlag
           nameBaseCharCountFlag
           extensionFlag
@@ -42,7 +42,7 @@ module ArgValidation =
         member this.Return(x) =
             Ok x
 
-    let result = ResultBuilder()
+    let private result = ResultBuilder()
 
     let private tryParseInt (input: string) =
         match Int32.TryParse(input.Replace(", ", String.Empty)) with
@@ -122,7 +122,7 @@ module ArgValidation =
                                        |> Option.defaultValue 0
             }
 
-    let verifyDirectory options =
+    let private verifyDirectory options =
         let dir = options.OutputDirectory
         match IO.Directory.Exists(dir) with // これでよいのか……。
         | true -> Ok options
