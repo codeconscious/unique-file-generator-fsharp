@@ -4,10 +4,14 @@ open System
 open System.Text
 
 module StringGenerator =
-    let private uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    let private lowercase = "abcdefghijklmnopqrstuvwxyz"
-    let private numbers = "0123456789"
-    let private charBank = uppercase + lowercase + numbers
+    // let private uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    // let private lowercase = "abcdefghijklmnopqrstuvwxyz"
+    // let private numbers = "0123456789"
+    // let private charBank = uppercase + lowercase + numbers
+    let private charBank =
+        [ 'A' .. 'Z' ] @ [ 'a' .. 'z' ] @ [ '0' .. '9' ]
+        |> Seq.map string
+        |> String.concat String.Empty
 
     let private rnd = Random()
 
