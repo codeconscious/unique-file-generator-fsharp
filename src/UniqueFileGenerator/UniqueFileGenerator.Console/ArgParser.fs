@@ -4,26 +4,30 @@ open System
 
 module ArgValidation =
     type Options =
-        { Prefix: string option
-          Extension: string option
-          OutputDirectory: string option
+        { Prefix: string
+          NameBaseCharCount: int
+          Extension: string
+          OutputDirectory: string
           Size: int option
-          Delay: int option }
+          Delay: int }
 
     type Args =
         { FileCount: int
           Options: Options }
 
     let prefixFlag = "-p"
+    let nameBaseCharCountFlag = "-b"
     let extensionFlag = "-e"
     let outputDirectoryFlag = "-o"
     let sizeFlag = "-s"
     let delayFlag = "-d"
 
     let defaultOutputDirectory = "output"
+    let defaultNameBaseCharCount = 256
 
     let supportedFlags =
         [ prefixFlag
+          nameBaseCharCountFlag
           extensionFlag
           outputDirectoryFlag
           sizeFlag
@@ -44,6 +48,12 @@ module ArgValidation =
         match Int32.TryParse(input.Replace(", ", String.Empty)) with
         | true, i -> Some i
         | false, _ -> None
+
+    let private ensureBetween (floor, ceiling) i =
+        match i with
+        | i when i < floor -> floor
+        | i when i > ceiling -> ceiling
+        | _ -> i
 
     let private verifyArgCount (args: string array) =
         let isEven i = i % 2 = 0
@@ -70,9 +80,10 @@ module ArgValidation =
             |> Seq.forall isCorrectFormat
             |> not
 
-        let extractValue option map =
+        let extractValue option fallback map =
             map
             |> Map.tryFind option
+            |> Option.defaultValue fallback
 
         let hasUnsupportedOption (options: string seq) =
             let isUnsupported (o: string) =
@@ -97,22 +108,25 @@ module ArgValidation =
             Error "Unsupported flag(s) found."
         | o ->
             Ok {
-                Prefix =          o |> extractValue prefixFlag
-                Extension =       o |> extractValue extensionFlag
-                OutputDirectory = o |> extractValue outputDirectoryFlag
-                Size =            o |> extractValue sizeFlag
-                                    |> Option.bind tryParseInt
-                Delay =           o |> extractValue delayFlag
-                                    |> Option.bind tryParseInt
+                Prefix =             o |> extractValue prefixFlag String.Empty
+                NameBaseCharCount =  o |> extractValue nameBaseCharCountFlag String.Empty
+                                       |> tryParseInt
+                                       |> Option.defaultValue defaultNameBaseCharCount
+                                       |> ensureBetween (1, 100)
+                Extension =          o |> extractValue extensionFlag String.Empty
+                OutputDirectory =    o |> extractValue outputDirectoryFlag defaultOutputDirectory
+                Size =               o |> extractValue sizeFlag String.Empty
+                                       |> tryParseInt
+                Delay =              o |> extractValue delayFlag String.Empty
+                                       |> tryParseInt
+                                       |> Option.defaultValue 0
             }
 
     let verifyDirectory options =
-        match options.OutputDirectory with
-        | None -> Ok { options with OutputDirectory = Some defaultOutputDirectory }
-        | Some d ->
-            match IO.Directory.Exists(d) with // これでよいのか……。
-            | true -> Ok options
-            | false -> Error $"Directory \"{d}\" does not exist."
+        let dir = options.OutputDirectory
+        match IO.Directory.Exists(dir) with // これでよいのか……。
+        | true -> Ok options
+        | false -> Error $"Directory \"%s{dir}\" does not exist."
 
     let validate (args: string array) =
         result {

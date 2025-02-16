@@ -15,21 +15,13 @@ module Printing =
 module IO =
     open System.IO
 
-    // let directoryExists dir =
-    //     match Directory.Exists(dir) with
-    //     | true -> Ok dir
-    //     | false -> Error $"Directory \"{dir}\" does not exist."
-
     let createFile directory fileName (contents: string) =
-        match directory with
-        | None -> Error "A directory must be supplied."
-        | Some d ->
-            try
-                let path = Path.Combine(d, fileName)
-                File.WriteAllText(path, contents)
-                Ok fileName
-            with
-                | e -> Error $"%s{e.Message}"
+        try
+            let path = Path.Combine(directory, fileName)
+            File.WriteAllText(path, contents)
+            Ok fileName
+        with
+            | e -> Error $"%s{e.Message}"
 
 module Main =
     open ArgValidation
@@ -37,27 +29,20 @@ module Main =
     open IO
 
     // TODO: Move elsewhere.
-    let private prepend args =
-        match args.Options.Prefix with
-        | Some p -> fun fileName -> $"%s{p}%s{fileName}"
-        | None -> id
+    let private prepend pre =
+        fun fileName -> $"%s{pre}%s{fileName}"
 
-    let private appendExt args =
-        match args.Options.Extension with
-        | Some e -> fun fileName -> $"%s{fileName}.%s{e}"
-        | None -> id
+    let private appendExt ext =
+        fun fileName -> $"%s{fileName}.%s{ext}"
 
     let private generateContent sizeInBytes fallback =
         match sizeInBytes with
         | None -> fallback
         | Some s -> StringGenerator.generateSingle s
 
-    let private sleep (ms: int option) f =
-        match ms with
-        | None -> f
-        | Some i ->
-            Thread.Sleep i
-            f
+    let private sleep (ms: int) x =
+        Thread.Sleep ms
+        x
 
     [<EntryPoint>]
     let main args =
@@ -66,19 +51,21 @@ module Main =
 
         match validatedArgs with
         | Ok a ->
-            let ext = appendExt a
-            let pre = prepend a
+            let pre = prepend a.Options.Prefix
+            let ext = appendExt a.Options.Extension
             let processText = ext >> pre
 
-            StringGenerator.generateMultiple 10 a.FileCount
+            StringGenerator.generateMultiple a.Options.NameBaseCharCount a.FileCount
                 |> Array.map (fun x -> x |> processText)
-                |> Array.map (fun f ->
+                |> Array.iter (fun f ->
                     let content = generateContent a.Options.Size f
-                    sleep a.Options.Delay <| (createFile a.Options.OutputDirectory f content))
-                |> Array.iter (fun x ->
-                    match x with
-                    | Ok f -> $"OK: %s{f}" |> printColor None
-                    | Error e -> $"Error: %s{e}" |> printColor (Some(ConsoleColor.Red)))
+
+                    createFile a.Options.OutputDirectory f content
+                    |> sleep a.Options.Delay
+                    |> (fun r ->
+                        match r with
+                            | Ok f -> $"OK: %s{f}" |> printColor None
+                            | Error e -> $"Error: %s{e}" |> printColor (Some(ConsoleColor.Red))))
 
             $"Done after %s{watch.ElapsedFriendly}" |> printColor None
             0
