@@ -26,19 +26,8 @@ module IO =
 module Main =
     open ArgValidation
     open Printing
+    open StringGenerator
     open IO
-
-    // TODO: Move elsewhere.
-    let private prepend pre =
-        fun fileName -> $"%s{pre}%s{fileName}"
-
-    let private appendExt ext =
-        fun fileName -> $"%s{fileName}.%s{ext}"
-
-    let private generateContent sizeInBytes fallback =
-        match sizeInBytes with
-        | None -> fallback
-        | Some s -> StringGenerator.generateSingle s
 
     let private sleep (ms: int) x =
         Thread.Sleep ms
@@ -47,25 +36,21 @@ module Main =
     [<EntryPoint>]
     let main args =
         let watch = Startwatch.Library.Watch()
-        let validatedArgs = validate args
 
-        match validatedArgs with
+        let printResult = function
+            | Ok x -> $"OK: %s{x}" |> printColor None
+            | Error e -> $"Error: %s{e}" |> printColor (Some(ConsoleColor.Red))
+
+        match validate args with
         | Ok a ->
-            let pre = prepend a.Options.Prefix
-            let ext = appendExt a.Options.Extension
-            let processText = ext >> pre
-
-            StringGenerator.generateMultiple a.Options.NameBaseCharCount a.FileCount
-                |> Array.map (fun x -> x |> processText)
-                |> Array.iter (fun f ->
-                    let content = generateContent a.Options.Size f
-
-                    createFile a.Options.OutputDirectory f content
+            generateMultiple a.Options.NameBaseCharCount a.FileCount
+                |> Array.map (fun x ->
+                    x |> modifyFileName a.Options.Prefix a.Options.Extension)
+                |> Array.iter (fun x ->
+                    generateContent a.Options.Size x
+                    |> createFile a.Options.OutputDirectory x
                     |> sleep a.Options.Delay
-                    |> (fun r ->
-                        match r with
-                            | Ok f -> $"OK: %s{f}" |> printColor None
-                            | Error e -> $"Error: %s{e}" |> printColor (Some(ConsoleColor.Red))))
+                    |> printResult)
 
             $"Done after %s{watch.ElapsedFriendly}" |> printColor None
             0

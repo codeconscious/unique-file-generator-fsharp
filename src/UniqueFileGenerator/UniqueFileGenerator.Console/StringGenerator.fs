@@ -25,6 +25,22 @@ module StringGenerator =
         [| 0..count-1 |]
         |> Array.map (fun _ -> generateSingle eachLength)
 
-    let generateGuids count : string array =
-        [| 0..count-1 |]
-        |> Array.map (fun _ -> Guid.NewGuid().ToString())
+    // let generateGuids count : string array =
+    //     [| 0..count-1 |]
+    //     |> Array.map (fun _ -> Guid.NewGuid().ToString())
+
+    let modifyFileName prependText extension baseName =
+        let prepend pre =
+            fun fileName -> $"%s{pre}%s{fileName}"
+
+        let appendExt ext =
+            fun fileName -> $"%s{fileName}.%s{ext}"
+
+        baseName
+        |> prepend prependText
+        |> appendExt extension
+
+    let generateContent sizeInBytes fallback =
+        match sizeInBytes with
+        | None -> fallback
+        | Some s -> generateSingle s
