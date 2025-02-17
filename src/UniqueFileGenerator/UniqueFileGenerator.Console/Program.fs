@@ -3,15 +3,6 @@
 open System
 open System.Threading
 
-module Printing =
-    let printColor color msg =
-        match color with
-        | Some c ->
-            Console.ForegroundColor <- c
-            printfn $"%s{msg}"
-            Console.ResetColor()
-        | None -> printfn $"%s{msg}"
-
 module IO =
     open System.IO
 
@@ -38,8 +29,8 @@ module Main =
         let watch = Startwatch.Library.Watch()
 
         let printResult = function
-            | Ok x -> $"OK: %s{x}" |> printColor None
-            | Error e -> $"Error: %s{e}" |> printColor (Some(ConsoleColor.Red))
+            | Ok x -> $"OK: %s{x}" |> printLineColor None
+            | Error e -> $"Error: %s{e}" |> printLineColor (Some(ConsoleColor.Red))
 
         match validate args with
         | Ok a ->
@@ -52,10 +43,10 @@ module Main =
                     |> sleep a.Options.Delay
                     |> printResult)
 
-            $"Done after %s{watch.ElapsedFriendly}" |> printColor None
+            $"Done after %s{watch.ElapsedFriendly}" |> printLineColor None
             0
         | Error e ->
-            e |> printColor (Some ConsoleColor.Red)
-            Help.printInstructions() |> ignore
+            e |> printLineColor (Some ConsoleColor.Red)
+            Help.print() |> ignore
             1
 
