@@ -65,10 +65,11 @@ module ArgValidation =
             separators
             |> List.fold (fun (x: string) s -> x.Replace(s, String.Empty)) text
 
-        let countArg = Array.head args |> stripSeparators [ ","; "_" ]
+        let countArg = Array.head args
+        let countArg' = countArg |> stripSeparators [ ","; "_" ]
 
-        match tryParseInt countArg with
-        | None -> Error $"Invalid file count: {(Array.head args)}."
+        match tryParseInt countArg' with
+        | None -> Error $"Invalid file count: %s{countArg}."
         | Some c -> Ok c
 
     let private parseOptions (options: string array) =
