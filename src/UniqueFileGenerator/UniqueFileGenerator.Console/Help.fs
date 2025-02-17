@@ -17,9 +17,9 @@ module Help =
         printLine "Optional flags:"
         printEmptyLine ()
         printLine "-p"
-        printLine "    Add a filename prefix. If the prefix ends with a non-alphanumeric character, no space will be added after the prefix otherwise, one will be automatically added."
+        printLine "    Add a filename prefix."
         printLine "-e"
-        printLine "    The file extension of the generated files. The opening period is optional. If not specified, no extension is added."
+        printLine "    The file extension of the generated files. The initial period is optional."
         printLine "-s"
         printLine "    The desired size of each file in bytes, which will be populated with random characters. If not specified, each file will only contain its own name."
         printLine "-o"

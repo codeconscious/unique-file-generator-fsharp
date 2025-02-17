@@ -116,6 +116,7 @@ module ArgValidation =
                                     |> Option.defaultValue defaultNameBaseLengthCount
                                     |> ensureBetween (1, 100)
                 Extension =       o |> extractValue extensionFlag String.Empty
+                                    |> (fun x -> if x[0] = '.' then x[1..] else x)
                 OutputDirectory = o |> extractValue outputDirectoryFlag defaultOutputDirectory
                 Size =            o |> extractValue sizeFlag String.Empty
                                     |> tryParseInt
