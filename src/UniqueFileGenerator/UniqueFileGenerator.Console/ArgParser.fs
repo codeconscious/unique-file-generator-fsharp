@@ -5,7 +5,7 @@ open System
 module ArgValidation =
     type Options =
         { Prefix: string
-          NameBaseCharCount: int
+          NameBaseLength: int
           Extension: string
           OutputDirectory: string
           Size: int option
@@ -16,18 +16,18 @@ module ArgValidation =
           Options: Options }
 
     let private prefixFlag = "-p"
-    let private nameBaseCharCountFlag = "-b"
+    let private nameBaseLengthFlag = "-b"
     let private extensionFlag = "-e"
     let private outputDirectoryFlag = "-o"
     let private sizeFlag = "-s"
     let private delayFlag = "-d"
 
     let private defaultOutputDirectory = "output"
-    let private defaultNameBaseCharCount = 256
+    let private defaultNameBaseLengthCount = 256
 
     let private supportedFlags =
         [ prefixFlag
-          nameBaseCharCountFlag
+          nameBaseLengthFlag
           extensionFlag
           outputDirectoryFlag
           sizeFlag
@@ -50,10 +50,7 @@ module ArgValidation =
         | false, _ -> None
 
     let private ensureBetween (floor, ceiling) i =
-        match i with
-        | i when i < floor -> floor
-        | i when i > ceiling -> ceiling
-        | _ -> i
+        i |> max floor |> min ceiling
 
     let private verifyArgCount (args: string array) =
         let isEven i = i % 2 = 0
@@ -64,7 +61,7 @@ module ArgValidation =
         | _ -> Ok args
 
     let private verifyFileCount (args: string array) =
-        let countArg = args |> Array.head
+        let countArg = Array.head args
         match tryParseInt countArg with
         | None -> Error $"Invalid file count: %s{countArg}."
         | Some c -> Ok c
@@ -108,23 +105,23 @@ module ArgValidation =
             Error "Unsupported flag(s) found."
         | o ->
             Ok {
-                Prefix =             o |> extractValue prefixFlag String.Empty
-                NameBaseCharCount =  o |> extractValue nameBaseCharCountFlag String.Empty
-                                       |> tryParseInt
-                                       |> Option.defaultValue defaultNameBaseCharCount
-                                       |> ensureBetween (1, 100)
-                Extension =          o |> extractValue extensionFlag String.Empty
-                OutputDirectory =    o |> extractValue outputDirectoryFlag defaultOutputDirectory
-                Size =               o |> extractValue sizeFlag String.Empty
-                                       |> tryParseInt
-                Delay =              o |> extractValue delayFlag String.Empty
-                                       |> tryParseInt
-                                       |> Option.defaultValue 0
+                Prefix =          o |> extractValue prefixFlag String.Empty
+                NameBaseLength =  o |> extractValue nameBaseLengthFlag String.Empty
+                                    |> tryParseInt
+                                    |> Option.defaultValue defaultNameBaseLengthCount
+                                    |> ensureBetween (1, 100)
+                Extension =       o |> extractValue extensionFlag String.Empty
+                OutputDirectory = o |> extractValue outputDirectoryFlag defaultOutputDirectory
+                Size =            o |> extractValue sizeFlag String.Empty
+                                    |> tryParseInt
+                Delay =           o |> extractValue delayFlag String.Empty
+                                    |> tryParseInt
+                                    |> Option.defaultValue 0
             }
 
     let private verifyDirectory options =
         let dir = options.OutputDirectory
-        match IO.Directory.Exists(dir) with // これでよいのか……。
+        match IO.Directory.Exists dir with
         | true -> Ok options
         | false -> Error $"Directory \"%s{dir}\" does not exist."
 

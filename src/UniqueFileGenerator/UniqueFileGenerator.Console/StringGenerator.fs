@@ -41,6 +41,7 @@ module StringGenerator =
         |> appendExt extension
 
     let generateContent sizeInBytes fallback =
-        match sizeInBytes with
-        | None -> fallback
-        | Some s -> generateSingle s
+        sizeInBytes
+        |> Option.map generateSingle
+        |> Option.defaultValue fallback
+

@@ -43,7 +43,7 @@ module Main =
 
         match validate args with
         | Ok a ->
-            generateMultiple a.Options.NameBaseCharCount a.FileCount
+            generateMultiple a.Options.NameBaseLength a.FileCount
                 |> Array.map (fun x ->
                     x |> modifyFileName a.Options.Prefix a.Options.Extension)
                 |> Array.iter (fun x ->
