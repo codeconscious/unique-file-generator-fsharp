@@ -3,6 +3,24 @@ namespace UniqueFileGenerator.Console
 open System
 
 module ArgValidation =
+    let private empty = String.Empty
+
+    type OptionType =
+        | Prefix
+        | NameBaseLength
+        | Extension
+        | OutputDirectory
+        | Size
+        | Delay
+
+    let private flags =
+        [ (Prefix, "-p")
+          (NameBaseLength, "-b")
+          (Extension, "-e")
+          (OutputDirectory, "-o")
+          (Size, "-s")
+          (Delay, "-d") ] |> Map.ofList
+
     type Options =
         { Prefix: string
           NameBaseLength: int
@@ -15,23 +33,8 @@ module ArgValidation =
         { FileCount: int
           Options: Options }
 
-    let private prefixFlag = "-p"
-    let private nameBaseLengthFlag = "-b"
-    let private extensionFlag = "-e"
-    let private outputDirectoryFlag = "-o"
-    let private sizeFlag = "-s"
-    let private delayFlag = "-d"
-
     let private defaultOutputDirectory = "output"
     let private defaultNameBaseLengthCount = 256
-
-    let private supportedFlags =
-        [ prefixFlag
-          nameBaseLengthFlag
-          extensionFlag
-          outputDirectoryFlag
-          sizeFlag
-          delayFlag ]
 
     type ValidationErrors =
         | NoArgsPassed
@@ -53,7 +56,7 @@ module ArgValidation =
     let private result = ResultBuilder()
 
     let private tryParseInt (input: string) =
-        match Int32.TryParse(input.Replace(",", String.Empty)) with
+        match Int32.TryParse(input.Replace(",", empty)) with
         | true, i -> Some i
         | false, _ -> None
 
@@ -71,16 +74,16 @@ module ArgValidation =
     let private verifyFileCount (args: string array) =
         let stripSeparators separators text =
             separators
-            |> List.fold (fun (x: string) s -> x.Replace(s, String.Empty)) text
+            |> List.fold (fun (x: string) s -> x.Replace(s, empty)) text
 
-        let countArg = Array.head args
-        let countArg' = countArg |> stripSeparators [ ","; "_" ]
+        let rawArg = Array.head args
+        let strippedArg = rawArg |> stripSeparators [ ","; "_" ]
 
-        match tryParseInt countArg' with
+        match tryParseInt strippedArg with
         | Some c ->
             if c > 1 then Ok c
-            else Error <| FileCountInvalid countArg
-        | None -> Error <| FileCountInvalid countArg
+            else Error <| FileCountInvalid rawArg
+        | None -> Error <| FileCountInvalid rawArg
 
     let private parseOptions (options: string array) =
         let hasMalformedOption (optionPairs: string seq) =
@@ -100,8 +103,9 @@ module ArgValidation =
 
         let hasUnsupportedOption (options: string seq) =
             let isUnsupported (o: string) =
-                supportedFlags
-                |> List.contains o
+                flags
+                |> Map.values
+                |> Seq.contains o
                 |> not
 
             options
@@ -121,17 +125,17 @@ module ArgValidation =
             Error UnsupportedFlags
         | o ->
             Ok {
-                Prefix =          o |> extractValue prefixFlag String.Empty
-                NameBaseLength =  o |> extractValue nameBaseLengthFlag String.Empty
+                Prefix =          o |> extractValue flags[Prefix] empty
+                NameBaseLength =  o |> extractValue flags[NameBaseLength] empty
                                     |> tryParseInt
                                     |> Option.defaultValue defaultNameBaseLengthCount
                                     |> ensureBetween (1, 100)
-                Extension =       o |> extractValue extensionFlag String.Empty
+                Extension =       o |> extractValue flags[Extension] empty
                                     |> (fun x -> if x.StartsWith '.' then x[1..] else x)
-                OutputDirectory = o |> extractValue outputDirectoryFlag defaultOutputDirectory
-                Size =            o |> extractValue sizeFlag String.Empty
+                OutputDirectory = o |> extractValue flags[OutputDirectory] defaultOutputDirectory
+                Size =            o |> extractValue flags[Size] empty
                                     |> tryParseInt
-                Delay =           o |> extractValue delayFlag String.Empty
+                Delay =           o |> extractValue flags[Delay] empty
                                     |> tryParseInt
                                     |> Option.defaultValue 0
             }
