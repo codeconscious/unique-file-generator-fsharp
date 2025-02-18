@@ -53,7 +53,7 @@ module ArgValidation =
     let private result = ResultBuilder()
 
     let private tryParseInt (input: string) =
-        match Int32.TryParse(input.Replace(", ", String.Empty)) with
+        match Int32.TryParse(input.Replace(",", String.Empty)) with
         | true, i -> Some i
         | false, _ -> None
 
@@ -77,8 +77,10 @@ module ArgValidation =
         let countArg' = countArg |> stripSeparators [ ","; "_" ]
 
         match tryParseInt countArg' with
+        | Some c ->
+            if c > 1 then Ok c
+            else Error <| FileCountInvalid countArg
         | None -> Error <| FileCountInvalid countArg
-        | Some c -> Ok c
 
     let private parseOptions (options: string array) =
         let hasMalformedOption (optionPairs: string seq) =
