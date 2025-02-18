@@ -46,7 +46,16 @@ module Main =
             $"Done after %s{watch.ElapsedFriendly}" |> printLineColor None
             0
         | Error e ->
-            e |> printLineColor (Some ConsoleColor.Red)
+            let msg =
+                match e with
+                | NoArgsPassed -> "You must pass in at least one argument: the number of files to generate."
+                | ArgCountInvalid -> "Invalid argument count."
+                | FileCountInvalid c -> $"Invalid file count: %s{c}."
+                | MalformedFlags -> "Malformed flag(s) found."
+                | UnsupportedFlags -> "Unsupported flag(s) found."
+                | DirectoryMissing d -> $"Directory \"%s{d}\" does not exist."
+
+            msg |> printLineColor (Some ConsoleColor.Red)
             Help.print() |> ignore
             1
 

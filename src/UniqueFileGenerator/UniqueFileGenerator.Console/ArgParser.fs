@@ -33,6 +33,14 @@ module ArgValidation =
           sizeFlag
           delayFlag ]
 
+    type ValidationErrors =
+        | NoArgsPassed
+        | ArgCountInvalid
+        | FileCountInvalid of string
+        | MalformedFlags
+        | UnsupportedFlags
+        | DirectoryMissing of string
+
     type ResultBuilder() =
         member this.Bind(m, f) =
             match m with
@@ -56,8 +64,8 @@ module ArgValidation =
         let isEven i = i % 2 = 0
 
         match args.Length with
-        | 0 -> Error "You must pass in at least one argument: the number of files to generate."
-        | l when isEven l -> Error "Invalid argument count."
+        | 0 -> Error NoArgsPassed
+        | l when isEven l -> Error ArgCountInvalid
         | _ -> Ok args
 
     let private verifyFileCount (args: string array) =
@@ -69,7 +77,7 @@ module ArgValidation =
         let countArg' = countArg |> stripSeparators [ ","; "_" ]
 
         match tryParseInt countArg' with
-        | None -> Error $"Invalid file count: %s{countArg}."
+        | None -> Error <| FileCountInvalid countArg
         | Some c -> Ok c
 
     let private parseOptions (options: string array) =
@@ -106,9 +114,9 @@ module ArgValidation =
 
         match optionMap with
         | o when o.Keys |> hasMalformedOption ->
-            Error "Malformed flag(s) found."
+            Error MalformedFlags
         | o when o.Keys |> hasUnsupportedOption ->
-            Error "Unsupported flag(s) found."
+            Error UnsupportedFlags
         | o ->
             Ok {
                 Prefix =          o |> extractValue prefixFlag String.Empty
@@ -130,7 +138,7 @@ module ArgValidation =
         let dir = options.OutputDirectory
         match IO.Directory.Exists dir with
         | true -> Ok options
-        | false -> Error $"Directory \"%s{dir}\" does not exist."
+        | false -> Error <| DirectoryMissing dir
 
     let validate (args: string array) =
         result {
