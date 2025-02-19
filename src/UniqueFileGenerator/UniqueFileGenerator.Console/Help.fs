@@ -13,7 +13,8 @@ module Help =
         printEmptyLine ()
         printLine "Usage:"
         printEmptyLine ()
-        printLine "At the minimum, you must specify the number of files to generate."
+        printLine "At the minimum, you must specify the number of files to generate as a single, positive integer."
+        printLine "(Commas and underscores will be ignored.)"
         printEmptyLine ()
         printLine "If desired, files can be customized via the options below. You must supply a value for each option passed."
         printEmptyLine ()
