@@ -33,8 +33,8 @@ module ArgValidation =
         { FileCount: int
           Options: Options }
 
-    let private defaultOutputDirectory = "output"
-    let private defaultNameBaseLengthCount = 256
+    let defaultOutputDirectory = "output"
+    let defaultNameBaseLength = 50
 
     type ValidationErrors =
         | NoArgsPassed
@@ -128,7 +128,7 @@ module ArgValidation =
                 Prefix =          o |> extractValue flags[Prefix] empty
                 NameBaseLength =  o |> extractValue flags[NameBaseLength] empty
                                     |> tryParseInt
-                                    |> Option.defaultValue defaultNameBaseLengthCount
+                                    |> Option.defaultValue defaultNameBaseLength
                                     |> ensureBetween (1, 100)
                 Extension =       o |> extractValue flags[Extension] empty
                                     |> (fun x -> if x.StartsWith '.' then x[1..] else x)

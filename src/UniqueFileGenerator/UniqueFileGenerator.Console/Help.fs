@@ -6,38 +6,43 @@ module Help =
     let print () =
         printEmptyLine ()
         printLine "Unique File Generator"
-        printLine "• Quickly and easily create an arbitrary number of unique (by name and content) files."
-        printLine "• Each filename contains a random collection of characters."
-        printLine "• You can also supply optional parameters to customize files according to your needs."
-        printLine "• The tool checks that there is sufficient drive space available before starting."
+        printLine "• Quickly and easily creates an arbitrary number of unique (by name and content) files."
+        printLine "• Accepts optional parameters to customize files according to your needs."
+        printLine "• Requirement: .NET 9 (or higher) runtime"
+        printLine "• Homepage: https://github.com/codeconscious/unique-file-generator-fsharp"
+        printEmptyLine ()
+        printLine "Usage:"
         printEmptyLine ()
         printLine "At the minimum, you must specify the number of files to generate."
         printEmptyLine ()
-        printLine "Optional flags:"
+        printLine "If desired, files can be customized via the options below. You must supply a value for each option passed."
         printEmptyLine ()
         printLine "-p"
-        printLine "    Add a filename prefix."
+        printLine "    Prepends a specified prefix to each filename."
+        printLine "-b"
+        printLine "    The base filename length. Random alphanumeric characters will be used."
+        printLine $"    If not specified, defaults to {ArgValidation.defaultNameBaseLength}."
         printLine "-e"
-        printLine "    The file extension of the generated files. The initial period is optional."
+        printLine "    The extension to append to each generated filename. The initial period is optional."
+        printLine "    If not specified, no extension will be added."
         printLine "-s"
-        printLine "    The desired size of each file in bytes. Files will be populated with random characters."
-        printLine "    If not specified, each file will only contain its own name."
+        printLine "    The size in bytes of each new file. Files will be populated with random alphanumeric characters."
+        printLine "    If not specified, each file will contain its own name."
         printLine "-o"
-        printLine "    The output subfolder, which must exist."
-        printLine "    If not specified, \"output\" is used by default."
+        printLine "    The output subdirectory in which files should be created. The directory must already exist."
+        printLine $"    If not specified, defaults to \"{ArgValidation.defaultOutputDirectory}\"."
         printLine "-d"
         printLine "    A delay in milliseconds to be applied between each file's creation."
         printEmptyLine ()
         printLine "Examples:"
         printEmptyLine ()
-        printLine "    dotnet run 10"
+        printLine "    dotnet run -- 10"
         printLine "         Creates 10 files with the default settings"
         printEmptyLine ()
-        printLine "    dotnet run 1,000 -p TEST-1229 -e txt -o My Output Folder"
-        printLine "                  -s 1000000 -d 1000"
+        printLine "    dotnet run -- 1,000 -p TEST-1229 -b 10 -e txt -o \"My Output Folder\" -s 1000000 -d 1000"
         printLine "         Creates one thousand 1MB files, each named like"
         printLine "         \"TEST-1229 ##########.txt\", in a subfolder called"
-        printLine "         \"My Output Folder\", with a 1s delay after each new file."
+        printLine "         \"My Output Folder\", with a 1s delay for each new file."
         printEmptyLine ()
-        printLine "Homepage: https://github.com/codeconscious/"
-
+        printLine "Note: `--` signals that the arguments are for this program and not the `dotnet` command."
+        printEmptyLine ()
