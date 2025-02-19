@@ -25,10 +25,6 @@ module StringGenerator =
         [| 0..count-1 |]
         |> Array.map (fun _ -> generateSingle eachLength)
 
-    // let generateGuids count : string array =
-    //     [| 0..count-1 |]
-    //     |> Array.map (fun _ -> Guid.NewGuid().ToString())
-
     let modifyFileName prependText extension baseName =
         let prepend pre =
             fun fileName -> $"%s{pre}%s{fileName}"
