@@ -12,29 +12,22 @@ module StringGenerator =
     let private rnd = Random()
 
     let generateSingle (length: int) : string =
-        [| 0..length |]
-        |> Array.fold (fun (state: StringBuilder) i ->
-            match i with
-            | i when i = length -> state
-            | _ ->
-                let nextChar = rnd.Next(0, charBank.Length - 1)
-                state.Append charBank[nextChar]) (StringBuilder(length))
-        |> _.ToString()
+        let sb = StringBuilder(length)
+        for _ in 1 .. length do
+            let nextChar = rnd.Next(0, charBank.Length - 1)
+            sb.Append(charBank[nextChar]) |> ignore
+        sb.ToString()
 
     let generateMultiple eachLength count : string array =
-        [| 0..count-1 |]
-        |> Array.map (fun _ -> generateSingle eachLength)
+        Array.init count (fun _ -> generateSingle eachLength)
 
-    let modifyFileName prependText extension baseName =
-        let prepend pre =
-            fun fileName -> $"%s{pre}%s{fileName}"
-
-        let appendExt ext =
-            fun fileName -> $"%s{fileName}.%s{ext}"
+    let modifyFileName prependText extensionText baseName =
+        let prepend fileName = $"%s{prependText}%s{fileName}"
+        let appendExtension fileName = $"%s{fileName}.%s{extensionText}"
 
         baseName
-        |> prepend prependText
-        |> appendExt extension
+        |> prepend
+        |> appendExtension
 
     let generateContent sizeInBytes fallback =
         sizeInBytes

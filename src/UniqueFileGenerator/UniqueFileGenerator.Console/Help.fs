@@ -22,7 +22,7 @@ module Help =
         printLine "    Prepends a specified prefix to each filename."
         printLine "-b"
         printLine "    The base filename length. Random alphanumeric characters will be used."
-        printLine $"    If not specified, defaults to {ArgValidation.defaultNameBaseLength}."
+        printLine $"    If not specified, defaults to %d{ArgValidation.defaultNameBaseLength}."
         printLine "-e"
         printLine "    The extension to append to each generated filename. The initial period is optional."
         printLine "    If not specified, no extension will be added."
@@ -31,7 +31,7 @@ module Help =
         printLine "    If not specified, each file will contain its own name."
         printLine "-o"
         printLine "    The output subdirectory in which files should be created. The directory must already exist."
-        printLine $"    If not specified, defaults to \"{ArgValidation.defaultOutputDirectory}\"."
+        printLine $"    If not specified, defaults to \"%s{ArgValidation.defaultOutputDirectory}\"."
         printLine "-d"
         printLine "    A delay in milliseconds to be applied between each file's creation."
         printEmptyLine ()

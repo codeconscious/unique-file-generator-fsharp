@@ -29,21 +29,20 @@ module Main =
         let watch = Startwatch.Library.Watch()
 
         let printResult = function
-            | Ok x -> $"OK: %s{x}" |> printLineColor None
-            | Error e -> $"Error: %s{e}" |> printLineColor (Some(ConsoleColor.Red))
+            | Ok x -> printLine $"OK: %s{x}"
+            | Error e -> printError $"Error: %s{e}"
 
         match validate args with
         | Ok a ->
             generateMultiple a.Options.NameBaseLength a.FileCount
-                |> Array.map (fun x ->
-                    x |> modifyFileName a.Options.Prefix a.Options.Extension)
-                |> Array.iter (fun x ->
-                    generateContent a.Options.Size x
-                    |> createFile a.Options.OutputDirectory x
+                |> Array.map (fun text -> text |> modifyFileName a.Options.Prefix a.Options.Extension)
+                |> Array.iter (fun text ->
+                    generateContent a.Options.Size text
+                    |> createFile a.Options.OutputDirectory text
                     |> sleep a.Options.Delay
                     |> printResult)
 
-            $"Done after %s{watch.ElapsedFriendly}" |> printLineColor None
+            printLine $"Done after %s{watch.ElapsedFriendly}"
             0
         | Error e ->
             let msg =
@@ -55,7 +54,7 @@ module Main =
                 | UnsupportedFlags -> "Unsupported flag(s) found."
                 | DirectoryMissing d -> $"Directory \"%s{d}\" does not exist."
 
-            msg |> printLineColor (Some ConsoleColor.Red)
-            Help.print() |> ignore
+            printError msg
+            Help.print()
             1
 

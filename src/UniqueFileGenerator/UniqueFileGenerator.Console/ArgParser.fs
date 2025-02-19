@@ -13,13 +13,14 @@ module ArgValidation =
         | Size
         | Delay
 
-    let private flags =
+    let private flags: Map<OptionType, string> =
         [ (Prefix, "-p")
           (NameBaseLength, "-b")
           (Extension, "-e")
           (OutputDirectory, "-o")
           (Size, "-s")
-          (Delay, "-d") ] |> Map.ofList
+          (Delay, "-d") ]
+        |> Map.ofList
 
     type Options =
         { Prefix: string
@@ -74,7 +75,7 @@ module ArgValidation =
     let private verifyFileCount (args: string array) =
         let stripSeparators separators text =
             separators
-            |> List.fold (fun (x: string) s -> x.Replace(s, empty)) text
+            |> List.fold (fun (acc: string) s -> acc.Replace(s, empty)) text
 
         let rawArg = Array.head args
         let strippedArg = rawArg |> stripSeparators [ ","; "_" ]
@@ -85,8 +86,8 @@ module ArgValidation =
             else Error <| FileCountInvalid rawArg
         | None -> Error <| FileCountInvalid rawArg
 
-    let private parseOptions (options: string array) =
-        let hasMalformedOption (optionPairs: string seq) =
+    let private parseOptions options =
+        let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
                 o.Length = 2 &&
                 o.StartsWith("-") &&
@@ -101,7 +102,7 @@ module ArgValidation =
             |> Map.tryFind option
             |> Option.defaultValue fallback
 
-        let hasUnsupportedOption (options: string seq) =
+        let hasUnsupportedOption options =
             let isUnsupported (o: string) =
                 flags
                 |> Map.values
@@ -113,7 +114,7 @@ module ArgValidation =
 
         let optionMap =
             options
-            |> Array.tail // Ignore the file count.
+            |> Array.tail // Disregard the file count.
             |> Array.chunkBySize 2 // Will throw if array length is odd!
             |> Array.map (fun x -> (x[0], x[1]))
             |> Map.ofArray
