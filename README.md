@@ -1,14 +1,17 @@
 # Unique File Generator (F# Version)
 
-This command line tool allows you to quickly and easily create an arbitrary number of unique (by name and content) files on your computer. Each filename contains a random collection of characters to differentiate them. You can also supply optional parameters to customize files according to your needs.
+- Quickly and easily creates an arbitrary number of unique (by name and content) files
+- Accepts optional parameters to customize files according to your needs
+- Requirement: .NET 9 (or higher) runtime
 
-※ I also have very similar tools written in C# and [Rust](https://github.com/codeconscious/unique-file-generator-rust/blob/main/README.md) since this has apparently become one of my go-to projects to practice languages. 😅)
+(I also have very similar tools written in C# and [Rust](https://github.com/codeconscious/unique-file-generator-rust/blob/main/README.md) since this has apparently become one of my go-to projects for language practice. 😅)
 
 ## Requirements
 
 - .NET 9 (or higher) runtime
 
 ## Usage
+
 At the minimum, you must specify the number of files you want to generate. This should be a single positive integer (with optional commas or underscores).
 
 ```
@@ -30,7 +33,8 @@ Flag | Description
 
 ### Examples
 
-Note: `--` is needed after `dotnet run` to signal that the parameters are for this application and not for the `dotnet` command.
+> [!NOTE]
+> `--` is needed after `dotnet run` to signal that the parameters are for this application and not for the `dotnet` command.
 
 ```
 dotnet run -- 50,000 -p Random-
@@ -38,6 +42,6 @@ dotnet run -- 50,000 -p Random-
 Creates 50,000 files, each named similarly to "Random-########", in a subfolder named "output". There are no prefixes or extensions.
 
 ```
-dotnet run -- 100 -p TEST-1229 -e txt -o My Output Folder -s 1000000 -d 1000
+dotnet run -- 100 -p "TEST -b 10 " -e txt -o "My Output Folder" -s 1000000 -d 1000
 ```
-Creates one hundred 1MB files, each named similarly to "TEST-1229 ##########.txt", with a 1s break between each file's creation, and in a subfolder called "My Output Folder".
+Creates 100 1MB files, each named similarly to "TEST ##########.txt", with a 1-second break between each file's creation, and in a subfolder called "My Output Folder".
