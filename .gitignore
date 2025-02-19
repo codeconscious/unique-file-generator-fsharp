@@ -2,6 +2,7 @@
 output/
 
 .vscode/
+.idea/
 *.profraw
 .DS_Store
 history.log
