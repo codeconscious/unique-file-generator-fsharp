@@ -42,7 +42,7 @@ module Help =
         printEmptyLine ()
         printLine "    dotnet run -- 1,000 -p TEST-1229 -b 10 -e txt -o \"My Output Folder\" -s 1000000 -d 1000"
         printLine "         Creates one thousand 1MB files, each named like"
-        printLine "         \"TEST-1229 ##########.txt\", in a subfolder called"
+        printLine "         \"TEST-1229 ##########.txt\", in the existing subfolder"
         printLine "         \"My Output Folder\", with a 1s delay for each new file."
         printEmptyLine ()
         printLine "Note: `--` signals that the arguments are for this program and not the `dotnet` command."
