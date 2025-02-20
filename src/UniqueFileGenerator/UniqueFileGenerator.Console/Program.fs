@@ -16,6 +16,7 @@ module IO =
 
 module Main =
     open ArgValidation
+    open ArgValidation.Types
     open Printing
     open StringGenerator
     open IO
