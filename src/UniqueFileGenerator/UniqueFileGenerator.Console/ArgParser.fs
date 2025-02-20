@@ -61,9 +61,6 @@ module ArgValidation =
         | true, i -> Some i
         | false, _ -> None
 
-    let private ensureBetween (floor, ceiling) i =
-        i |> max floor |> min ceiling
-
     let private verifyArgCount (args: string array) =
         let isEven i = i % 2 = 0
 
@@ -87,6 +84,9 @@ module ArgValidation =
         | None -> Error <| FileCountInvalid rawArg
 
     let private parseOptions options =
+        let ensureBetween (floor, ceiling) i =
+            i |> max floor |> min ceiling
+
         let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
                 o.Length = 2 &&
