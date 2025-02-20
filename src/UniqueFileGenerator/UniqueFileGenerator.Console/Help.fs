@@ -24,7 +24,7 @@ module Help =
             "-p"
             "    Prepends a specified prefix to each filename."
             "-b"
-            "    The base filename length. Random alphanumeric characters will be used."
+            "    The base filename length. Random alphanumeric characters will be used. The maximum is 100."
             $"    If not specified, defaults to %d{defaultOptions.NameBaseLength}."
             "-e"
             "    The extension to append to each generated filename. The initial period is optional."

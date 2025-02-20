@@ -22,7 +22,7 @@ If desired, files can be customized via the options below. You must supply a val
 Flag | Description
 ---- | :----
 -p | Prepends a specified prefix to each filename.
--b | The base filename length. Random alphanumeric characters will be used. If not specified, a default of 50 will be used.
+-b | The base filename length. Random alphanumeric characters will be used.  The maximum is 100. If not specified, a default of 50 will be used.
 -e | The extension to append to each generated filename. The initial period is optional. If not specified, no extension will be added.
 -s | The size in bytes of each new file. Files will be populated with random alphanumeric characters. If not specified, each file will contain its own name.
 -o | The output subdirectory in which files should be created. The directory must already exist. If not specified, defaults to "output".
