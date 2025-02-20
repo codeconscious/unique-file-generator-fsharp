@@ -30,12 +30,17 @@ module ArgValidation =
           Size: int option
           Delay: int }
 
+    let defaults =
+        { Prefix = empty
+          NameBaseLength = 50
+          Extension = empty
+          OutputDirectory = "output"
+          Size = None
+          Delay = 0 }
+
     type Args =
         { FileCount: int
           Options: Options }
-
-    let defaultOutputDirectory = "output"
-    let defaultNameBaseLength = 50
 
     type ValidationErrors =
         | NoArgsPassed
@@ -126,19 +131,19 @@ module ArgValidation =
             Error UnsupportedFlags
         | o ->
             Ok {
-                Prefix =          o |> extractValue flags[Prefix] empty
+                Prefix =          o |> extractValue flags[Prefix] defaults.Prefix
                 NameBaseLength =  o |> extractValue flags[NameBaseLength] empty
                                     |> tryParseInt
-                                    |> Option.defaultValue defaultNameBaseLength
+                                    |> Option.defaultValue defaults.NameBaseLength
                                     |> ensureBetween (1, 100)
-                Extension =       o |> extractValue flags[Extension] empty
+                Extension =       o |> extractValue flags[Extension] defaults.Extension
                                     |> (fun x -> if x.StartsWith '.' then x[1..] else x)
-                OutputDirectory = o |> extractValue flags[OutputDirectory] defaultOutputDirectory
+                OutputDirectory = o |> extractValue flags[OutputDirectory] defaults.OutputDirectory
                 Size =            o |> extractValue flags[Size] empty
                                     |> tryParseInt
                 Delay =           o |> extractValue flags[Delay] empty
                                     |> tryParseInt
-                                    |> Option.defaultValue 0
+                                    |> Option.defaultValue defaults.Delay
             }
 
     let private verifyDirectory options =

@@ -1,6 +1,7 @@
 namespace UniqueFileGenerator.Console
 
 open Printing
+open ArgValidation
 
 module Help =
     let private textBlocks = [
@@ -24,7 +25,7 @@ module Help =
             "    Prepends a specified prefix to each filename."
             "-b"
             "    The base filename length. Random alphanumeric characters will be used."
-            $"    If not specified, defaults to %d{ArgValidation.defaultNameBaseLength}."
+            $"    If not specified, defaults to %d{defaults.NameBaseLength}."
             "-e"
             "    The extension to append to each generated filename. The initial period is optional."
             "    If not specified, no extension will be added."
@@ -33,7 +34,7 @@ module Help =
             "    If not specified, each file will contain its own name."
             "-o"
             "    The output subdirectory in which files should be created. The directory must already exist."
-            $"    If not specified, defaults to \"%s{ArgValidation.defaultOutputDirectory}\"."
+            $"    If not specified, defaults to \"%s{defaults.OutputDirectory}\"."
             "-d"
             "    A delay in milliseconds to be applied between each file's creation."
         ]
