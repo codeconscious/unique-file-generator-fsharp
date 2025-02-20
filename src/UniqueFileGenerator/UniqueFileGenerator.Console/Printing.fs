@@ -3,7 +3,8 @@ namespace UniqueFileGenerator.Console
 open System
 
 module Printing =
-    // Be careful with color because we don't know users' terminal color schemes.
+    // Be careful with color because we don't know the user's terminal color scheme,
+    // so it's easy to unintentionally output invisible or hard-to-read text.
     let private printLineColor color msg =
         match color with
         | Some c ->
@@ -17,9 +18,6 @@ module Printing =
 
     let printError msg =
         printLineColor (Some ConsoleColor.Red) msg
-
-    let printWarning msg =
-        printLineColor (Some ConsoleColor.Yellow) msg
 
     let printEmptyLine () =
         printLineColor None String.Empty
