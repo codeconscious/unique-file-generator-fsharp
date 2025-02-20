@@ -25,21 +25,21 @@ module Main =
         x
 
     [<EntryPoint>]
-    let main args =
+    let main rawArgs =
         let watch = Startwatch.Library.Watch()
 
         let printResult = function
             | Ok x -> printLine $"OK: %s{x}"
             | Error e -> printError $"Error: %s{e}"
 
-        match validate args with
-        | Ok a ->
-            generateMultiple a.Options.NameBaseLength a.FileCount
-                |> Array.map (fun text -> text |> modifyFileName a.Options.Prefix a.Options.Extension)
+        match validate rawArgs with
+        | Ok args ->
+            generateMultiple args.Options.NameBaseLength args.FileCount
+                |> Array.map (fun text -> text |> modifyFileName args.Options.Prefix args.Options.Extension)
                 |> Array.iter (fun text ->
-                    generateContent a.Options.Size text
-                    |> createFile a.Options.OutputDirectory text
-                    |> sleep a.Options.Delay
+                    generateContent args.Options.Size text
+                    |> createFile args.Options.OutputDirectory text
+                    |> sleep args.Options.Delay
                     |> printResult)
 
             printLine $"Done after %s{watch.ElapsedFriendly}"
