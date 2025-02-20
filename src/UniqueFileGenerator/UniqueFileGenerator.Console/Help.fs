@@ -15,7 +15,8 @@ module Help =
             "Usage:"
         ]
         [
-            "At the minimum, you must specify the number of files to generate. (Commas and underscores are ignored.)"
+            "At the minimum, you must specify the number of files to generate with the default options."
+            "(Commas and underscores are ignored.)"
         ]
         [
             "If desired, files can be customized via the options below. You must supply a value for each option passed."

@@ -4,12 +4,14 @@
 - Accepts optional parameters to customize files according to your needs
 - Requirement: .NET 9 (or higher) runtime
 
-(I also have very similar tools written in [C#](https://github.com/codeconscious/unique-file-generator-csharp) and [Rust](https://github.com/codeconscious/unique-file-generator-rust/) since this has apparently become one of my go-to projects for language practice. 😅)
+## But... why?
+
+In a previous position, I actually had use for such a utility once. However, I only created _this_ utility to get more experience with F#. (I have also written very tools in [C#](https://github.com/codeconscious/unique-file-generator-csharp) and [Rust](https://github.com/codeconscious/unique-file-generator-rust/) before, so it seems this has become one of my go-to projects for getting experience with languages. 😅)
 
 
 ## Usage
 
-At the minimum, you must specify the number of files you want to generate. This should be a single positive integer (with optional commas or underscores).
+At the minimum, you must specify the number of files you want to generate with the default options. This should be a single positive integer (with optional commas or underscores).
 
 ```
 dotnet run -- 1000
