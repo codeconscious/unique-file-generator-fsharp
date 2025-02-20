@@ -32,10 +32,10 @@ module Main =
             | Ok x -> printLine $"OK: %s{x}"
             | Error e -> printError $"Error: %s{e}"
 
-        match validate rawArgs with
-        | Ok args ->
+        let generateFiles args =
             generateMultiple args.Options.NameBaseLength args.FileCount
-                |> Array.map (fun text -> text |> modifyFileName args.Options.Prefix args.Options.Extension)
+                |> Array.map (fun text ->
+                    text |> modifyFileName args.Options.Prefix args.Options.Extension)
                 |> Array.iter (fun text ->
                     generateContent args.Options.Size text
                     |> createFile args.Options.OutputDirectory text
@@ -44,7 +44,8 @@ module Main =
 
             printLine $"Done after %s{watch.ElapsedFriendly}"
             0
-        | Error e ->
+
+        let printValidationErrors e =
             let msg =
                 match e with
                 | NoArgsPassed -> "You must pass in at least one argument: the number of files to generate."
@@ -55,6 +56,10 @@ module Main =
                 | DirectoryMissing d -> $"Directory \"%s{d}\" does not exist."
 
             printError msg
-            Help.print()
+            Help.print ()
             1
+
+        match validate rawArgs with
+        | Ok args -> generateFiles args
+        | Error e -> printValidationErrors e
 
