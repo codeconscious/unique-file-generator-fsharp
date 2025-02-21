@@ -1,7 +1,7 @@
 # Unique File Generator (F# Version)
 
-- Quickly and easily creates an arbitrary number of unique (by name and content) files
-- Accepts optional parameters to customize files according to your needs
+- Quickly and easily create an arbitrary number of unique (by name and content) files
+- Use optional parameters to customize files according to your needs
 - Requirement: .NET 9 (or higher) runtime
 
 ## But... why?
@@ -42,10 +42,10 @@ Flag | Description
 dotnet run -- 50,000 -p Random-
 ```
 
-Creates 50,000 files, each named similarly to "Random-##########...", in a subfolder named "output". There are no extensions.
+Creates 50,000 files, each named similarly to "Random-##########", in a subfolder named "output". No files have extensions.
 
 ```sh
-dotnet run -- 100 -p "TEST " -b 10 -e txt -o "My Output Folder" -s 1000000 -d 1000
+dotnet run -- 100 -p "TEST " -b 7 -e txt -o "My Output Folder" -s 1000000 -d 1000
 ```
 
-Creates 100 1MB files, each named similarly to "TEST ##########.txt", with a 1-second break between each file's creation, in a subfolder called "My Output Folder".
+Creates 100 1MB files, each named similarly to "TEST #######.txt", with a 1-second break between each file's creation, in a subfolder called "My Output Folder".
