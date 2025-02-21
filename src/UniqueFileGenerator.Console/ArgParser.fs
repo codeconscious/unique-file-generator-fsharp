@@ -87,7 +87,7 @@ module ArgValidation =
 
         match tryParseInt strippedArg with
         | Some c ->
-            if c > 1 then Ok c
+            if c > 0 then Ok c
             else Error (FileCountInvalid rawArg)
         | None -> Error (FileCountInvalid rawArg)
 
