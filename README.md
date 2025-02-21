@@ -11,6 +11,9 @@ In a previous position, I actually had use for such a utility once. However, I o
 
 ## Usage
 
+> [!CAUTION]
+> This application does not (yet) verify remaining drive space, so ensure your arguments are appropriate to avoid unintentionally filling your drive.
+
 At the minimum, you must specify the number of files you want to generate with the default options. This should be a single positive integer (with optional commas or underscores).
 
 ```
