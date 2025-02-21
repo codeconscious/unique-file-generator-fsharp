@@ -12,7 +12,8 @@ module Help =
             "• Homepage: https://github.com/codeconscious/unique-file-generator-fsharp"
         ]
         [
-            "Usage:"
+            "Caution: This application does not (yet) verify remaining drive space, so ensure your arguments"
+            "         are appropriate to avoid unintentionally filling your drive."
         ]
         [
             "At the minimum, you must specify the number of files to generate with the default options."
