@@ -16,7 +16,7 @@ In a previous position, I actually had use for such a utility once. However, I o
 
 At the minimum, you must specify the number of files you want to generate with the default options. This should be a single positive integer (with optional commas or underscores).
 
-```
+```sh
 dotnet run -- 1000
 ```
 
@@ -38,13 +38,13 @@ Flag | Description
 > [!NOTE]
 > `--` is needed after `dotnet run` to signal that the arguments are for this application and not the `dotnet` command.
 
-```
+```sh
 dotnet run -- 50,000 -p Random-
 ```
 
 Creates 50,000 files, each named similarly to "Random-##########...", in a subfolder named "output". There are no extensions.
 
-```
+```sh
 dotnet run -- 100 -p "TEST " -b 10 -e txt -o "My Output Folder" -s 1000000 -d 1000
 ```
 
