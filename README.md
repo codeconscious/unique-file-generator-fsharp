@@ -1,7 +1,7 @@
 # Unique File Generator (F# Version)
 
-- Quickly and easily creates an arbitrary number of unique (by name and content) files
-- Accepts optional parameters to customize files according to your needs
+- Quickly and easily create an arbitrary number of unique (by name and content) files
+- Use optional parameters to customize files according to your needs
 - Requirement: .NET 9 (or higher) runtime
 
 ## But... why?
@@ -11,9 +11,12 @@ In a previous position, I actually had use for such a utility once. However, I o
 
 ## Usage
 
+> [!CAUTION]
+> This application does not (yet) verify remaining drive space, so ensure your arguments are appropriate to avoid unintentionally filling your drive.
+
 At the minimum, you must specify the number of files you want to generate with the default options. This should be a single positive integer (with optional commas or underscores).
 
-```
+```sh
 dotnet run -- 1000
 ```
 
@@ -35,14 +38,14 @@ Flag | Description
 > [!NOTE]
 > `--` is needed after `dotnet run` to signal that the arguments are for this application and not the `dotnet` command.
 
-```
+```sh
 dotnet run -- 50,000 -p Random-
 ```
 
-Creates 50,000 files, each named similarly to "Random-##########...", in a subfolder named "output". There are no extensions.
+Creates 50,000 files, each named similarly to "Random-##########", in a subfolder named "output". No files have extensions.
 
-```
-dotnet run -- 100 -p "TEST " -b 10 -e txt -o "My Output Folder" -s 1000000 -d 1000
+```sh
+dotnet run -- 100 -p "TEST " -b 7 -e txt -o "My Output Folder" -s 1000000 -d 1000
 ```
 
-Creates 100 1MB files, each named similarly to "TEST ##########.txt", with a 1-second break between each file's creation, in a subfolder called "My Output Folder".
+Creates 100 1MB files, each named similarly to "TEST #######.txt", with a 1-second break between each file's creation, in a subfolder called "My Output Folder".
