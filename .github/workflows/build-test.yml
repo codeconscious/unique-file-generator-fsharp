@@ -1,4 +1,4 @@
-name: Build the solution 
+name: Build and test the solution
 on:
   push:
     branches:
@@ -18,4 +18,6 @@ jobs:
         run: dotnet restore src
       - name: Build
         run: dotnet build src
+      - name: Run tests
+        run: dotnet test --no-build
 
