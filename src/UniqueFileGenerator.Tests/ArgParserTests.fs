@@ -33,8 +33,22 @@ let ``Appropriate error when invalid file count`` () =
     Assert.Equal(actual, expected)
 
 [<Fact>]
+let ``Appropriate error when negative file count`` () =
+    let args = [| "-1" |]
+    let actual = validate args
+    let expected = Error <| FileCountInvalid(args[0])
+    Assert.Equal(actual, expected)
+
+[<Fact>]
+let ``Appropriate error when zero file count`` () =
+    let args = [| "0" |]
+    let actual = validate args
+    let expected = Error <| FileCountInvalid(args[0])
+    Assert.Equal(actual, expected)
+
+[<Fact>]
 let ``Appropriate error when malformed flags found`` () =
-    let args = [| "1000"; "malformedFlag"; "0" |]
+    let args = [| "1000"; "malformedFlagWithNoHyphen"; "0" |]
     let actual = validate args
     let expected = Error MalformedFlags
     Assert.Equal(actual, expected)
@@ -54,4 +68,13 @@ let ``Appropriate error when unsupported flag(s) found`` () =
     let actual = validate args
     let expected = Error UnsupportedFlags
     Assert.Equal(actual, expected)
+
+// [<Fact>]
+// let ``Success when valid file count`` () =
+//     let args = [| "1000"; |]
+//     let actual = validate args
+//     let expected = Ok { FileCount = 1000; Options = defaultOptions }
+//     printfn "%A" actual
+//     printfn "%A" expected
+//     Assert.Equal(actual, expected)
 
