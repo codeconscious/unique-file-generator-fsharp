@@ -69,12 +69,12 @@ let ``Appropriate error when unsupported flag(s) found`` () =
     let expected = Error UnsupportedFlags
     Assert.Equal(actual, expected)
 
-// [<Fact>]
-// let ``Success when valid file count`` () =
-//     let args = [| "1000"; |]
-//     let actual = validate args
-//     let expected = Ok { FileCount = 1000; Options = defaultOptions }
-//     printfn "%A" actual
-//     printfn "%A" expected
-//     Assert.Equal(actual, expected)
+[<Fact>]
+let ``Success when valid file count`` () =
+    let args = [| "1000"; |]
+    let actual = validate args
+    let expected = Ok { FileCount = 1000; Options = defaultOptions }
+    // printfn "%A" actual
+    // printfn "%A" expected
+    Assert.Equal(actual, expected)
 
