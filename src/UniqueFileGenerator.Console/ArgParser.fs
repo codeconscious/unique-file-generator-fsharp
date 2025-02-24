@@ -149,17 +149,10 @@ module ArgValidation =
                                     |> Option.defaultValue defaultOptions.Delay
             }
 
-    let private verifyDirectory options =
-        let dir = options.OutputDirectory
-        match IO.Directory.Exists options.OutputDirectory with
-        | true -> Ok options
-        | false -> Error (DirectoryMissing dir)
-
     let validate (args: string array) =
         result {
             let! args' = verifyArgCount args
             let! fileCount = verifyFileCount args'
             let! options = parseOptions args'
-            let! options' = verifyDirectory options
-            return { FileCount = fileCount; Options = options' }
+            return { FileCount = fileCount; Options = options }
         }
