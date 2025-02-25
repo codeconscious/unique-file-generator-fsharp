@@ -4,6 +4,11 @@ module Io =
     open System.IO
     open Errors
 
+    let verifyDirectory dir =
+        match Directory.Exists dir with
+        | true -> Ok dir
+        | false -> Error (DirectoryMissing dir)
+
     let createFile directory fileName (contents: string) =
         try
             let path = Path.Combine(directory, fileName)
@@ -11,9 +16,3 @@ module Io =
             Ok fileName
         with
             | e -> Error $"%s{e.Message}"
-
-    let verifyDirectory dir =
-        match Directory.Exists dir with
-        | true -> Ok dir
-        | false -> Error (DirectoryMissing dir)
-

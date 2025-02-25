@@ -20,11 +20,6 @@ module Main =
     let main rawArgs =
         let watch = Startwatch.Library.Watch()
 
-        let printResult = function
-            | Ok x -> printLine $"OK: %s{x}"
-            | Error e -> printError $"Error: %s{e}"
-
-        // TODO: Re-add directory-existence validation.
         let generateFiles args =
             generateMultiple args.Options.NameBaseLength args.FileCount
                 |> Array.map (fun text ->
@@ -38,19 +33,10 @@ module Main =
             printLine $"Done after %s{watch.ElapsedFriendly}"
             0
 
-        let printValidationErrors e =
-            let msg =
-                match e with
-                | NoArgsPassed -> "You must pass in at least one argument: the number of files to generate."
-                | ArgCountInvalid -> "Invalid argument count."
-                | FileCountInvalid c -> $"Invalid file count: %s{c}."
-                | MalformedFlags -> "Malformed flag(s) found."
-                | UnsupportedFlags -> "Unsupported flag(s) found."
-                | DirectoryMissing e -> $"Directory \"%s{e}\" was not found."
-
-            printError msg
-            Help.print ()
-            1
+        let handleError e =
+             e |> errorMessage |> printError
+             Help.print()
+             1
 
         let run (rawArgs: string array) =
             result {
@@ -61,5 +47,5 @@ module Main =
 
         match run rawArgs with
         | Ok exitCode -> exitCode
-        | Error e -> printValidationErrors e
+        | Error e -> handleError e
 
