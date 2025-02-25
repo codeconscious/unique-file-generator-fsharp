@@ -52,15 +52,6 @@ module Main =
             Help.print ()
             1
 
-        // match validate rawArgs with
-        // | Ok args ->
-        //     match verifyDirectory args.Options.OutputDirectory with
-        //     | true -> generateFiles args
-        //     | false ->
-        //         printError $"Directory \"{args.Options.OutputDirectory}\" is does not exist."
-        //         1
-        // | Error e -> printValidationErrors e
-
         let run (rawArgs: string array) =
             result {
                 let! args = validate rawArgs
@@ -69,6 +60,6 @@ module Main =
             }
 
         match run rawArgs with
-        | Ok _ -> 0
+        | Ok exitCode -> exitCode
         | Error e -> printValidationErrors e
 
