@@ -1,6 +1,7 @@
 namespace UniqueFileGenerator.Console
 
 open System
+open FsToolkit.ErrorHandling
 
 module ArgValidation =
     module Types =
@@ -40,15 +41,6 @@ module ArgValidation =
             | MalformedFlags
             | UnsupportedFlags
 
-        type ResultBuilder() =
-            member this.Bind(m, f) =
-                match m with
-                | Error e -> Error e
-                | Ok a -> f a
-
-            member this.Return(x) =
-                Ok x
-
     open Types
 
     let private empty = String.Empty
@@ -60,8 +52,6 @@ module ArgValidation =
           OutputDirectory = "output"
           Size = None
           Delay = 0 }
-
-    let private result = ResultBuilder()
 
     let private tryParseInt (input: string) =
         match Int32.TryParse(input.Replace(",", empty)) with
