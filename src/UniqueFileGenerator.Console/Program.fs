@@ -3,23 +3,12 @@
 open System
 open System.Threading
 
-module IO =
-    open System.IO
-
-    let createFile directory fileName (contents: string) =
-        try
-            let path = Path.Combine(directory, fileName)
-            File.WriteAllText(path, contents)
-            Ok fileName
-        with
-            | e -> Error $"%s{e.Message}"
-
 module Main =
     open ArgValidation
     open ArgValidation.Types
     open Printing
     open StringGenerator
-    open IO
+    open Io
 
     let private sleep (ms: int) x =
         Thread.Sleep ms
@@ -55,13 +44,17 @@ module Main =
                 | FileCountInvalid c -> $"Invalid file count: %s{c}."
                 | MalformedFlags -> "Malformed flag(s) found."
                 | UnsupportedFlags -> "Unsupported flag(s) found."
-                | DirectoryMissing d -> $"Directory \"%s{d}\" does not exist."
 
             printError msg
             Help.print ()
             1
 
         match validate rawArgs with
-        | Ok args -> generateFiles args
+        | Ok args ->
+            match verifyDirectory args.Options.OutputDirectory with
+            | true -> generateFiles args
+            | false ->
+                printError $"Directory \"{args.Options.OutputDirectory}\" is does not exist."
+                1
         | Error e -> printValidationErrors e
 

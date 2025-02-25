@@ -39,7 +39,6 @@ module ArgValidation =
             | FileCountInvalid of string
             | MalformedFlags
             | UnsupportedFlags
-            | DirectoryMissing of string
 
         type ResultBuilder() =
             member this.Bind(m, f) =
