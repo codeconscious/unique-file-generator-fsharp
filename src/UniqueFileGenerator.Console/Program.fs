@@ -2,6 +2,7 @@
 
 open System
 open System.Threading
+open FsToolkit.ErrorHandling
 
 module Main =
     open ArgValidation
@@ -9,6 +10,7 @@ module Main =
     open Printing
     open StringGenerator
     open Io
+    open Errors
 
     let private sleep (ms: int) x =
         Thread.Sleep ms
@@ -44,17 +46,29 @@ module Main =
                 | FileCountInvalid c -> $"Invalid file count: %s{c}."
                 | MalformedFlags -> "Malformed flag(s) found."
                 | UnsupportedFlags -> "Unsupported flag(s) found."
+                | DirectoryMissing e -> $"Directory \"%s{e}\" was not found."
 
             printError msg
             Help.print ()
             1
 
-        match validate rawArgs with
-        | Ok args ->
-            match verifyDirectory args.Options.OutputDirectory with
-            | true -> generateFiles args
-            | false ->
-                printError $"Directory \"{args.Options.OutputDirectory}\" is does not exist."
-                1
+        // match validate rawArgs with
+        // | Ok args ->
+        //     match verifyDirectory args.Options.OutputDirectory with
+        //     | true -> generateFiles args
+        //     | false ->
+        //         printError $"Directory \"{args.Options.OutputDirectory}\" is does not exist."
+        //         1
+        // | Error e -> printValidationErrors e
+
+        let run (rawArgs: string array) =
+            result {
+                let! args = validate rawArgs
+                let! _ = verifyDirectory args.Options.OutputDirectory
+                return generateFiles args
+            }
+
+        match run rawArgs with
+        | Ok _ -> 0
         | Error e -> printValidationErrors e
 

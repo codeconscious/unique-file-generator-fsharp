@@ -2,6 +2,7 @@ namespace UniqueFileGenerator.Console
 
 open System
 open FsToolkit.ErrorHandling
+open Errors
 
 module ArgValidation =
     module Types =
@@ -33,13 +34,6 @@ module ArgValidation =
               (Size, "-s")
               (Delay, "-d") ]
             |> Map.ofList
-
-        type ValidationErrors =
-            | NoArgsPassed
-            | ArgCountInvalid
-            | FileCountInvalid of string
-            | MalformedFlags
-            | UnsupportedFlags
 
     open Types
 

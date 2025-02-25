@@ -2,7 +2,7 @@ namespace UniqueFileGenerator.Console
 
 module Io =
     open System.IO
-    open ArgValidation.Types
+    open Errors
 
     let createFile directory fileName (contents: string) =
         try
@@ -13,5 +13,7 @@ module Io =
             | e -> Error $"%s{e.Message}"
 
     let verifyDirectory dir =
-        Directory.Exists dir
+        match Directory.Exists dir with
+        | true -> Ok dir
+        | false -> Error (DirectoryMissing dir)
 
