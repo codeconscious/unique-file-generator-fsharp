@@ -1,6 +1,7 @@
 namespace UniqueFileGenerator.Console
 
 open System
+open Errors
 open FsToolkit.ErrorHandling
 
 module ArgValidation =
@@ -34,14 +35,6 @@ module ArgValidation =
               (Delay, "-d") ]
             |> Map.ofList
 
-        type ValidationErrors =
-            | NoArgsPassed
-            | ArgCountInvalid
-            | FileCountInvalid of string
-            | MalformedFlags
-            | UnsupportedFlags
-            | DirectoryMissing of string
-
     open Types
 
     let private empty = String.Empty
@@ -60,7 +53,7 @@ module ArgValidation =
 
     let private tryParseInt (input: string) =
         let strippedArg = input |> stripSeparators [ ","; "_" ]
-        match Int32.TryParse(strippedArg) with
+        match Int32.TryParse strippedArg with
         | true, i -> Some i
         | false, _ -> None
 
@@ -89,7 +82,7 @@ module ArgValidation =
         let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
                 o.Length = 2 &&
-                o.StartsWith("-") &&
+                o.StartsWith "-" &&
                 Char.IsLetter o[1]
 
             optionPairs
@@ -102,10 +95,10 @@ module ArgValidation =
             |> Option.defaultValue fallback
 
         let hasUnsupportedOption options =
-            let isUnsupported (o: string) =
+            let isUnsupported option =
                 flags
                 |> Map.values
-                |> Seq.contains o
+                |> Seq.contains option
                 |> not
 
             options
@@ -115,7 +108,7 @@ module ArgValidation =
             options
             |> Array.tail // Disregard the file count.
             |> Array.chunkBySize 2 // Will throw if array length is odd!
-            |> Array.map (fun x -> (x[0], x[1]))
+            |> Array.map (fun x -> x[0], x[1])
             |> Map.ofArray
 
         match optionMap with

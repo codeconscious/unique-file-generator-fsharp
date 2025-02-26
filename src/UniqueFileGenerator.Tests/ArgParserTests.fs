@@ -2,6 +2,7 @@
 
 open UniqueFileGenerator.Console.ArgValidation
 open UniqueFileGenerator.Console.ArgValidation.Types
+open UniqueFileGenerator.Console.Errors
 open Xunit
 
 let validFileCountArg = "1000"

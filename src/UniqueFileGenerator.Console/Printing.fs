@@ -21,3 +21,7 @@ module Printing =
 
     let printEmptyLine () =
         printLineColor None String.Empty
+
+    let printResult = function
+        | Ok x -> printLine $"OK: %s{x}"
+        | Error e -> printError $"Error: %s{e}"
