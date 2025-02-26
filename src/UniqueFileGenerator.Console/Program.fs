@@ -25,6 +25,6 @@ module Main =
             printLine $"Done after %s{watch.ElapsedFriendly}"
             0
         | Error e ->
-             e |> errorMessage |> printErrorRed
+             e |> errorMessage |> printError
              Help.print()
              1
