@@ -24,14 +24,14 @@ let ``Appropriate error when no args`` () =
 
 [<Fact>]
 let ``Appropriate error when invalid arg count (first pair incomplete)`` () =
-    let emptyArgs = [| "12"; "-p" |]
+    let emptyArgs = [| "12"; flags[Prefix] |]
     let actual = validate emptyArgs
     let expected = Error ArgCountInvalid
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Appropriate error when invalid arg count (second pair incomplete)`` () =
-    let emptyArgs = [| "12"; "-p"; "__"; "-e" |]
+    let emptyArgs = [| "12"; flags[Prefix]; "__"; flags[Extension] |]
     let actual = validate emptyArgs
     let expected = Error ArgCountInvalid
     Assert.Equal(actual, expected)
@@ -89,7 +89,10 @@ let ``Success when valid file count`` () =
 
 [<Fact>]
 let ``Success when valid file count with prefix`` () =
-    let args = [| validFileCountArg; "-p"; validOptionValues[Prefix] |]
+    let args = [|
+        validFileCountArg
+        flags[Prefix]; validOptionValues[Prefix]
+    |]
     let actual = validate args
     let expected = Ok {
         FileCount = int validFileCountArg
@@ -98,7 +101,11 @@ let ``Success when valid file count with prefix`` () =
 
 [<Fact>]
 let ``Success when valid file count with prefix and extension`` () =
-    let args = [| validFileCountArg; "-p"; validOptionValues[Prefix]; "-e"; validOptionValues[Extension] |]
+    let args = [|
+        validFileCountArg
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+    |]
     let actual = validate args
     let expected = Ok {
         FileCount = int validFileCountArg
@@ -111,9 +118,9 @@ let ``Success when valid file count with prefix and extension`` () =
 let ``Success when valid file count with prefix, extension, and base length`` () =
     let args = [|
         validFileCountArg
-        "-p"; validOptionValues[Prefix]
-        "-e"; validOptionValues[Extension]
-        "-b"; validOptionValues[NameBaseLength]
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+        flags[NameBaseLength]; validOptionValues[NameBaseLength]
     |]
 
     let actual = validate args
@@ -129,10 +136,10 @@ let ``Success when valid file count with prefix, extension, and base length`` ()
 let ``Success when valid file count with prefix, extension, base length, and custom subdirectory`` () =
     let args = [|
         validFileCountArg
-        "-p"; validOptionValues[Prefix]
-        "-e"; validOptionValues[Extension]
-        "-b"; validOptionValues[NameBaseLength]
-        "-o"; validOptionValues[OutputDirectory]
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+        flags[NameBaseLength]; validOptionValues[NameBaseLength]
+        flags[OutputDirectory]; validOptionValues[OutputDirectory]
     |]
 
     let actual = validate args
@@ -149,11 +156,11 @@ let ``Success when valid file count with prefix, extension, base length, and cus
 let ``Success when valid file count with prefix, extension, base length, custom subdirectory, and size`` () =
     let args = [|
         validFileCountArg
-        "-p"; validOptionValues[Prefix]
-        "-e"; validOptionValues[Extension]
-        "-b"; validOptionValues[NameBaseLength]
-        "-o"; validOptionValues[OutputDirectory]
-        "-s"; validOptionValues[Size]
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+        flags[NameBaseLength]; validOptionValues[NameBaseLength]
+        flags[OutputDirectory]; validOptionValues[OutputDirectory]
+        flags[Size]; validOptionValues[Size]
     |]
     let actual = validate args
     let expected = Ok {
@@ -170,12 +177,12 @@ let ``Success when valid file count with prefix, extension, base length, custom 
 let ``Success when valid file count with prefix, extension, base length, custom subdirectory, size, and delay`` () =
     let args = [|
         validFileCountArg
-        "-p"; validOptionValues[Prefix]
-        "-e"; validOptionValues[Extension]
-        "-b"; validOptionValues[NameBaseLength]
-        "-o"; validOptionValues[OutputDirectory]
-        "-s"; validOptionValues[Size]
-        "-d"; string validOptionValues[Delay]
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+        flags[NameBaseLength]; validOptionValues[NameBaseLength]
+        flags[OutputDirectory]; validOptionValues[OutputDirectory]
+        flags[Size]; validOptionValues[Size]
+        flags[Delay]; string validOptionValues[Delay]
     |]
 
     let actual = validate args
