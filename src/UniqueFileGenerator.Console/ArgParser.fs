@@ -35,14 +35,6 @@ module ArgValidation =
               (Delay, "-d") ]
             |> Map.ofList
 
-        type ValidationErrors =
-            | NoArgsPassed
-            | ArgCountInvalid
-            | FileCountInvalid of string
-            | MalformedFlags
-            | UnsupportedFlags
-            | DirectoryMissing of string
-
     open Types
 
     let private empty = String.Empty
