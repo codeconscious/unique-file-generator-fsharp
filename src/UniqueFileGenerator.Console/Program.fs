@@ -20,6 +20,10 @@ module Main =
     let main rawArgs =
         let watch = Startwatch.Library.Watch()
 
+        let printResult = function
+            | Ok x -> printLine $"OK: %s{x}"
+            | Error e -> printError $"Error: %s{e}"
+
         let generateFiles args =
             generateMultiple args.Options.NameBaseLength args.FileCount
                 |> Array.map (fun text ->
@@ -48,4 +52,3 @@ module Main =
         match run rawArgs with
         | Ok exitCode -> exitCode
         | Error e -> handleError e
-
