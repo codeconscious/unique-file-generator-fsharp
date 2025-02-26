@@ -1,6 +1,7 @@
 namespace UniqueFileGenerator.Console
 
 open System
+open FsToolkit.ErrorHandling
 
 module ArgValidation =
     module Types =
@@ -41,15 +42,6 @@ module ArgValidation =
             | UnsupportedFlags
             | DirectoryMissing of string
 
-        type ResultBuilder() =
-            member this.Bind(m, f) =
-                match m with
-                | Error e -> Error e
-                | Ok a -> f a
-
-            member this.Return(x) =
-                Ok x
-
     open Types
 
     let private empty = String.Empty
@@ -62,10 +54,13 @@ module ArgValidation =
           Size = None
           Delay = 0 }
 
-    let private result = ResultBuilder()
+    let stripSeparators separators text =
+        separators
+        |> List.fold (fun (acc: string) s -> acc.Replace(s, empty)) text
 
     let private tryParseInt (input: string) =
-        match Int32.TryParse(input.Replace(",", empty)) with
+        let strippedArg = input |> stripSeparators [ ","; "_" ]
+        match Int32.TryParse(strippedArg) with
         | true, i -> Some i
         | false, _ -> None
 
@@ -78,10 +73,6 @@ module ArgValidation =
         | _ -> Ok args
 
     let private verifyFileCount (args: string array) =
-        let stripSeparators separators text =
-            separators
-            |> List.fold (fun (acc: string) s -> acc.Replace(s, empty)) text
-
         let rawArg = Array.head args
         let strippedArg = rawArg |> stripSeparators [ ","; "_" ]
 
@@ -149,17 +140,10 @@ module ArgValidation =
                                     |> Option.defaultValue defaultOptions.Delay
             }
 
-    let private verifyDirectory options =
-        let dir = options.OutputDirectory
-        match IO.Directory.Exists options.OutputDirectory with
-        | true -> Ok options
-        | false -> Error (DirectoryMissing dir)
-
     let validate (args: string array) =
         result {
             let! args' = verifyArgCount args
             let! fileCount = verifyFileCount args'
             let! options = parseOptions args'
-            let! options' = verifyDirectory options
-            return { FileCount = fileCount; Options = options' }
+            return { FileCount = fileCount; Options = options }
         }

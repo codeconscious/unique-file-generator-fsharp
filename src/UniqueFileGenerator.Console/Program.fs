@@ -33,6 +33,7 @@ module Main =
             | Ok x -> printLine $"OK: %s{x}"
             | Error e -> printError $"Error: %s{e}"
 
+        // TODO: Re-add directory-existence validation.
         let generateFiles args =
             generateMultiple args.Options.NameBaseLength args.FileCount
                 |> Array.map (fun text ->
