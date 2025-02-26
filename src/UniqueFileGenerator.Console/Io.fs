@@ -26,11 +26,19 @@ module Io =
             | e -> Error $"%s{e.Message}"
 
     let generateFiles args =
-        generateMultiple args.Options.NameBaseLength args.FileCount
-            |> Array.map (fun text ->
-                text |> modifyFileName args.Options.Prefix args.Options.Extension)
-            |> Array.iter (fun text ->
-                generateContent args.Options.Size text
-                |> createFile args.Options.OutputDirectory text
-                |> sleep args.Options.Delay
+        let count, prefix, baseLength, extension, outputDir, size, delay =
+            (args.FileCount,
+             args.Options.Prefix,
+             args.Options.NameBaseLength,
+             args.Options.Extension,
+             args.Options.OutputDirectory,
+             args.Options.Size,
+             args.Options.Delay)
+
+        generateMultiple baseLength count
+            |> Array.map (fun baseName -> baseName |> updateFileName prefix extension)
+            |> Array.iter (fun fileName ->
+                generateFileContent size fileName
+                |> createFile outputDir fileName
+                |> sleep delay
                 |> printResult)

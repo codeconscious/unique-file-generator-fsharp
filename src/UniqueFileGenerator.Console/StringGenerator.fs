@@ -21,7 +21,7 @@ module StringGenerator =
     let generateMultiple eachLength count : string array =
         Array.init count (fun _ -> generateSingle eachLength)
 
-    let modifyFileName prependText extensionText baseName =
+    let updateFileName prependText extensionText baseName =
         let prepend fileName = $"%s{prependText}%s{fileName}"
         let appendExtension fileName = $"%s{fileName}.%s{extensionText}"
 
@@ -29,7 +29,7 @@ module StringGenerator =
         |> prepend
         |> appendExtension
 
-    let generateContent sizeInBytes fallback =
+    let generateFileContent sizeInBytes fallback =
         sizeInBytes
         |> Option.map generateSingle
         |> Option.defaultValue fallback
