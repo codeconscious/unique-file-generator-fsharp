@@ -35,10 +35,17 @@ module Io =
              args.Options.Size,
              args.Options.Delay)
 
+        let updateFileName baseName =
+            baseName
+            |> updateFileName prefix extension
+
+        let writeFile fileName =
+            fileName
+            |> generateFileContent size
+            |> createFile outputDir fileName
+            |> sleep delay
+            |> printResult
+
         generateMultiple baseLength count
-            |> Array.map (fun baseName -> baseName |> updateFileName prefix extension)
-            |> Array.iter (fun fileName ->
-                generateFileContent size fileName
-                |> createFile outputDir fileName
-                |> sleep delay
-                |> printResult)
+            |> Array.map updateFileName
+            |> Array.iter writeFile
