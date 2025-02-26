@@ -9,8 +9,8 @@ module Errors =
         | UnsupportedFlags
         | DirectoryMissing of string
 
-    let errorMessage e =
-        match e with
+    let getMessage error =
+        match error with
         | NoArgsPassed -> "You must pass in at least one argument: the number of files to generate."
         | ArgCountInvalid -> "Invalid argument count."
         | FileCountInvalid c -> $"Invalid file count: %s{c}."
