@@ -4,12 +4,14 @@ open UniqueFileGenerator.Console.ArgValidation
 open UniqueFileGenerator.Console.ArgValidation.Types
 open Xunit
 
-let prefix = "PREFIX_"
-let extension = ".txt"
-let baseLength = 60
-let directory = "何らかのフォルダー名"
-let size = 1_000_000
-let delay = 5_000
+let testValues =
+    Map.ofList<OptionType, string>
+        [ Prefix, "PREFIX_"
+          NameBaseLength, "60"
+          Extension, ".txt"
+          OutputDirectory, "何らかのフォルダー名"
+          Size, "1_000_000"
+          Delay, "5_000" ]
 
 [<Fact>]
 let ``Appropriate error when no args`` () =
@@ -85,100 +87,103 @@ let ``Success when valid file count`` () =
 
 [<Fact>]
 let ``Success when valid file count with prefix`` () =
-    let args = [| "1000"; "-p"; prefix |]
+    let args = [| "1000"; "-p"; testValues[Prefix] |]
     let actual = validate args
     let expected = Ok {
         FileCount = 1000
-        Options = { defaultOptions with Prefix = prefix }
-    }
+        Options = { defaultOptions with Prefix = testValues[Prefix] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix and extension`` () =
-    let args = [| "1000"; "-p"; prefix; "-e"; extension |]
+    let args = [| "1000"; "-p"; testValues[Prefix]; "-e"; testValues[Extension] |]
     let actual = validate args
     let expected = Ok {
         FileCount = 1000
-        Options = { defaultOptions with Prefix = prefix; Extension = extension[1..] }
-    }
+        Options = { defaultOptions with
+                        Prefix = testValues[Prefix]
+                        Extension = testValues[Extension][1..] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix, extension, and base length`` () =
     let args = [|
         "1000"
-        "-p"; prefix
-        "-e"; extension
-        "-b"; string baseLength
+        "-p"; testValues[Prefix]
+        "-e"; testValues[Extension]
+        "-b"; testValues[NameBaseLength]
     |]
 
     let actual = validate args
     let expected = Ok {
         FileCount = 1000
         Options = { defaultOptions with
-                        Prefix = prefix
-                        Extension = extension[1..]
-                        NameBaseLength = baseLength }
-    }
+                        Prefix = testValues[Prefix]
+                        Extension = testValues[Extension][1..]
+                        NameBaseLength = int testValues[NameBaseLength] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix, extension, base length, and custom subdirectory`` () =
     let args = [|
         "1000"
-        "-p"; prefix
-        "-e"; extension
-        "-b"; string baseLength
-        "-o"; directory
+        "-p"; testValues[Prefix]
+        "-e"; testValues[Extension]
+        "-b"; testValues[NameBaseLength]
+        "-o"; testValues[OutputDirectory]
     |]
 
     let actual = validate args
     let expected = Ok {
         FileCount = 1000
         Options = { defaultOptions with
-                        Prefix = prefix
-                        Extension = extension[1..]
-                        NameBaseLength = baseLength
-                        OutputDirectory = directory }
-    }
+                        Prefix = testValues[Prefix]
+                        Extension = testValues[Extension][1..]
+                        NameBaseLength = int testValues[NameBaseLength]
+                        OutputDirectory = testValues[OutputDirectory] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix, extension, base length, custom subdirectory, and size`` () =
-    let args = [| "1000"; "-p"; prefix; "-e"; extension; "-b"; string baseLength; "-o"; directory; "-s"; string size |]
+    let args = [|
+        "1000"
+        "-p"; testValues[Prefix]
+        "-e"; testValues[Extension]
+        "-b"; testValues[NameBaseLength]
+        "-o"; testValues[OutputDirectory]
+        "-s"; testValues[Size]
+    |]
     let actual = validate args
     let expected = Ok {
         FileCount = 1000
         Options = { defaultOptions with
-                        Prefix = prefix
-                        Extension = extension[1..]
-                        NameBaseLength = baseLength
-                        OutputDirectory = directory
-                        Size = Some size }
-    }
+                        Prefix = testValues[Prefix]
+                        Extension = testValues[Extension][1..]
+                        NameBaseLength = int testValues[NameBaseLength]
+                        OutputDirectory = testValues[OutputDirectory]
+                        Size = Some (int testValues[Size]) } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix, extension, base length, custom subdirectory, size, and delay`` () =
     let args = [|
         "1000"
-        "-p"; prefix
-        "-e"; extension
-        "-b"; string baseLength
-        "-o"; directory
-        "-s"; string size
-        "-d"; string delay
+        "-p"; testValues[Prefix]
+        "-e"; testValues[Extension]
+        "-b"; testValues[NameBaseLength]
+        "-o"; testValues[OutputDirectory]
+        "-s"; testValues[Size]
+        "-d"; string testValues[Delay]
     |]
 
     let actual = validate args
     let expected = Ok {
         FileCount = 1000
         Options = { defaultOptions with
-                        Prefix = prefix
-                        Extension = extension[1..]
-                        NameBaseLength = baseLength
-                        OutputDirectory = directory
-                        Size = Some size
-                        Delay = delay }
-    }
+                        Prefix = testValues[Prefix]
+                        Extension = testValues[Extension][1..]
+                        NameBaseLength = int testValues[NameBaseLength]
+                        OutputDirectory = testValues[OutputDirectory]
+                        Size = Some (int testValues[Size])
+                        Delay = int testValues[Delay] } }
     Assert.Equal(actual, expected)
