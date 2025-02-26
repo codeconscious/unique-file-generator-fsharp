@@ -47,8 +47,13 @@ module ArgValidation =
           Size = None
           Delay = 0 }
 
+    let stripSeparators separators text =
+        separators
+        |> List.fold (fun (acc: string) s -> acc.Replace(s, empty)) text
+
     let private tryParseInt (input: string) =
-        match Int32.TryParse(input.Replace(",", empty)) with
+        let strippedArg = input |> stripSeparators [ ","; "_" ]
+        match Int32.TryParse(strippedArg) with
         | true, i -> Some i
         | false, _ -> None
 
@@ -61,10 +66,6 @@ module ArgValidation =
         | _ -> Ok args
 
     let private verifyFileCount (args: string array) =
-        let stripSeparators separators text =
-            separators
-            |> List.fold (fun (acc: string) s -> acc.Replace(s, empty)) text
-
         let rawArg = Array.head args
         let strippedArg = rawArg |> stripSeparators [ ","; "_" ]
 

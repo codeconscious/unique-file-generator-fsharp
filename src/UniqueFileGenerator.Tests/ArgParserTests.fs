@@ -5,12 +5,16 @@ open UniqueFileGenerator.Console.ArgValidation.Types
 open UniqueFileGenerator.Console.Errors
 open Xunit
 
-let prefix = "PREFIX_"
-let extension = ".txt"
-let baseLength = 60
-let directory = "何らかのフォルダー名"
-let size = 1_000_000
-let delay = 5_000
+let validFileCountArg = "1000"
+
+let validOptionValues =
+    Map.ofList<OptionType, string>
+        [ Prefix, "PREFIX_"
+          NameBaseLength, "60"
+          Extension, ".txt"
+          OutputDirectory, "何らかのフォルダー名"
+          Size, "1_000_000"
+          Delay, "5_000" ]
 
 [<Fact>]
 let ``Appropriate error when no args`` () =
@@ -21,21 +25,21 @@ let ``Appropriate error when no args`` () =
 
 [<Fact>]
 let ``Appropriate error when invalid arg count (first pair incomplete)`` () =
-    let emptyArgs = [| "12"; "-p" |]
+    let emptyArgs = [| "12"; flags[Prefix] |]
     let actual = validate emptyArgs
     let expected = Error ArgCountInvalid
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Appropriate error when invalid arg count (second pair incomplete)`` () =
-    let emptyArgs = [| "12"; "-p"; "__"; "-e" |]
+    let emptyArgs = [| "12"; flags[Prefix]; "__"; flags[Extension] |]
     let actual = validate emptyArgs
     let expected = Error ArgCountInvalid
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Appropriate error when invalid file count`` () =
-    let args = [| "invalid" |]
+    let args = [| "notNumeric" |]
     let actual = validate args
     let expected = Error <| FileCountInvalid(args[0])
     Assert.Equal(actual, expected)
@@ -56,7 +60,7 @@ let ``Appropriate error when zero file count`` () =
 
 [<Fact>]
 let ``Appropriate error when malformed flags found`` () =
-    let args = [| "1000"; "malformedFlagWithNoHyphen"; "0" |]
+    let args = [| validFileCountArg; "malformedFlagWithNoHyphen"; "0" |]
     let actual = validate args
     let expected = Error MalformedFlags
     Assert.Equal(actual, expected)
@@ -64,7 +68,7 @@ let ``Appropriate error when malformed flags found`` () =
 [<Fact>]
 let ``Appropriate error when unsupported symbol flag found`` () =
     let unsupportedFlag = "-@"
-    let args = [| "1000"; unsupportedFlag; "0" |]
+    let args = [| validFileCountArg; unsupportedFlag; "0" |]
     let actual = validate args
     let expected = Error MalformedFlags
     Assert.Equal(actual, expected)
@@ -72,114 +76,124 @@ let ``Appropriate error when unsupported symbol flag found`` () =
 [<Fact>]
 let ``Appropriate error when unsupported flag(s) found`` () =
     let unsupportedFlag = "-a"
-    let args = [| "1000"; unsupportedFlag; "0" |]
+    let args = [| validFileCountArg; unsupportedFlag; "0" |]
     let actual = validate args
     let expected = Error UnsupportedFlags
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count`` () =
-    let args = [| "1000"; |]
+    let args = [| validFileCountArg; |]
     let actual = validate args
-    let expected = Ok { FileCount = 1000; Options = defaultOptions }
+    let expected = Ok { FileCount = int validFileCountArg; Options = defaultOptions }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix`` () =
-    let args = [| "1000"; "-p"; prefix |]
+    let args = [|
+        validFileCountArg
+        flags[Prefix]; validOptionValues[Prefix]
+    |]
     let actual = validate args
     let expected = Ok {
-        FileCount = 1000
-        Options = { defaultOptions with Prefix = prefix }
-    }
+        FileCount = int validFileCountArg
+        Options = { defaultOptions with Prefix = validOptionValues[Prefix] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix and extension`` () =
-    let args = [| "1000"; "-p"; prefix; "-e"; extension |]
+    let args = [|
+        validFileCountArg
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+    |]
     let actual = validate args
     let expected = Ok {
-        FileCount = 1000
-        Options = { defaultOptions with Prefix = prefix; Extension = extension[1..] }
-    }
+        FileCount = int validFileCountArg
+        Options = { defaultOptions with
+                        Prefix = validOptionValues[Prefix]
+                        Extension = validOptionValues[Extension][1..] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix, extension, and base length`` () =
     let args = [|
-        "1000"
-        "-p"; prefix
-        "-e"; extension
-        "-b"; string baseLength
+        validFileCountArg
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+        flags[NameBaseLength]; validOptionValues[NameBaseLength]
     |]
 
     let actual = validate args
     let expected = Ok {
-        FileCount = 1000
+        FileCount = int validFileCountArg
         Options = { defaultOptions with
-                        Prefix = prefix
-                        Extension = extension[1..]
-                        NameBaseLength = baseLength }
-    }
+                        Prefix = validOptionValues[Prefix]
+                        Extension = validOptionValues[Extension][1..]
+                        NameBaseLength = int validOptionValues[NameBaseLength] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix, extension, base length, and custom subdirectory`` () =
     let args = [|
-        "1000"
-        "-p"; prefix
-        "-e"; extension
-        "-b"; string baseLength
-        "-o"; directory
+        validFileCountArg
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+        flags[NameBaseLength]; validOptionValues[NameBaseLength]
+        flags[OutputDirectory]; validOptionValues[OutputDirectory]
     |]
 
     let actual = validate args
     let expected = Ok {
-        FileCount = 1000
+        FileCount = int validFileCountArg
         Options = { defaultOptions with
-                        Prefix = prefix
-                        Extension = extension[1..]
-                        NameBaseLength = baseLength
-                        OutputDirectory = directory }
-    }
+                        Prefix = validOptionValues[Prefix]
+                        Extension = validOptionValues[Extension][1..]
+                        NameBaseLength = int validOptionValues[NameBaseLength]
+                        OutputDirectory = validOptionValues[OutputDirectory] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix, extension, base length, custom subdirectory, and size`` () =
-    let args = [| "1000"; "-p"; prefix; "-e"; extension; "-b"; string baseLength; "-o"; directory; "-s"; string size |]
+    let args = [|
+        validFileCountArg
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+        flags[NameBaseLength]; validOptionValues[NameBaseLength]
+        flags[OutputDirectory]; validOptionValues[OutputDirectory]
+        flags[Size]; validOptionValues[Size]
+    |]
     let actual = validate args
     let expected = Ok {
-        FileCount = 1000
+        FileCount = int validFileCountArg
         Options = { defaultOptions with
-                        Prefix = prefix
-                        Extension = extension[1..]
-                        NameBaseLength = baseLength
-                        OutputDirectory = directory
-                        Size = Some size }
-    }
+                        Prefix = validOptionValues[Prefix]
+                        Extension = validOptionValues[Extension][1..]
+                        NameBaseLength = int validOptionValues[NameBaseLength]
+                        OutputDirectory = validOptionValues[OutputDirectory]
+                        Size = Some (int validOptionValues[Size]) } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Success when valid file count with prefix, extension, base length, custom subdirectory, size, and delay`` () =
     let args = [|
-        "1000"
-        "-p"; prefix
-        "-e"; extension
-        "-b"; string baseLength
-        "-o"; directory
-        "-s"; string size
-        "-d"; string delay
+        validFileCountArg
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension]
+        flags[NameBaseLength]; validOptionValues[NameBaseLength]
+        flags[OutputDirectory]; validOptionValues[OutputDirectory]
+        flags[Size]; validOptionValues[Size]
+        flags[Delay]; string validOptionValues[Delay]
     |]
 
     let actual = validate args
     let expected = Ok {
-        FileCount = 1000
+        FileCount = int validFileCountArg
         Options = { defaultOptions with
-                        Prefix = prefix
-                        Extension = extension[1..]
-                        NameBaseLength = baseLength
-                        OutputDirectory = directory
-                        Size = Some size
-                        Delay = delay }
-    }
+                        Prefix = validOptionValues[Prefix]
+                        Extension = validOptionValues[Extension][1..]
+                        NameBaseLength = int validOptionValues[NameBaseLength]
+                        OutputDirectory = validOptionValues[OutputDirectory]
+                        Size = Some (int validOptionValues[Size])
+                        Delay = int validOptionValues[Delay] } }
     Assert.Equal(actual, expected)
