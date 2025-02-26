@@ -1,8 +1,8 @@
 namespace UniqueFileGenerator.Console
 
 open System
-open FsToolkit.ErrorHandling
 open Errors
+open FsToolkit.ErrorHandling
 
 module ArgValidation =
     module Types =
