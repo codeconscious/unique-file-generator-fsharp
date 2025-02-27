@@ -104,6 +104,11 @@ module ArgValidation =
             options
             |> Seq.exists isUnsupported
 
+        let formatExtension (x: string) =
+            if String.IsNullOrWhiteSpace x then String.Empty
+            elif x.StartsWith '.' then x
+            else $".%s{x}"
+
         let optionMap =
             options
             |> Array.tail // Disregard the file count.
@@ -124,7 +129,7 @@ module ArgValidation =
                                     |> Option.defaultValue defaultOptions.NameBaseLength
                                     |> ensureBetween (1, 100)
                 Extension =       o |> extractValue flags[Extension] defaultOptions.Extension
-                                    |> (fun x -> if x.StartsWith '.' then x[1..] else x)
+                                    |> formatExtension
                 OutputDirectory = o |> extractValue flags[OutputDirectory] defaultOptions.OutputDirectory
                 Size =            o |> extractValue flags[Size] empty
                                     |> tryParseInt

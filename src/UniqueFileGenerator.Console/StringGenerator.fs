@@ -23,7 +23,7 @@ module StringGenerator =
 
     let updateFileName prependText extensionText baseName =
         let prepend fileName = $"%s{prependText}%s{fileName}"
-        let appendExtension fileName = $"%s{fileName}.%s{extensionText}"
+        let appendExtension fileName = $"%s{fileName}%s{extensionText}"
 
         baseName
         |> prepend
