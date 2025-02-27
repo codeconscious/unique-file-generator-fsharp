@@ -101,7 +101,7 @@ let ``Success when valid file count with prefix`` () =
     Assert.Equal(actual, expected)
 
 [<Fact>]
-let ``Success when valid file count with prefix and extension`` () =
+let ``Success when valid file count with prefix and extension (with initial period)`` () =
     let args = [|
         validFileCountArg
         flags[Prefix]; validOptionValues[Prefix]
@@ -112,7 +112,22 @@ let ``Success when valid file count with prefix and extension`` () =
         FileCount = int validFileCountArg
         Options = { defaultOptions with
                         Prefix = validOptionValues[Prefix]
-                        Extension = validOptionValues[Extension][1..] } }
+                        Extension = validOptionValues[Extension] } }
+    Assert.Equal(actual, expected)
+
+[<Fact>]
+let ``Success when valid file count with prefix and extension (without initial period)`` () =
+    let args = [|
+        validFileCountArg
+        flags[Prefix]; validOptionValues[Prefix]
+        flags[Extension]; validOptionValues[Extension][1..]
+    |]
+    let actual = validate args
+    let expected = Ok {
+        FileCount = int validFileCountArg
+        Options = { defaultOptions with
+                        Prefix = validOptionValues[Prefix]
+                        Extension = validOptionValues[Extension] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
@@ -129,7 +144,7 @@ let ``Success when valid file count with prefix, extension, and base length`` ()
         FileCount = int validFileCountArg
         Options = { defaultOptions with
                         Prefix = validOptionValues[Prefix]
-                        Extension = validOptionValues[Extension][1..]
+                        Extension = validOptionValues[Extension]
                         NameBaseLength = int validOptionValues[NameBaseLength] } }
     Assert.Equal(actual, expected)
 
@@ -148,7 +163,7 @@ let ``Success when valid file count with prefix, extension, base length, and cus
         FileCount = int validFileCountArg
         Options = { defaultOptions with
                         Prefix = validOptionValues[Prefix]
-                        Extension = validOptionValues[Extension][1..]
+                        Extension = validOptionValues[Extension]
                         NameBaseLength = int validOptionValues[NameBaseLength]
                         OutputDirectory = validOptionValues[OutputDirectory] } }
     Assert.Equal(actual, expected)
@@ -168,7 +183,7 @@ let ``Success when valid file count with prefix, extension, base length, custom 
         FileCount = int validFileCountArg
         Options = { defaultOptions with
                         Prefix = validOptionValues[Prefix]
-                        Extension = validOptionValues[Extension][1..]
+                        Extension = validOptionValues[Extension]
                         NameBaseLength = int validOptionValues[NameBaseLength]
                         OutputDirectory = validOptionValues[OutputDirectory]
                         Size = Some (int validOptionValues[Size]) } }
@@ -191,7 +206,7 @@ let ``Success when valid file count with prefix, extension, base length, custom 
         FileCount = int validFileCountArg
         Options = { defaultOptions with
                         Prefix = validOptionValues[Prefix]
-                        Extension = validOptionValues[Extension][1..]
+                        Extension = validOptionValues[Extension]
                         NameBaseLength = int validOptionValues[NameBaseLength]
                         OutputDirectory = validOptionValues[OutputDirectory]
                         Size = Some (int validOptionValues[Size])
