@@ -106,8 +106,8 @@ module ArgValidation =
 
         let formatExtension (x: string) =
             if String.IsNullOrWhiteSpace x then String.Empty
-            elif x.StartsWith '.' then x
-            else $".%s{x}"
+            elif x.StartsWith '.' then x.Trim()
+            else $".%s{x}".Trim()
 
         let optionMap =
             options
