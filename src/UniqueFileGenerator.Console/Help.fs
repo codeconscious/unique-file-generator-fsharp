@@ -62,3 +62,6 @@ module Help =
         |> List.iter (fun blockLines ->
             printEmptyLine ()
             blockLines |> List.iter printLine)
+
+    let suggest () =
+        printfn "Pass \"--help\" to see the instructions."
