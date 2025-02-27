@@ -13,23 +13,21 @@ module Main =
         let watch = Startwatch.Library.Watch()
 
         let run (rawArgs: string array) =
-            if rawArgs.Length > 1 && rawArgs[0].Trim() = "--help"
-                then
-                    Help.print()
-                    Ok ()
-            else
-                result {
+            result {
+                let! args = validate rawArgs
+                let! _ = verifyDirectory args.Options.OutputDirectory
+                return generateFiles args
+            }
 
-                        let! args = validate rawArgs
-                        let! _ = verifyDirectory args.Options.OutputDirectory
-                        return generateFiles args
-                }
-
-        match run rawArgs with
-        | Ok _ ->
-            printLine $"Done after %s{watch.ElapsedFriendly}"
+        if Help.wasRequested rawArgs then
+            Help.print ()
             0
-        | Error e ->
-            printError <| getMessage e
-            Help.suggest()
-            1
+        else
+            match run rawArgs with
+            | Ok _ ->
+                printLine $"Done after %s{watch.ElapsedFriendly}"
+                0
+            | Error e ->
+                printError <| getMessage e
+                Help.suggest ()
+                1
