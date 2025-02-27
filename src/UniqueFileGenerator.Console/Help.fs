@@ -4,6 +4,7 @@ open System
 open ArgValidation
 open Printing
 
+[<RequireQualifiedAccess>]
 module Help =
     let private helpFlag = "--help"
 
