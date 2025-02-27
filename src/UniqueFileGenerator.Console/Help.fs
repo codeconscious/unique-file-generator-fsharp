@@ -1,9 +1,17 @@
 namespace UniqueFileGenerator.Console
 
-open Printing
+open System
 open ArgValidation
+open Printing
 
+[<RequireQualifiedAccess>]
 module Help =
+    let private helpFlag = "--help"
+
+    let wasRequested (args: string array) =
+        args.Length > 0 &&
+        args[0].Trim().Equals(helpFlag, StringComparison.InvariantCultureIgnoreCase)
+
     let private textBlocks = [
         [
             "Unique File Generator"
@@ -59,6 +67,9 @@ module Help =
 
     let print () =
         textBlocks
-        |> List.iter (fun blockLines ->
-            printEmptyLine ()
+        |> List.iteri (fun i blockLines ->
+            if i = 0 then () else printEmptyLine ()
             blockLines |> List.iter printLine)
+
+    let suggest () =
+        printfn "Pass \"--help\" to see the program instructions."

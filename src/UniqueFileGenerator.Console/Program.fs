@@ -1,14 +1,13 @@
 ﻿namespace UniqueFileGenerator.Console
 
+open ArgValidation
+open ArgValidation.Types
+open Errors
+open Printing
+open Io
 open FsToolkit.ErrorHandling
 
 module Main =
-    open ArgValidation
-    open ArgValidation.Types
-    open Printing
-    open Io
-    open Errors
-
     [<EntryPoint>]
     let main rawArgs =
         let watch = Startwatch.Library.Watch()
@@ -20,11 +19,15 @@ module Main =
                 return generateFiles args
             }
 
-        match run rawArgs with
-        | Ok _ ->
-            printLine $"Done after %s{watch.ElapsedFriendly}"
+        if Help.wasRequested rawArgs then
+            Help.print ()
             0
-        | Error e ->
-            e |> getMessage |> printError
-            Help.print()
-            1
+        else
+            match run rawArgs with
+            | Ok _ ->
+                printLine $"Done after %s{watch.ElapsedFriendly}"
+                0
+            | Error e ->
+                printError <| getMessage e
+                Help.suggest ()
+                1
