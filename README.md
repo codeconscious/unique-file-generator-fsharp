@@ -6,8 +6,9 @@
 
 ## But... why?
 
-In a previous position, I actually had use for such a utility once. However, I only created _this_ utility to get more experience with F#. (I have also written very tools in [C#](https://github.com/codeconscious/unique-file-generator-csharp) and [Rust](https://github.com/codeconscious/unique-file-generator-rust/) before, so it seems this has become one of my go-to projects for getting experience with languages. 😅)
+In a previous position, I had use for such a utility once to avoid unneeded warnings when testing file uploads in a system that warned about duplicate files and filenames.
 
+However, I only created _this_ utility to get more experience with F# and functional programming in general. (I have also written similar tools in [C#](https://github.com/codeconscious/unique-file-generator-csharp) and [Rust](https://github.com/codeconscious/unique-file-generator-rust/) before, so it seems this has become one of my go-to projects for getting experience with languages. 😅)
 
 ## Usage
 
@@ -19,6 +20,9 @@ At the minimum, you must specify the number of files you want to generate with t
 ```sh
 dotnet run -- 1000
 ```
+
+> [!NOTE]
+> `--` is needed after `dotnet run` to signal that the arguments are for this application and not the `dotnet` command.
 
 ### Options
 
@@ -35,9 +39,6 @@ Flag | Description
 
 ### Examples
 
-> [!NOTE]
-> `--` is needed after `dotnet run` to signal that the arguments are for this application and not the `dotnet` command.
-
 ```sh
 dotnet run -- 50,000 -p Random-
 ```
@@ -49,3 +50,9 @@ dotnet run -- 100 -p "TEST " -b 7 -e txt -o "My Output Folder" -s 1000000 -d 100
 ```
 
 Creates 100 1MB files, each named similarly to "TEST #######.txt", with a 1-second break between each file's creation, in a subfolder called "My Output Folder".
+
+```sh
+dotnet run -- --help
+```
+
+See the in-program instructions.
