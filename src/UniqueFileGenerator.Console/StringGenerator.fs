@@ -18,8 +18,8 @@ module StringGenerator =
             sb.Append charBank[nextChar] |> ignore
         sb.ToString()
 
-    let generateMultiple eachLength count : string array =
-        Array.init count (fun _ -> generateSingle eachLength)
+    let generateMultiple itemLength count : string array =
+        Array.init count (fun _ -> generateSingle itemLength)
 
     let updateFileName prependText extensionText baseName =
         let prepend fileName = $"%s{prependText}%s{fileName}"
