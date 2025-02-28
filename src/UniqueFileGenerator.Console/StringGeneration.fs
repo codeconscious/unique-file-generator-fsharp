@@ -3,7 +3,7 @@ namespace UniqueFileGenerator.Console
 open System
 open System.Text
 
-module StringGenerator =
+module StringGeneration =
     let private charBank =
         [ 'A' .. 'Z' ] @ [ 'a' .. 'z' ] @ [ '0' .. '9' ]
         |> List.map string

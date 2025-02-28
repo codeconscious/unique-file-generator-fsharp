@@ -1,7 +1,7 @@
-module StringGeneratorTests
+module StringGenerationTests
 
 open System
-open UniqueFileGenerator.Console.StringGenerator
+open UniqueFileGenerator.Console.StringGeneration
 open Xunit
 
 module Generator =
