@@ -4,7 +4,7 @@ open System
 open UniqueFileGenerator.Console.StringGenerator
 open Xunit
 
-module Generation =
+module Generator =
     [<Fact>]
     let ``Generates strings with valid args`` () =
         let itemLength = 111
@@ -40,3 +40,58 @@ module Generation =
     let ``Throws with negative item length`` () =
         Assert.Throws<ArgumentOutOfRangeException>(fun () ->
             (generateMultiple -1 5000) :> obj)
+
+module FileNames =
+    [<Fact>]
+    let ``Generates filenames without a prefix or extension when not provided`` () =
+        let prefix = String.Empty
+        let extension = String.Empty
+        let generated = generateMultiple 10 10
+
+        let fileNames =
+            generated
+            |> Array.map (fun x ->
+                x |> updateFileName prefix extension)
+
+        Assert.Equal<string[]>(generated, fileNames)
+
+    [<Fact>]
+    let ``Generates filenames with a prefix and no extension`` () =
+        let prefix = "@@"
+        let extension = String.Empty
+        let generated = generateMultiple 10 10
+
+        let fileNames =
+            generated
+            |> Array.map (fun x ->
+                x |> updateFileName prefix extension)
+
+        Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
+        Assert.True(fileNames |> Array.forall (fun x -> not <| x.Contains '.'))
+
+    [<Fact>]
+    let ``Generates filenames with an extension and no prefix`` () =
+        let prefix = String.Empty
+        let extension = ".txt"
+        let generated = generateMultiple 10 10
+
+        let fileNames =
+            generated
+            |> Array.map (fun x ->
+                x |> updateFileName prefix extension)
+
+        Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))
+
+    [<Fact>]
+    let ``Generates filenames with a prefix and extension args`` () =
+        let prefix = "@@"
+        let extension = ".txt"
+        let generated = generateMultiple 10 10
+
+        let fileNames =
+            generated
+            |> Array.map (fun x ->
+                x |> updateFileName prefix extension)
+
+        Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
+        Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))
