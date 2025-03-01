@@ -47,12 +47,14 @@ module ArgValidation =
           Size = None
           Delay = 0 }
 
+    let supportedSeparators = [ ","; "_" ]
+
     let stripSeparators separators text =
         separators
         |> List.fold (fun (acc: string) s -> acc.Replace(s, empty)) text
 
     let private tryParseInt (input: string) =
-        let strippedArg = input |> stripSeparators [ ","; "_" ]
+        let strippedArg = input |> stripSeparators supportedSeparators
         match Int32.TryParse strippedArg with
         | true, i -> Some i
         | false, _ -> None
@@ -67,7 +69,7 @@ module ArgValidation =
 
     let private verifyFileCount (args: string array) =
         let rawArg = Array.head args
-        let strippedArg = rawArg |> stripSeparators [ ","; "_" ]
+        let strippedArg = rawArg |> stripSeparators supportedSeparators
 
         match tryParseInt strippedArg with
         | Some c ->
@@ -104,11 +106,6 @@ module ArgValidation =
             options
             |> Seq.exists isUnsupported
 
-        let formatExtension (x: string) =
-            if String.IsNullOrWhiteSpace x then String.Empty
-            elif x.StartsWith '.' then x.Trim()
-            else $".%s{x}".Trim()
-
         let optionMap =
             options
             |> Array.tail // Disregard the file count.
@@ -129,7 +126,6 @@ module ArgValidation =
                                     |> Option.defaultValue defaultOptions.NameBaseLength
                                     |> ensureBetween (1, 100)
                 Extension =       o |> extractValue flags[Extension] defaultOptions.Extension
-                                    |> formatExtension
                 OutputDirectory = o |> extractValue flags[OutputDirectory] defaultOptions.OutputDirectory
                 Size =            o |> extractValue flags[Size] empty
                                     |> tryParseInt

@@ -21,15 +21,15 @@ module StringGeneration =
     let generateMultiple itemLength count : string array =
         Array.init count (fun _ -> generateSingle itemLength)
 
-    let updateFileName prependText extensionText baseName =
-        let prepend fileName = $"%s{prependText}%s{fileName}"
-        let appendExtension fileName = $"%s{fileName}%s{extensionText}"
+    let toFileName prefix extension baseName : string =
+        let ensureValidExtension (x: string) =
+            if String.IsNullOrWhiteSpace x then String.Empty
+            elif x.StartsWith '.' then x.Trim()
+            else $".%s{x.Trim()}"
 
-        baseName
-        |> prepend
-        |> appendExtension
+        $"%s{prefix}%s{baseName}%s{ensureValidExtension extension}"
 
-    let generateFileContent sizeInBytes fallback =
+    let generateFileContent sizeInBytes fallback : string =
         sizeInBytes
         |> Option.map generateSingle
         |> Option.defaultValue fallback
