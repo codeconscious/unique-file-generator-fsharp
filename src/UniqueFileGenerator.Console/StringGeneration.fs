@@ -22,10 +22,10 @@ module StringGeneration =
         Array.init count (fun _ -> generateSingle itemLength)
 
     let toFileName prefix extension baseName : string =
-        let ensureValidExtension (x: string) =
-            if String.IsNullOrWhiteSpace x then String.Empty
-            elif x.StartsWith '.' then x.Trim()
-            else $".%s{x.Trim()}"
+        let ensureValidExtension ext =
+            if String.IsNullOrWhiteSpace ext then String.Empty
+            elif ext.StartsWith '.' then ext.Trim()
+            else $".%s{ext.Trim()}"
 
         $"%s{prefix}%s{baseName}%s{ensureValidExtension extension}"
 
