@@ -4,7 +4,7 @@ module Io =
     open ArgValidation.Types
     open Errors
     open Printing
-    open StringGenerator
+    open StringGeneration
     open System.IO
     open System.Threading
 

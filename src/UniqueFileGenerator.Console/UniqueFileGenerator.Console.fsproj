@@ -10,7 +10,7 @@
         <Compile Include="Printing.fs" />
         <Compile Include="Errors.fs" />
         <Compile Include="ArgParser.fs" />
-        <Compile Include="StringGenerator.fs" />
+        <Compile Include="StringGeneration.fs" />
         <Compile Include="Io.fs" />
         <Compile Include="Help.fs" />
         <Compile Include="Program.fs"/>
