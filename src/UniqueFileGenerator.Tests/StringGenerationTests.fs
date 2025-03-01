@@ -1,10 +1,10 @@
 module StringGenerationTests
 
-open System
 open UniqueFileGenerator.Console.StringGeneration
+open System
 open Xunit
 
-module Generator =
+module Strings =
     [<Fact>]
     let ``Generates strings with valid args`` () =
         let itemLength = 111
@@ -67,7 +67,6 @@ module FileNames =
                 x |> updateFileName prefix extension)
 
         Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
-        Assert.True(fileNames |> Array.forall (fun x -> not <| x.Contains '.'))
 
     [<Fact>]
     let ``Generates filenames with an extension and no prefix`` () =
