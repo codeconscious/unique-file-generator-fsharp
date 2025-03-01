@@ -51,7 +51,7 @@ module FileNames =
         let fileNames =
             generated
             |> Array.map (fun x ->
-                x |> updateFileName prefix extension)
+                x |> toFileName prefix extension)
 
         Assert.Equal<string[]>(generated, fileNames)
 
@@ -64,7 +64,7 @@ module FileNames =
         let fileNames =
             generated
             |> Array.map (fun x ->
-                x |> updateFileName prefix extension)
+                x |> toFileName prefix extension)
 
         Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
 
@@ -77,7 +77,7 @@ module FileNames =
         let fileNames =
             generated
             |> Array.map (fun x ->
-                x |> updateFileName prefix extension)
+                x |> toFileName prefix extension)
 
         Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))
 
@@ -90,7 +90,7 @@ module FileNames =
         let fileNames =
             generated
             |> Array.map (fun x ->
-                x |> updateFileName prefix extension)
+                x |> toFileName prefix extension)
 
         Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
         Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))

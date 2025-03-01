@@ -37,7 +37,7 @@ module Io =
 
         let updateFileName baseName =
             baseName
-            |> updateFileName prefix extension
+            |> toFileName prefix extension
 
         let writeFile fileName =
             fileName

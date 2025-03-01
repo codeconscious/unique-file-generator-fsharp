@@ -127,7 +127,7 @@ let ``Success when valid file count with prefix and extension (without initial p
         FileCount = int validFileCountArg
         Options = { defaultOptions with
                         Prefix = validOptionValues[Prefix]
-                        Extension = validOptionValues[Extension] } }
+                        Extension = validOptionValues[Extension][1..] } }
     Assert.Equal(actual, expected)
 
 [<Fact>]
