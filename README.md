@@ -2,6 +2,7 @@
 
 - Quickly and easily create an arbitrary number of unique (by name and content) files
 - Use optional parameters to customize files according to your needs
+- Checks remaining drive space to ensure users do not accidentally fill their drive
 - Requirement: .NET 9 (or higher) runtime
 
 ## But... why?
@@ -11,9 +12,6 @@ In a previous position, I had use for such a utility once to avoid unneeded warn
 However, I only created _this_ utility to get more experience with F# and functional programming in general. (I have also written similar tools in [C#](https://github.com/codeconscious/unique-file-generator-csharp) and [Rust](https://github.com/codeconscious/unique-file-generator-rust/) before, so it seems this has become one of my go-to projects for getting experience with languages. 😅)
 
 ## Usage
-
-> [!CAUTION]
-> This application does not (yet) verify remaining drive space, so ensure your arguments are appropriate to avoid unintentionally filling your drive.
 
 At the minimum, you must specify the number of files you want to generate with the default options. This should be a single positive integer (with optional commas or underscores).
 
