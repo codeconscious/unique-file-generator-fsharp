@@ -1,7 +1,7 @@
 namespace UniqueFileGenerator.Console
 
 module Errors =
-    type StartupError =
+    type ErrorType =
         | NoArgsPassed
         | ArgCountInvalid
         | FileCountInvalid of string
@@ -9,7 +9,8 @@ module Errors =
         | UnsupportedFlags
         | DirectoryMissing of string
         | DriveSpaceConfirmationFailure
-        | InsufficientDriveSpace of Needed: int64 * Actual: int64
+        | DriveSpaceInsufficient of Needed: string * Actual: string
+        | UnknownError of string
 
     let getMessage error =
         match error with
@@ -20,7 +21,7 @@ module Errors =
         | UnsupportedFlags -> "Unsupported flag(s) found."
         | DirectoryMissing e -> $"Directory \"%s{e}\" was not found."
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
-        | InsufficientDriveSpace (needed, actual) ->
-            sprintf "Not enough drive space available. %d bytes are necessary, but only %d are available."
-                    needed actual
+        | DriveSpaceInsufficient (needed, actual) ->
+            $"Insufficient drive space. %s{needed} is necessary, but only %s{actual} is available."
+        | UnknownError e -> e
 

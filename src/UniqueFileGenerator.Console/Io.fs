@@ -13,6 +13,19 @@ module Io =
         Thread.Sleep ms
         x
 
+    let private formatBytes (bytes: int64) : string =
+        let kilobyte = 1024L
+        let megabyte = kilobyte * 1024L
+        let gigabyte = megabyte * 1024L
+        let terabyte = gigabyte * 1024L
+
+        match bytes with
+        | _ when bytes >= terabyte -> sprintf "%.2f TB" (float bytes / float terabyte)
+        | _ when bytes >= gigabyte -> sprintf "%.2f GB" (float bytes / float gigabyte)
+        | _ when bytes >= megabyte -> sprintf "%.2f MB" (float bytes / float megabyte)
+        | _ when bytes >= kilobyte -> sprintf "%.2f KB" (float bytes / float kilobyte)
+        | _ -> sprintf "%d bytes" bytes
+
     let verifyDriveSpace (args: Args) =
         let necessaryDriveSpace =
             let o = args.Options
@@ -40,10 +53,10 @@ module Io =
                 printfn $"Actual: %d{usableFreeSpace}"
 
                 if necessaryDriveSpace < usableFreeSpace
-                then Ok necessaryDriveSpace
-                else Error <| InsufficientDriveSpace (necessaryDriveSpace, usableFreeSpace)
+                then Ok <| formatBytes necessaryDriveSpace
+                else Error <| DriveSpaceInsufficient (formatBytes necessaryDriveSpace, formatBytes usableFreeSpace)
         with
-            | e -> Error $"%s{e.Message}"
+            | e -> Error <| UnknownError $"%s{e.Message}"
 
     let verifyDirectory dir =
         match Directory.Exists dir with
