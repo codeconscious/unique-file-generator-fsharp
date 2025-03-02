@@ -1,16 +1,49 @@
 namespace UniqueFileGenerator.Console
 
 module Io =
-    open ArgValidation.Types
     open Errors
     open Printing
+    open ArgValidation.Types
     open StringGeneration
+    open System
     open System.IO
     open System.Threading
 
     let private sleep (ms: int) x =
         Thread.Sleep ms
         x
+
+    let verifyDriveSpace (args: Args) =
+        let necessaryDriveSpace =
+            let o = args.Options
+
+            let singleFileSize =
+                o.Size
+                |> Option.defaultValue (o.Prefix.Length + o.NameBaseLength + o.Extension.Length)
+                |> int64
+
+            printfn $"Math: %d{args.FileCount} files * %d{singleFileSize} bytes"
+            int64 args.FileCount * singleFileSize // Rough estimation
+
+        let spaceToKeepAvailable = 536_870_912L // 0.5 GB
+
+        try
+            let appDir = AppContext.BaseDirectory
+            let root = Path.GetPathRoot appDir
+
+            match root with
+            | null -> Error DriveSpaceConfirmationFailure
+            | path ->
+                let driveInfo = DriveInfo path
+                let usableFreeSpace = driveInfo.AvailableFreeSpace - spaceToKeepAvailable
+                printfn $"Needed: %d{necessaryDriveSpace}"
+                printfn $"Actual: %d{usableFreeSpace}"
+
+                if necessaryDriveSpace < usableFreeSpace
+                then Ok necessaryDriveSpace
+                else Error <| InsufficientDriveSpace (necessaryDriveSpace, usableFreeSpace)
+        with
+            | e -> Error $"%s{e.Message}"
 
     let verifyDirectory dir =
         match Directory.Exists dir with
