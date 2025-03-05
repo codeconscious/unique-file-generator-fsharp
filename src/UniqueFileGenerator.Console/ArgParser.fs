@@ -35,6 +35,11 @@ module ArgValidation =
               (Delay, "-d") ]
             |> Map.ofList
 
+        type ParsedIntError =
+            | TooLow of string
+            | TooHigh of string
+            | NaN of string
+
     open Types
 
     let private empty = String.Empty
@@ -78,8 +83,17 @@ module ArgValidation =
         | None -> Error (FileCountInvalid rawArg)
 
     let private parseOptions options =
-        let ensureBetween (floor, ceiling) i =
+        let lockBetween (floor, ceiling) i =
             i |> max floor |> min ceiling
+
+        let parseInRange (floor, ceiling) (x: string) =
+            let error = InvalidNumber (x, floor, ceiling)
+            match tryParseInt x with
+            | None -> Error error
+            | Some i ->
+                if i < floor then Error error
+                elif i > ceiling then Error error
+                else Ok i
 
         let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
@@ -113,26 +127,33 @@ module ArgValidation =
             |> Array.map (fun x -> x[0], x[1])
             |> Map.ofArray
 
+        let nameBaseLength =
+            optionMap
+            |> Map.tryFind flags[NameBaseLength]
+            |> function
+                | None -> Ok defaultOptions.NameBaseLength
+                | Some x -> x |> parseInRange (1, Int32.MaxValue)
+
         match optionMap with
         | o when o.Keys |> hasMalformedOption ->
             Error MalformedFlags
         | o when o.Keys |> hasUnsupportedOption ->
             Error UnsupportedFlags
         | o ->
-            Ok {
-                Prefix =          o |> extractValue flags[Prefix] defaultOptions.Prefix
-                NameBaseLength =  o |> extractValue flags[NameBaseLength] empty
-                                    |> tryParseInt
-                                    |> Option.defaultValue defaultOptions.NameBaseLength
-                                    |> ensureBetween (1, 100)
-                Extension =       o |> extractValue flags[Extension] defaultOptions.Extension
-                OutputDirectory = o |> extractValue flags[OutputDirectory] defaultOptions.OutputDirectory
-                Size =            o |> extractValue flags[Size] empty
-                                    |> tryParseInt
-                Delay =           o |> extractValue flags[Delay] empty
-                                    |> tryParseInt
-                                    |> Option.defaultValue defaultOptions.Delay
-            }
+            match nameBaseLength with
+            | Error e -> Error e
+            | Ok b ->
+                Ok {
+                    Prefix =          o |> extractValue flags[Prefix] defaultOptions.Prefix
+                    NameBaseLength =  b
+                    Extension =       o |> extractValue flags[Extension] defaultOptions.Extension
+                    OutputDirectory = o |> extractValue flags[OutputDirectory] defaultOptions.OutputDirectory
+                    Size =            o |> extractValue flags[Size] empty
+                                        |> tryParseInt
+                    Delay =           o |> extractValue flags[Delay] empty
+                                        |> tryParseInt
+                                        |> Option.defaultValue defaultOptions.Delay
+                }
 
     let validate (args: string array) =
         result {
