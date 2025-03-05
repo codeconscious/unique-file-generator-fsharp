@@ -131,6 +131,13 @@ module ArgValidation =
                 | None -> Ok defaultOptions.NameBaseLength
                 | Some x -> x |> parseInRange (1, Int32.MaxValue)
 
+        let delay =
+            optionMap
+            |> Map.tryFind flags[Delay]
+            |> function
+                | None -> Ok defaultOptions.Delay
+                | Some x -> x |> parseInRange (0, Int32.MaxValue)
+
         let size =
             optionMap
             |> Map.tryFind flags[Size]
@@ -147,19 +154,19 @@ module ArgValidation =
         | o when o.Keys |> hasUnsupportedOption ->
             Error UnsupportedFlags
         | o ->
-            match (nameBaseLength, size) with
-            | Error e, _ -> Error e
-            | _, Error e -> Error e
-            | Ok b, Ok s ->
+            match (nameBaseLength, size, delay) with
+            | Error e, _, _
+            | _, Error e, _
+            | _, _, Error e ->
+                Error e
+            | Ok b, Ok s, Ok d ->
                 Ok {
                     Prefix =          o |> extractValue flags[Prefix] defaultOptions.Prefix
                     NameBaseLength =  b
                     Extension =       o |> extractValue flags[Extension] defaultOptions.Extension
                     OutputDirectory = o |> extractValue flags[OutputDirectory] defaultOptions.OutputDirectory
                     Size =            s
-                    Delay =           o |> extractValue flags[Delay] empty
-                                        |> tryParseInt
-                                        |> Option.defaultValue defaultOptions.Delay
+                    Delay =           d
                 }
 
     let validate (args: string array) =
