@@ -83,9 +83,6 @@ module ArgValidation =
         | None -> Error (FileCountInvalid rawArg)
 
     let private parseOptions options =
-        let lockBetween (floor, ceiling) i =
-            i |> max floor |> min ceiling
-
         let parseInRange (floor, ceiling) (x: string) =
             let error = InvalidNumber (x, floor, ceiling)
             match tryParseInt x with
@@ -134,22 +131,32 @@ module ArgValidation =
                 | None -> Ok defaultOptions.NameBaseLength
                 | Some x -> x |> parseInRange (1, Int32.MaxValue)
 
+        let size =
+            optionMap
+            |> Map.tryFind flags[Size]
+            |> function
+                | None -> Ok None
+                | Some x ->
+                    match (x |> parseInRange (1, Int32.MaxValue)) with
+                    | Error e -> Error e
+                    | Ok i -> Ok (Some i)
+
         match optionMap with
         | o when o.Keys |> hasMalformedOption ->
             Error MalformedFlags
         | o when o.Keys |> hasUnsupportedOption ->
             Error UnsupportedFlags
         | o ->
-            match nameBaseLength with
-            | Error e -> Error e
-            | Ok b ->
+            match (nameBaseLength, size) with
+            | Error e, _ -> Error e
+            | _, Error e -> Error e
+            | Ok b, Ok s ->
                 Ok {
                     Prefix =          o |> extractValue flags[Prefix] defaultOptions.Prefix
                     NameBaseLength =  b
                     Extension =       o |> extractValue flags[Extension] defaultOptions.Extension
                     OutputDirectory = o |> extractValue flags[OutputDirectory] defaultOptions.OutputDirectory
-                    Size =            o |> extractValue flags[Size] empty
-                                        |> tryParseInt
+                    Size =            s
                     Delay =           o |> extractValue flags[Delay] empty
                                         |> tryParseInt
                                         |> Option.defaultValue defaultOptions.Delay
