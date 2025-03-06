@@ -63,14 +63,9 @@ module ArgValidation =
         | false, _ -> None
 
     let private parseInRange (floor, ceiling) (x: string) =
-        let error = InvalidNumber (x, floor, ceiling)
-
         match tryParseInt x with
-        | None -> Error error
-        | Some i ->
-            if i < floor then Error error
-            elif i > ceiling then Error error
-            else Ok i
+        | Some i when i >= floor && i <= ceiling -> Ok i
+        | _ -> Error (InvalidNumber (x, floor, ceiling))
 
     let private verifyArgCount (args: string array) =
         let isEven i = i % 2 = 0
@@ -81,13 +76,9 @@ module ArgValidation =
         | _ -> Ok ()
 
     let private verifyFileCount arg =
-        let strippedArg = arg |> stripSeparators
-
-        match tryParseInt strippedArg with
-        | Some c ->
-            if c > 0 then Ok c
-            else Error (FileCountInvalid arg)
-        | None -> Error (FileCountInvalid arg)
+        match arg |> stripSeparators |> tryParseInt with
+        | Some c when c > 0 ->  Ok c
+        | _ -> Error (FileCountInvalid arg)
 
     let private toOptionPairs argPairs =
         argPairs
@@ -98,26 +89,23 @@ module ArgValidation =
     let private parseBaseLength optionPairs =
         optionPairs
         |> Map.tryFind flags[NameBaseLength]
-        |> function
-            | None -> Ok defaultOptions.NameBaseLength
-            | Some x -> x |> parseInRange (1, Int32.MaxValue)
+        |> Option.map (parseInRange (1, Int32.MaxValue))
+        |> Option.defaultValue (Ok defaultOptions.NameBaseLength)
 
     let private parseSize optionPairs =
         optionPairs
         |> Map.tryFind flags[Size]
+        |> Option.map (parseInRange (1, Int32.MaxValue))
         |> function
             | None -> Ok None
-            | Some x ->
-                match (x |> parseInRange (1, Int32.MaxValue)) with
-                | Error e -> Error e
-                | Ok i -> Ok (Some i)
+            | Some (Error e) -> Error e
+            | Some (Ok i) -> Ok (Some i)
 
     let private parseDelay optionPairs =
         optionPairs
         |> Map.tryFind flags[Delay]
-        |> function
-            | None -> Ok defaultOptions.Delay
-            | Some x -> x |> parseInRange (0, Int32.MaxValue)
+        |> Option.map (parseInRange (0, Int32.MaxValue))
+        |> Option.defaultValue (Ok defaultOptions.Delay)
 
     let private verifyFlags (optionPairs: RawOptionPairs) =
         let hasMalformedOption optionPairs =
@@ -162,13 +150,13 @@ module ArgValidation =
 
     let validate args =
         result {
-            let! _ = verifyArgCount args
+            do! verifyArgCount args
             let fileCountArg, optionArgs = args[0], args[1..]
 
             let! fileCount = verifyFileCount fileCountArg
 
             let optionPairs = optionArgs |> toOptionPairs
-            let! _ = verifyFlags optionPairs
+            do! verifyFlags optionPairs
             let! b = parseBaseLength optionPairs
             let! s = parseSize optionPairs
             let! d = parseDelay optionPairs
