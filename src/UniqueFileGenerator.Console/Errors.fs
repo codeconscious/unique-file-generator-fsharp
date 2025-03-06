@@ -14,7 +14,6 @@ module Errors =
         | FileCountInvalid of string
         | MalformedFlags
         | UnsupportedFlags
-        | UnparsableToPositiveInt of string
         | DirectoryMissing of string
         | DriveSpaceConfirmationFailure
         | DriveSpaceInsufficient of Needed: string * Actual: string
@@ -27,7 +26,6 @@ module Errors =
         | FileCountInvalid c -> $"Invalid file count: %s{c}."
         | MalformedFlags -> "Malformed flag(s) found."
         | UnsupportedFlags -> "Unsupported flag(s) found."
-        | UnparsableToPositiveInt x -> $"Could not parse \"%s{x}\" to an integer between 1 and %s{formatInt Int32.MaxValue}."
         | DirectoryMissing e -> $"Directory \"%s{e}\" was not found."
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
         | DriveSpaceInsufficient (needed, actual) ->
