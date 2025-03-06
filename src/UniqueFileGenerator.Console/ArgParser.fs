@@ -2,6 +2,7 @@ namespace UniqueFileGenerator.Console
 
 open System
 open Errors
+open Utilities
 open FsToolkit.ErrorHandling
 
 module ArgValidation =
@@ -64,7 +65,7 @@ module ArgValidation =
 
     let private parseInRange (floor, ceiling) (x: string) =
         match tryParseInt x with
-        | Some i when i >= floor && i <= ceiling -> Ok i
+        | Some i when (>=<) i (floor, ceiling) -> Ok i
         | _ -> Error (InvalidNumber (x, floor, ceiling))
 
     let private verifyArgCount (args: string array) =
