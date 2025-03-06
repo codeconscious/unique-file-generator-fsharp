@@ -29,12 +29,12 @@ module ArgValidation =
         type RawOptionPairs = Map<string,string>
 
         let flags: Map<OptionType, string> =
-            [ (Prefix, "-p")
-              (NameBaseLength, "-b")
-              (Extension, "-e")
-              (OutputDirectory, "-o")
-              (Size, "-s")
-              (Delay, "-d") ]
+            [ Prefix, "-p"
+              NameBaseLength, "-b"
+              Extension, "-e"
+              OutputDirectory, "-o"
+              Size, "-s"
+              Delay, "-d" ]
             |> Map.ofList
 
     open Types
@@ -52,7 +52,8 @@ module ArgValidation =
         let supportedSeparators = [ ","; "_" ]
 
         supportedSeparators
-        |> List.fold (fun (acc: string) s -> acc.Replace(s, String.Empty)) text
+        |> List.fold (fun (acc: string) s ->
+            acc.Replace(s, String.Empty)) text
 
     let private tryParseInt (input: string) =
         let strippedArg = input |> stripSeparators
@@ -77,17 +78,16 @@ module ArgValidation =
         match args.Length with
         | 0 -> Error NoArgsPassed
         | l when isEven l -> Error ArgCountInvalid
-        | _ -> Ok args
+        | _ -> Ok ()
 
-    let private verifyFileCount (args: string array) =
-        let rawArg = Array.head args
-        let strippedArg = rawArg |> stripSeparators
+    let private verifyFileCount arg =
+        let strippedArg = arg |> stripSeparators
 
         match tryParseInt strippedArg with
         | Some c ->
             if c > 0 then Ok c
-            else Error (FileCountInvalid rawArg)
-        | None -> Error (FileCountInvalid rawArg)
+            else Error (FileCountInvalid arg)
+        | None -> Error (FileCountInvalid arg)
 
     let private toOptionPairs argPairs =
         argPairs
@@ -162,14 +162,12 @@ module ArgValidation =
 
     let validate args =
         result {
-            let! args' = verifyArgCount args
-            let! fileCount = verifyFileCount args'
+            let! _ = verifyArgCount args
+            let fileCountArg, optionArgs = args[0], args[1..]
 
-            let optionPairs =
-                args'
-                |> Array.tail // Disregard the file count (in the initial position).
-                |> toOptionPairs
+            let! fileCount = verifyFileCount fileCountArg
 
+            let optionPairs = optionArgs |> toOptionPairs
             let! _ = verifyFlags optionPairs
             let! b = parseBaseLength optionPairs
             let! s = parseSize optionPairs
