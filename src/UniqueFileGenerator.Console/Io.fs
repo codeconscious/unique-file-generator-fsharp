@@ -5,6 +5,7 @@ module Io =
     open Printing
     open ArgValidation.Types
     open StringGeneration
+    open Utilities
     open System
     open System.IO
     open System.Threading
@@ -20,11 +21,11 @@ module Io =
         let terabyte = gigabyte * 1024L
 
         match bytes with
-        | _ when bytes >= terabyte -> sprintf "%.2f TB" (float bytes / float terabyte)
-        | _ when bytes >= gigabyte -> sprintf "%.2f GB" (float bytes / float gigabyte)
-        | _ when bytes >= megabyte -> sprintf "%.2f MB" (float bytes / float megabyte)
-        | _ when bytes >= kilobyte -> sprintf "%.2f KB" (float bytes / float kilobyte)
-        | _ -> sprintf "%d bytes" bytes
+        | _ when bytes >= terabyte -> sprintf "%s TB" ((float bytes / float terabyte) |> formatFloat)
+        | _ when bytes >= gigabyte -> sprintf "%s GB" ((float bytes / float gigabyte) |> formatFloat)
+        | _ when bytes >= megabyte -> sprintf "%s MB" ((float bytes / float megabyte) |> formatFloat)
+        | _ when bytes >= kilobyte -> sprintf "%s KB" ((float bytes / float kilobyte) |> formatFloat)
+        | _ -> sprintf "%s bytes" (bytes |> formatInt64)
 
     let verifyDriveSpace (args: Args) =
         let necessaryDriveSpace =
@@ -49,12 +50,13 @@ module Io =
             | path ->
                 let driveInfo = DriveInfo path
                 let usableFreeSpace = driveInfo.AvailableFreeSpace - spaceToKeepAvailable
-                printfn $"Needed: %d{necessaryDriveSpace}"
-                printfn $"Actual: %d{usableFreeSpace}"
+                // printfn $"Needed: %d{necessaryDriveSpace}"
+                // printfn $"Actual: %d{usableFreeSpace}"
 
                 if necessaryDriveSpace < usableFreeSpace
                 then Ok <| formatBytes necessaryDriveSpace
-                else Error <| DriveSpaceInsufficient (formatBytes necessaryDriveSpace, formatBytes usableFreeSpace)
+                else Error <| DriveSpaceInsufficient (formatBytes necessaryDriveSpace,
+                                                      formatBytes usableFreeSpace)
         with
             | e -> Error <| UnknownError $"%s{e.Message}"
 

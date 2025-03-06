@@ -1,13 +1,8 @@
 namespace UniqueFileGenerator.Console
 
-open System
-open System.Globalization
+open Utilities
 
 module Errors =
-
-    let private formatInt (i: int) =
-        i.ToString("N0", CultureInfo.InvariantCulture)
-
     type ErrorType =
         | NoArgsPassed
         | ArgCountInvalid
@@ -31,6 +26,6 @@ module Errors =
         | DirectoryMissing e -> $"Directory \"%s{e}\" was not found."
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
         | DriveSpaceInsufficient (needed, actual) ->
-            $"Insufficient drive space. %s{needed} is necessary, but only %s{actual} is available."
+            $"Insufficient drive space. Though %s{needed} is necessary, only %s{actual} is available."
         | UnknownError e -> e
 
