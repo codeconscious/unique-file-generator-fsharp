@@ -26,6 +26,8 @@ module ArgValidation =
             { FileCount: int
               Options: Options }
 
+        type MappedRawOptions = Map<string,string>
+
         let flags: Map<OptionType, string> =
             [ (Prefix, "-p")
               (NameBaseLength, "-b")
@@ -35,19 +37,12 @@ module ArgValidation =
               (Delay, "-d") ]
             |> Map.ofList
 
-        type ParsedIntError =
-            | TooLow of string
-            | TooHigh of string
-            | NaN of string
-
     open Types
 
-    let private empty = String.Empty
-
     let defaultOptions =
-        { Prefix = empty
+        { Prefix = String.Empty
           NameBaseLength = 50
-          Extension = empty
+          Extension = String.Empty
           OutputDirectory = "output"
           Size = None
           Delay = 0 }
@@ -56,13 +51,22 @@ module ArgValidation =
 
     let stripSeparators separators text =
         separators
-        |> List.fold (fun (acc: string) s -> acc.Replace(s, empty)) text
+        |> List.fold (fun (acc: string) s -> acc.Replace(s, String.Empty)) text
 
     let private tryParseInt (input: string) =
         let strippedArg = input |> stripSeparators supportedSeparators
         match Int32.TryParse strippedArg with
         | true, i -> Some i
         | false, _ -> None
+
+    let private parseInRange (floor, ceiling) (x: string) =
+        let error = InvalidNumber (x, floor, ceiling)
+        match tryParseInt x with
+        | None -> Error error
+        | Some i ->
+            if i < floor then Error error
+            elif i > ceiling then Error error
+            else Ok i
 
     let private verifyArgCount (args: string array) =
         let isEven i = i % 2 = 0
@@ -82,16 +86,36 @@ module ArgValidation =
             else Error (FileCountInvalid rawArg)
         | None -> Error (FileCountInvalid rawArg)
 
-    let private parseOptions options =
-        let parseInRange (floor, ceiling) (x: string) =
-            let error = InvalidNumber (x, floor, ceiling)
-            match tryParseInt x with
-            | None -> Error error
-            | Some i ->
-                if i < floor then Error error
-                elif i > ceiling then Error error
-                else Ok i
+    let private toOptionMap args =
+        args
+        |> Array.chunkBySize 2 // Will throw if array length is odd!
+        |> Array.map (fun x -> x[0], x[1])
+        |> Map.ofArray
+    let private verifyBaseLength (optionMap : MappedRawOptions) =
+        optionMap
+        |> Map.tryFind flags[NameBaseLength]
+        |> function
+            | None -> Ok defaultOptions.NameBaseLength
+            | Some x -> x |> parseInRange (1, Int32.MaxValue)
 
+    let private verifySize (optionMap : MappedRawOptions) =
+        optionMap
+        |> Map.tryFind flags[Size]
+        |> function
+            | None -> Ok None
+            | Some x ->
+                match (x |> parseInRange (1, Int32.MaxValue)) with
+                | Error e -> Error e
+                | Ok i -> Ok (Some i)
+
+    let private verifyDelay (optionMap : MappedRawOptions) =
+        optionMap
+        |> Map.tryFind flags[Delay]
+        |> function
+            | None -> Ok defaultOptions.Delay
+            | Some x -> x |> parseInRange (0, Int32.MaxValue)
+
+    let private verifyFlags (optionMap : MappedRawOptions) =
         let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
                 o.Length = 2 &&
@@ -101,11 +125,6 @@ module ArgValidation =
             optionPairs
             |> Seq.forall isCorrectFormat
             |> not
-
-        let extractValue option fallback map =
-            map
-            |> Map.tryFind option
-            |> Option.defaultValue fallback
 
         let hasUnsupportedOption options =
             let isUnsupported option =
@@ -117,62 +136,42 @@ module ArgValidation =
             options
             |> Seq.exists isUnsupported
 
-        let optionMap =
-            options
-            |> Array.tail // Disregard the file count.
-            |> Array.chunkBySize 2 // Will throw if array length is odd!
-            |> Array.map (fun x -> x[0], x[1])
-            |> Map.ofArray
-
-        let nameBaseLength =
-            optionMap
-            |> Map.tryFind flags[NameBaseLength]
-            |> function
-                | None -> Ok defaultOptions.NameBaseLength
-                | Some x -> x |> parseInRange (1, Int32.MaxValue)
-
-        let delay =
-            optionMap
-            |> Map.tryFind flags[Delay]
-            |> function
-                | None -> Ok defaultOptions.Delay
-                | Some x -> x |> parseInRange (0, Int32.MaxValue)
-
-        let size =
-            optionMap
-            |> Map.tryFind flags[Size]
-            |> function
-                | None -> Ok None
-                | Some x ->
-                    match (x |> parseInRange (1, Int32.MaxValue)) with
-                    | Error e -> Error e
-                    | Ok i -> Ok (Some i)
-
         match optionMap with
-        | o when o.Keys |> hasMalformedOption ->
-            Error MalformedFlags
-        | o when o.Keys |> hasUnsupportedOption ->
-            Error UnsupportedFlags
-        | o ->
-            match (nameBaseLength, size, delay) with
-            | Error e, _, _
-            | _, Error e, _
-            | _, _, Error e ->
-                Error e
-            | Ok b, Ok s, Ok d ->
-                Ok {
-                    Prefix =          o |> extractValue flags[Prefix] defaultOptions.Prefix
-                    NameBaseLength =  b
-                    Extension =       o |> extractValue flags[Extension] defaultOptions.Extension
-                    OutputDirectory = o |> extractValue flags[OutputDirectory] defaultOptions.OutputDirectory
-                    Size =            s
-                    Delay =           d
-                }
+        | o when o.Keys |> hasMalformedOption -> Error MalformedFlags
+        | o when o.Keys |> hasUnsupportedOption -> Error UnsupportedFlags
+        | _ -> Ok ()
+
+    let private parseOptions (optionMap : MappedRawOptions) baseLength size delay =
+        let extractValue option fallback map =
+            map
+            |> Map.tryFind option
+            |> Option.defaultValue fallback
+
+        Ok {
+            Prefix =          optionMap |> extractValue flags[Prefix] defaultOptions.Prefix
+            NameBaseLength =  baseLength
+            Extension =       optionMap |> extractValue flags[Extension] defaultOptions.Extension
+            OutputDirectory = optionMap |> extractValue flags[OutputDirectory] defaultOptions.OutputDirectory
+            Size =            size
+            Delay =           delay
+        }
 
     let validate (args: string array) =
         result {
             let! args' = verifyArgCount args
             let! fileCount = verifyFileCount args'
-            let! options = parseOptions args'
-            return { FileCount = fileCount; Options = options }
+
+            let optionMap =
+                args'
+                |> Array.tail // Disregard the file count (in the initial position).
+                |> toOptionMap
+
+            let! _ = verifyFlags optionMap
+            let! b = verifyBaseLength optionMap
+            let! s = verifySize optionMap
+            let! d = verifyDelay optionMap
+
+            let! options = parseOptions optionMap b s d
+            return { FileCount = fileCount
+                     Options = options }
         }
