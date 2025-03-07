@@ -40,6 +40,8 @@ module ArgValidation =
 
     open Types
 
+    let supportedSeparators = [ ","; "_" ]
+
     let defaultOptions =
         { Prefix = String.Empty
           NameBaseLength = 50
@@ -47,26 +49,6 @@ module ArgValidation =
           OutputDirectory = "output"
           Size = None
           Delay = 0 }
-
-
-    let stripSeparators text =
-        let supportedSeparators = [ ","; "_" ]
-
-        supportedSeparators
-        |> List.fold (fun (acc: string) s ->
-            acc.Replace(s, String.Empty)) text
-
-    let private tryParseInt (input: string) =
-        let strippedArg = input |> stripSeparators
-
-        match Int32.TryParse strippedArg with
-        | true, i -> Some i
-        | false, _ -> None
-
-    let private parseInRange (floor, ceiling) (x: string) =
-        match tryParseInt x with
-        | Some i when (>=<) i (floor, ceiling) -> Ok i
-        | _ -> Error (InvalidNumber (x, floor, ceiling))
 
     let private verifyArgCount (args: string array) =
         let isEven i = i % 2 = 0
@@ -77,7 +59,8 @@ module ArgValidation =
         | _ -> Ok ()
 
     let private verifyFileCount arg =
-        match arg |> stripSeparators |> tryParseInt with
+        let cleanArg = arg |> stripSeparators supportedSeparators
+        match tryParseInt cleanArg with
         | Some c when c > 0 ->  Ok c
         | _ -> Error (FileCountInvalid arg)
 
@@ -87,25 +70,39 @@ module ArgValidation =
         |> Array.map (fun x -> x[0], x[1])
         |> Map.ofArray
 
+    let private parseAndMapError (floor, ceiling) (arg: string) =
+        arg
+        |> parseInRange (floor, ceiling)
+        |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
+
     let private parseBaseLength optionPairs =
+        let floor, ceiling = 1, 150
+
         optionPairs
         |> Map.tryFind flags[NameBaseLength]
-        |> Option.map (parseInRange (1, Int32.MaxValue))
+        |> Option.map (stripSeparators supportedSeparators)
+        |> Option.map (fun arg -> arg |> parseAndMapError (floor, ceiling))
         |> Option.defaultValue (Ok defaultOptions.NameBaseLength)
 
     let private parseSize optionPairs =
+        let floor, ceiling = 1, Int32.MaxValue
+
         optionPairs
         |> Map.tryFind flags[Size]
-        |> Option.map (parseInRange (1, Int32.MaxValue))
+        |> Option.map (stripSeparators supportedSeparators)
+        |> Option.map (fun arg ->arg |> parseAndMapError (floor, ceiling))
         |> function
             | None -> Ok None
             | Some (Error e) -> Error e
             | Some (Ok i) -> Ok (Some i)
 
     let private parseDelay optionPairs =
+        let floor, ceiling = 0, Int32.MaxValue
+
         optionPairs
         |> Map.tryFind flags[Delay]
-        |> Option.map (parseInRange (0, Int32.MaxValue))
+        |> Option.map (stripSeparators supportedSeparators)
+        |> Option.map (fun arg ->arg |> parseAndMapError (floor, ceiling))
         |> Option.defaultValue (Ok defaultOptions.Delay)
 
     let private verifyFlags (optionPairs: RawOptionPairs) =
