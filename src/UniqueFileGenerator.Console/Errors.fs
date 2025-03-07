@@ -6,10 +6,10 @@ module Errors =
     type ErrorType =
         | NoArgsPassed
         | ArgCountInvalid
-        | FileCountInvalid of string
+        | FileCountInvalid of Arg: string * Floor: int * Ceiling: int
         | MalformedFlags
         | UnsupportedFlags
-        | InvalidNumber of string * int * int
+        | InvalidNumber of Arg: string * Floor: int * Ceiling: int
         | DirectoryMissing of string
         | DriveSpaceConfirmationFailure
         | DriveSpaceInsufficient of Needed: string * Actual: string
@@ -19,7 +19,8 @@ module Errors =
         match error with
         | NoArgsPassed -> "You must pass in at least one argument: the number of files to generate."
         | ArgCountInvalid -> "Invalid argument count."
-        | FileCountInvalid c -> $"Invalid file count: %s{c}."
+        | FileCountInvalid (x, f, c) ->
+            $"Could not parse file count \"%s{x}\". Enter an integer between %s{formatInt f} and %s{formatInt c}, inclusive."
         | MalformedFlags -> "Malformed flag(s) found."
         | UnsupportedFlags -> "Unsupported flag(s) found."
         | InvalidNumber (x, f, c) ->

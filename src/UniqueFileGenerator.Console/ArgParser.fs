@@ -59,10 +59,12 @@ module ArgValidation =
         | _ -> Ok ()
 
     let private verifyFileCount arg =
-        let cleanArg = arg |> stripSeparators supportedSeparators
-        match tryParseInt cleanArg with
-        | Some c when c > 0 ->  Ok c
-        | _ -> Error (FileCountInvalid arg)
+        let floor, ceiling = (1, Int32.MaxValue)
+
+        arg
+        |> stripSeparators supportedSeparators
+        |> parseInRange (floor, ceiling)
+        |> Result.mapError (fun _ -> FileCountInvalid (arg, floor, ceiling))
 
     let private toOptionPairs argPairs =
         argPairs
@@ -90,7 +92,7 @@ module ArgValidation =
         optionPairs
         |> Map.tryFind flags[Size]
         |> Option.map (stripSeparators supportedSeparators)
-        |> Option.map (fun arg ->arg |> parseAndMapError (floor, ceiling))
+        |> Option.map (fun arg -> arg |> parseAndMapError (floor, ceiling))
         |> function
             | None -> Ok None
             | Some (Error e) -> Error e
@@ -102,7 +104,7 @@ module ArgValidation =
         optionPairs
         |> Map.tryFind flags[Delay]
         |> Option.map (stripSeparators supportedSeparators)
-        |> Option.map (fun arg ->arg |> parseAndMapError (floor, ceiling))
+        |> Option.map (fun arg -> arg |> parseAndMapError (floor, ceiling))
         |> Option.defaultValue (Ok defaultOptions.Delay)
 
     let private verifyFlags (optionPairs: RawOptionPairs) =
