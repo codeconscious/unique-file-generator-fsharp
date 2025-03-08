@@ -50,8 +50,6 @@ module Io =
             | path ->
                 let driveInfo = DriveInfo path
                 let usableFreeSpace = driveInfo.AvailableFreeSpace - spaceToKeepAvailable
-                // printfn $"Needed: %d{necessaryDriveSpace}"
-                // printfn $"Actual: %d{usableFreeSpace}"
 
                 if necessaryDriveSpace < usableFreeSpace
                 then Ok <| formatBytes necessaryDriveSpace
