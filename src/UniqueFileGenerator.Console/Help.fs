@@ -17,11 +17,8 @@ module Help =
             "Unique File Generator"
             "• Quickly and easily creates an arbitrary number of unique (by name and content) files"
             "• Accepts optional parameters to customize files according to your needs"
+            "• Checks remaining drive space to ensure the drive is not unintentionally filled"
             "• Homepage: https://github.com/codeconscious/unique-file-generator-fsharp"
-        ]
-        [
-            "Caution: This application does not (yet) verify remaining drive space, so ensure your arguments"
-            "         are appropriate to avoid unintentionally filling your drive."
         ]
         [
             "At the minimum, you must specify the number of files to generate with the default options."

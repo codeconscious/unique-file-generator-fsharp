@@ -15,7 +15,9 @@ module Main =
         let run (rawArgs: string array) =
             result {
                 let! args = validate rawArgs
-                let! _ = verifyDirectory args.Options.OutputDirectory
+                do! verifyDirectory args.Options.OutputDirectory
+                let! spaceNeeded = verifyDriveSpace args
+                printLine $"This operation will use %s{spaceNeeded} of drive space."
                 return generateFiles args
             }
 
