@@ -149,7 +149,7 @@ module ArgValidation =
 
             let optionPairs = optionArgs |> toPairs
             do! verifyFlags optionPairs
-            let! b = parseBaseLength (1, 150) optionPairs // Help avoid filename-length errors.
+            let! b = parseBaseLength (1, 100) optionPairs // Help avoid filename-length errors.
             let! s = parseSize (1, Int32.MaxValue) optionPairs
             let! d = parseDelay (0, Int32.MaxValue) optionPairs
             let! options = toOptions optionPairs b s d
