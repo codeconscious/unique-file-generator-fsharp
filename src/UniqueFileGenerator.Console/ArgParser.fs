@@ -58,13 +58,11 @@ module ArgValidation =
         | l when isEven l -> Error ArgCountInvalid
         | _ -> Ok ()
 
-    let private verifyFileCount arg =
-        let floor, ceiling = (1, Int32.MaxValue)
-
+    let private verifyFileCount (floor, ceiling) arg =
         arg
         |> stripSeparators supportedSeparators
         |> parseInRange (floor, ceiling)
-        |> Result.mapError (fun _ -> FileCountInvalid (arg, floor, ceiling))
+        |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
 
     let private toOptionPairs argPairs =
         argPairs
@@ -77,18 +75,14 @@ module ArgValidation =
         |> parseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
 
-    let private parseBaseLength optionPairs =
-        let floor, ceiling = 1, 150
-
+    let private parseBaseLength (floor, ceiling) optionPairs =
         optionPairs
         |> Map.tryFind flags[NameBaseLength]
         |> Option.map (stripSeparators supportedSeparators)
         |> Option.map (fun arg -> arg |> parseAndMapError (floor, ceiling))
         |> Option.defaultValue (Ok defaultOptions.NameBaseLength)
 
-    let private parseSize optionPairs =
-        let floor, ceiling = 1, Int32.MaxValue
-
+    let private parseSize (floor, ceiling) optionPairs =
         optionPairs
         |> Map.tryFind flags[Size]
         |> Option.map (stripSeparators supportedSeparators)
@@ -98,9 +92,7 @@ module ArgValidation =
             | Some (Error e) -> Error e
             | Some (Ok i) -> Ok (Some i)
 
-    let private parseDelay optionPairs =
-        let floor, ceiling = 0, Int32.MaxValue
-
+    let private parseDelay  (floor, ceiling) optionPairs =
         optionPairs
         |> Map.tryFind flags[Delay]
         |> Option.map (stripSeparators supportedSeparators)
@@ -153,13 +145,13 @@ module ArgValidation =
             do! verifyArgCount args
             let fileCountArg, optionArgs = args[0], args[1..]
 
-            let! fileCount = verifyFileCount fileCountArg
+            let! fileCount = verifyFileCount (1, Int32.MaxValue) fileCountArg
 
             let optionPairs = optionArgs |> toOptionPairs
             do! verifyFlags optionPairs
-            let! b = parseBaseLength optionPairs
-            let! s = parseSize optionPairs
-            let! d = parseDelay optionPairs
+            let! b = parseBaseLength (1, 150) optionPairs // Help avoid filename-length errors.
+            let! s = parseSize (1, Int32.MaxValue) optionPairs
+            let! d = parseDelay (0, Int32.MaxValue) optionPairs
             let! options = toOptions optionPairs b s d
 
             return { FileCount = fileCount

@@ -1,5 +1,6 @@
 ﻿module ArgParserTests
 
+open System
 open UniqueFileGenerator.Console.ArgValidation
 open UniqueFileGenerator.Console.ArgValidation.Types
 open UniqueFileGenerator.Console.Errors
@@ -41,21 +42,21 @@ let ``Appropriate error when invalid arg count (second pair incomplete)`` () =
 let ``Appropriate error when invalid file count`` () =
     let args = [| "notNumeric" |]
     let actual = validate args
-    let expected = Error <| FileCountInvalid(args[0])
+    let expected = Error <| InvalidNumber(args[0], 1, Int32.MaxValue)
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Appropriate error when negative file count`` () =
     let args = [| "-1" |]
     let actual = validate args
-    let expected = Error <| FileCountInvalid(args[0])
+    let expected = Error <| InvalidNumber(args[0], 1, Int32.MaxValue)
     Assert.Equal(actual, expected)
 
 [<Fact>]
 let ``Appropriate error when zero file count`` () =
     let args = [| "0" |]
     let actual = validate args
-    let expected = Error <| FileCountInvalid(args[0])
+    let expected = Error <| InvalidNumber(args[0], 1, Int32.MaxValue)
     Assert.Equal(actual, expected)
 
 [<Fact>]
