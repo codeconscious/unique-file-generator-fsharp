@@ -64,13 +64,13 @@ module ArgValidation =
         |> parseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
 
-    let private toOptionPairs argPairs =
+    let private toPairs argPairs =
         argPairs
         |> Array.chunkBySize 2 // Will throw if array length is odd!
         |> Array.map (fun x -> x[0], x[1])
         |> Map.ofArray
 
-    let private parseAndMapError (floor, ceiling) (arg: string) =
+    let private parseAndMapInvalidNumberError (floor, ceiling) (arg: string) =
         arg
         |> parseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
@@ -79,24 +79,24 @@ module ArgValidation =
         optionPairs
         |> Map.tryFind flags[NameBaseLength]
         |> Option.map (stripSeparators supportedSeparators)
-        |> Option.map (fun arg -> arg |> parseAndMapError (floor, ceiling))
+        |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError (floor, ceiling))
         |> Option.defaultValue (Ok defaultOptions.NameBaseLength)
 
     let private parseSize (floor, ceiling) optionPairs =
         optionPairs
         |> Map.tryFind flags[Size]
         |> Option.map (stripSeparators supportedSeparators)
-        |> Option.map (fun arg -> arg |> parseAndMapError (floor, ceiling))
+        |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError (floor, ceiling))
         |> function
-            | None -> Ok None
-            | Some (Error e) -> Error e
             | Some (Ok i) -> Ok (Some i)
+            | Some (Error e) -> Error e
+            | None -> Ok None
 
     let private parseDelay  (floor, ceiling) optionPairs =
         optionPairs
         |> Map.tryFind flags[Delay]
         |> Option.map (stripSeparators supportedSeparators)
-        |> Option.map (fun arg -> arg |> parseAndMapError (floor, ceiling))
+        |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError (floor, ceiling))
         |> Option.defaultValue (Ok defaultOptions.Delay)
 
     let private verifyFlags (optionPairs: RawOptionPairs) =
@@ -147,7 +147,7 @@ module ArgValidation =
 
             let! fileCount = verifyFileCount (1, Int32.MaxValue) fileCountArg
 
-            let optionPairs = optionArgs |> toOptionPairs
+            let optionPairs = optionArgs |> toPairs
             do! verifyFlags optionPairs
             let! b = parseBaseLength (1, 150) optionPairs // Help avoid filename-length errors.
             let! s = parseSize (1, Int32.MaxValue) optionPairs
