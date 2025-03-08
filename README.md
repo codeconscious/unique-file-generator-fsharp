@@ -2,7 +2,7 @@
 
 - Quickly and easily create an arbitrary number of unique (by name and content) files
 - Use optional parameters to customize files according to your needs
-- Checks remaining drive space to ensure users do not accidentally fill their drive
+- Checks remaining drive space to ensure the drive is not unintentionally filled
 - Requirement: .NET 9 (or higher) runtime
 
 ## But... why?
