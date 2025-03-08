@@ -1,9 +1,9 @@
 namespace UniqueFileGenerator.Console
 
 module Io =
+    open ArgValidation.Types
     open Errors
     open Printing
-    open ArgValidation.Types
     open StringGeneration
     open Utilities
     open System
@@ -28,18 +28,18 @@ module Io =
         | _ -> sprintf "%s bytes" (bytes |> formatInt64)
 
     let verifyDriveSpace (args: Args) =
-        let necessaryDriveSpace =
-            let o = args.Options
+        let bytesToKeepAvailable = 536_870_912L // 0.5 GB
 
+        let necessaryDriveSpace =
             let singleFileSize =
-                o.Size
-                |> Option.defaultValue (o.Prefix.Length + o.NameBaseLength + o.Extension.Length)
+                args.Options.Size
+                |> Option.defaultValue
+                       (args.Options.Prefix.Length +
+                        args.Options.NameBaseLength +
+                        args.Options.Extension.Length)
                 |> int64
 
-            printfn $"Math: %d{args.FileCount} files * %d{singleFileSize} bytes"
-            int64 args.FileCount * singleFileSize // Rough estimation
-
-        let spaceToKeepAvailable = 536_870_912L // 0.5 GB
+            singleFileSize * int64 args.FileCount // Rough estimation
 
         try
             let appDir = AppContext.BaseDirectory
@@ -49,7 +49,7 @@ module Io =
             | null -> Error DriveSpaceConfirmationFailure
             | path ->
                 let driveInfo = DriveInfo path
-                let usableFreeSpace = driveInfo.AvailableFreeSpace - spaceToKeepAvailable
+                let usableFreeSpace = driveInfo.AvailableFreeSpace - bytesToKeepAvailable
 
                 if necessaryDriveSpace < usableFreeSpace
                 then Ok <| formatBytes necessaryDriveSpace
@@ -60,7 +60,7 @@ module Io =
 
     let verifyDirectory dir =
         match Directory.Exists dir with
-        | true -> Ok dir
+        | true -> Ok ()
         | false -> Error (DirectoryMissing dir)
 
     let private createFile directory fileName (contents: string) =

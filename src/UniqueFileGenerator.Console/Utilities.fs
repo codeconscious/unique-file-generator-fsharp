@@ -15,9 +15,9 @@ module Utilities =
 
     let inline (>=<) a (floor, ceiling) = a >= floor && a <= ceiling
 
-    let stripSeparators separators text : string =
-        separators
-        |> List.fold (fun (acc: string) s ->
+    let stripSubStrings strings text : string =
+        strings
+        |> List.fold (fun acc s ->
             acc.Replace(s, String.Empty)) text
 
     let tryParseInt (input: string) : int option =
@@ -25,9 +25,11 @@ module Utilities =
         | true, i -> Some i
         | false, _ -> None
 
-    let parseInRange (floor, ceiling) (x: string) =
+    let parseInRange (floor, ceiling) (x: string) : Result<int, unit> =
         match tryParseInt x with
-        | Some i when (>=<) i (floor, ceiling) -> Ok i
-        | _ -> Error ()
+        | Some i when (>=<) i (floor, ceiling) ->
+            Ok i
+        | _ ->
+            Error ()
 
 

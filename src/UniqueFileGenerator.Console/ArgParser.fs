@@ -60,7 +60,7 @@ module ArgValidation =
 
     let private verifyFileCount (floor, ceiling) arg =
         arg
-        |> stripSeparators supportedSeparators
+        |> stripSubStrings supportedSeparators
         |> parseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
 
@@ -78,14 +78,14 @@ module ArgValidation =
     let private parseBaseLength (floor, ceiling) optionPairs =
         optionPairs
         |> Map.tryFind flags[NameBaseLength]
-        |> Option.map (stripSeparators supportedSeparators)
+        |> Option.map (stripSubStrings supportedSeparators)
         |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError (floor, ceiling))
         |> Option.defaultValue (Ok defaultOptions.NameBaseLength)
 
     let private parseSize (floor, ceiling) optionPairs =
         optionPairs
         |> Map.tryFind flags[Size]
-        |> Option.map (stripSeparators supportedSeparators)
+        |> Option.map (stripSubStrings supportedSeparators)
         |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError (floor, ceiling))
         |> function
             | Some (Ok i) -> Ok (Some i)
@@ -95,7 +95,7 @@ module ArgValidation =
     let private parseDelay  (floor, ceiling) optionPairs =
         optionPairs
         |> Map.tryFind flags[Delay]
-        |> Option.map (stripSeparators supportedSeparators)
+        |> Option.map (stripSubStrings supportedSeparators)
         |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError (floor, ceiling))
         |> Option.defaultValue (Ok defaultOptions.Delay)
 
