@@ -1,7 +1,7 @@
 ﻿namespace UniqueFileGenerator.Console
 
-open ArgValidation
-open ArgValidation.Types
+open ArgumentValidation
+open ArgumentTypes
 open Errors
 open Printing
 open Io
