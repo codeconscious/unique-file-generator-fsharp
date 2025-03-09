@@ -2,11 +2,93 @@ namespace UniqueFileGenerator.Console
 
 open System
 open Errors
-open Utilities
+open UniqueFileGenerator.Console.Utilities
 open FsToolkit.ErrorHandling
 
 module ArgValidation =
     module Types =
+        let supportedSeparators = [ ","; "_" ]
+
+        let private parseAndMapInvalidNumberError (floor, ceiling) (arg: string) =
+            arg
+            |> parseInRange (floor, ceiling)
+            |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
+
+        type Prefix = private Prefix of string with
+            static member val DefaultValue = String.Empty
+
+            static member Create (input: string option) =
+                match input with
+                | None -> Prefix.DefaultValue
+                | Some x -> x
+                |> Prefix
+
+            member this.Value = let (Prefix prefix) = this in prefix
+
+        type NameBaseLength = private NameBaseLength of int with
+            static member val DefaultValue = 50
+
+            static member TryCreate (input: string option) =
+                let allowedRange = (1, 100)
+
+                input
+                |> Option.map (stripSubStrings supportedSeparators)
+                |> Option.map (fun arg ->
+                    arg
+                    |> parseAndMapInvalidNumberError allowedRange
+                    |> Result.map NameBaseLength)
+                |> Option.defaultValue (Ok (NameBaseLength NameBaseLength.DefaultValue))
+
+            member this.Value = let (NameBaseLength length) = this in length
+
+        type Extension = private Extension of string with
+            static member val DefaultValue = String.Empty
+
+            static member Create (input: string option) =
+                match input with
+                | None -> Extension.DefaultValue
+                | Some x -> x.Trim()
+                |> Extension
+
+            member this.Value = let (Extension extension) = this in extension
+
+        type OutputDirectory = private OutputDirectory of string with
+            static member val DefaultValue = "output"
+
+            static member Create (input: string option) =
+                match input with
+                | None -> OutputDirectory.DefaultValue
+                | Some x -> x.Trim()
+                |> OutputDirectory
+
+            member this.Value = let (OutputDirectory dir) = this in dir
+
+        type Size = private Size of int option with
+          static member val AllowedRange = (1, Int32.MaxValue)
+
+          static member TryCreate (input: string option) =
+              input
+              |> Option.map (stripSubStrings supportedSeparators)
+              |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError Size.AllowedRange)
+              |> function
+                  | Some (Ok i) -> Ok (Size (Some i))
+                  | Some (Error e) -> Error e
+                  | None -> Ok (Size None)
+
+          member this.Value = let (Size length) = this in length
+
+        type Delay = private Delay of int with
+            static member val AllowedRange = (0, Int32.MaxValue)
+            static member val DefaultValue = 0
+
+            static member TryCreate (input: string option) =
+                input
+                |> Option.map (stripSubStrings supportedSeparators)
+                |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError Delay.AllowedRange |> Result.map Delay)
+                |> Option.defaultValue (Ok (Delay Delay.DefaultValue))
+
+            member this.Value = let (Delay length) = this in length
+
         type OptionType =
             | Prefix
             | NameBaseLength
@@ -40,16 +122,6 @@ module ArgValidation =
 
     open Types
 
-    let supportedSeparators = [ ","; "_" ]
-
-    let defaultOptions =
-        { Prefix = String.Empty
-          NameBaseLength = 50
-          Extension = String.Empty
-          OutputDirectory = "output"
-          Size = None
-          Delay = 0 }
-
     let private verifyArgCount (args: string array) =
         let isEven i = i % 2 = 0
 
@@ -69,35 +141,6 @@ module ArgValidation =
         |> Array.chunkBySize 2 // Will throw if array length is odd!
         |> Array.map (fun x -> x[0], x[1])
         |> Map.ofArray
-
-    let private parseAndMapInvalidNumberError (floor, ceiling) (arg: string) =
-        arg
-        |> parseInRange (floor, ceiling)
-        |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
-
-    let private parseBaseLength (floor, ceiling) optionPairs =
-        optionPairs
-        |> Map.tryFind flags[NameBaseLength]
-        |> Option.map (stripSubStrings supportedSeparators)
-        |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError (floor, ceiling))
-        |> Option.defaultValue (Ok defaultOptions.NameBaseLength)
-
-    let private parseSize (floor, ceiling) optionPairs =
-        optionPairs
-        |> Map.tryFind flags[Size]
-        |> Option.map (stripSubStrings supportedSeparators)
-        |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError (floor, ceiling))
-        |> function
-            | Some (Ok i) -> Ok (Some i)
-            | Some (Error e) -> Error e
-            | None -> Ok None
-
-    let private parseDelay  (floor, ceiling) optionPairs =
-        optionPairs
-        |> Map.tryFind flags[Delay]
-        |> Option.map (stripSubStrings supportedSeparators)
-        |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError (floor, ceiling))
-        |> Option.defaultValue (Ok defaultOptions.Delay)
 
     let private verifyFlags (optionPairs: RawOptionPairs) =
         let hasMalformedOption optionPairs =
@@ -125,21 +168,6 @@ module ArgValidation =
         | o when o.Keys |> hasUnsupportedOption -> Error UnsupportedFlags
         | _ -> Ok ()
 
-    let private toOptions (optionMap : RawOptionPairs) baseLength size delay =
-        let extractValue option fallback map =
-            map
-            |> Map.tryFind option
-            |> Option.defaultValue fallback
-
-        Ok {
-            Prefix          = optionMap |> extractValue flags[Prefix] defaultOptions.Prefix
-            NameBaseLength  = baseLength
-            Extension       = optionMap |> extractValue flags[Extension] defaultOptions.Extension
-            OutputDirectory = optionMap |> extractValue flags[OutputDirectory] defaultOptions.OutputDirectory
-            Size            = size
-            Delay           = delay
-        }
-
     let validate args =
         result {
             do! verifyArgCount args
@@ -149,11 +177,22 @@ module ArgValidation =
 
             let optionPairs = optionArgs |> toPairs
             do! verifyFlags optionPairs
-            let! b = parseBaseLength (1, 100) optionPairs // Help avoid filename-length errors.
-            let! s = parseSize (1, Int32.MaxValue) optionPairs
-            let! d = parseDelay (0, Int32.MaxValue) optionPairs
-            let! options = toOptions optionPairs b s d
+            let p = Prefix.Create (optionPairs |> Map.tryFind flags[Prefix])
+            let! b = NameBaseLength.TryCreate (optionPairs |> Map.tryFind flags[NameBaseLength])
+            let e = Extension.Create (optionPairs |> Map.tryFind flags[Extension])
+            let o = OutputDirectory.Create (optionPairs |> Map.tryFind flags[OutputDirectory])
+            let! s = Size.TryCreate (optionPairs |> Map.tryFind flags[Size])
+            let! d = Delay.TryCreate (optionPairs |> Map.tryFind flags[Delay])
 
-            return { FileCount = fileCount
-                     Options = options }
+            return {
+                FileCount = fileCount
+                Options = {
+                     Prefix = p.Value
+                     NameBaseLength = b.Value
+                     Extension = e.Value
+                     OutputDirectory = o.Value
+                     Size = s.Value
+                     Delay = d.Value
+                }
+            }
         }

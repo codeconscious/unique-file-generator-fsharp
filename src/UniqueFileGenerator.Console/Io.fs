@@ -27,6 +27,7 @@ module Io =
         | _ when bytes >= kilobyte -> sprintf "%s KB" ((float bytes / float kilobyte) |> formatFloat)
         | _ -> sprintf "%s bytes" (bytes |> formatInt64)
 
+
     let verifyDriveSpace (args: Args) =
         let bytesToKeepAvailable = 536_870_912L // 0.5 GB
 

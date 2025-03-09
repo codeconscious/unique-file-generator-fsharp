@@ -1,7 +1,7 @@
 namespace UniqueFileGenerator.Console
 
 open System
-open ArgValidation
+open ArgValidation.Types
 open Printing
 
 [<RequireQualifiedAccess>]
@@ -30,9 +30,10 @@ module Help =
         [
             "-p"
             "    Prepends a specified prefix to each filename."
+            "    If not specified, no prefix will be added."
             "-b"
             "    The base filename length. Random alphanumeric characters will be used. The maximum is 100."
-            $"    If not specified, defaults to %d{defaultOptions.NameBaseLength}."
+            $"    If not specified, defaults to %d{NameBaseLength.DefaultValue}."
             "-e"
             "    The extension to append to each generated filename. The initial period is optional."
             "    If not specified, no extension will be added."
@@ -41,9 +42,10 @@ module Help =
             "    If not specified, each file will contain its own name."
             "-o"
             "    The output subdirectory in which files should be created. The directory must already exist."
-            $"    If not specified, defaults to \"%s{defaultOptions.OutputDirectory}\"."
+            $"    If not specified, defaults to \"%s{OutputDirectory.DefaultValue}\"."
             "-d"
             "    A delay in milliseconds to be applied between each file's creation."
+            "    If not specified, no delay is applied."
         ]
         [
             "Examples:"
