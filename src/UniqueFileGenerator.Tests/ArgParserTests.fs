@@ -1,8 +1,8 @@
 ﻿module ArgParserTests
 
 open System
-open UniqueFileGenerator.Console.ArgValidation
-open UniqueFileGenerator.Console.ArgValidation.Types
+open UniqueFileGenerator.Console.ArgumentValidation
+open UniqueFileGenerator.Console.ArgumentTypes
 open UniqueFileGenerator.Console.Errors
 open Xunit
 
