@@ -2,7 +2,7 @@ namespace UniqueFileGenerator.Console
 
 open System
 open Errors
-open UniqueFileGenerator.Console.Utilities
+open Utilities
 open FsToolkit.ErrorHandling
 
 module ArgValidation =
@@ -13,6 +13,18 @@ module ArgValidation =
             arg
             |> parseInRange (floor, ceiling)
             |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
+
+        type FileCount = private FileCount of string with
+            static member val AllowedRange = (1, Int32.MaxValue)
+
+            static member Create (input: string) =
+                input
+                |> stripSubStrings supportedSeparators
+                |> parseInRange (fst FileCount.AllowedRange, snd FileCount.AllowedRange)
+                |> Result.mapError (fun _ ->
+                    InvalidNumber (input, fst FileCount.AllowedRange, snd FileCount.AllowedRange))
+
+            member this.Value = let (FileCount prefix) = this in prefix
 
         type Prefix = private Prefix of string with
             static member val DefaultValue = String.Empty
@@ -130,12 +142,6 @@ module ArgValidation =
         | l when isEven l -> Error ArgCountInvalid
         | _ -> Ok ()
 
-    let private verifyFileCount (floor, ceiling) arg =
-        arg
-        |> stripSubStrings supportedSeparators
-        |> parseInRange (floor, ceiling)
-        |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
-
     let private toPairs argPairs =
         argPairs
         |> Array.chunkBySize 2 // Will throw if array length is odd!
@@ -173,7 +179,7 @@ module ArgValidation =
             do! verifyArgCount args
             let fileCountArg, optionArgs = args[0], args[1..]
 
-            let! fileCount = verifyFileCount (1, Int32.MaxValue) fileCountArg
+            let! fileCount = FileCount.Create fileCountArg
 
             let optionPairs = optionArgs |> toPairs
             do! verifyFlags optionPairs
