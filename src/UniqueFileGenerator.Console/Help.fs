@@ -1,7 +1,7 @@
 namespace UniqueFileGenerator.Console
 
 open System
-open ArgValidation.Types
+open ArgTypes
 open Printing
 
 [<RequireQualifiedAccess>]

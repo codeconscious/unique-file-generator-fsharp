@@ -2,7 +2,7 @@
 
 open System
 open UniqueFileGenerator.Console.ArgValidation
-open UniqueFileGenerator.Console.ArgValidation.Types
+open UniqueFileGenerator.Console.ArgTypes
 open UniqueFileGenerator.Console.Errors
 open Xunit
 

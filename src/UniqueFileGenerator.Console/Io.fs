@@ -1,15 +1,15 @@
 namespace UniqueFileGenerator.Console
 
-module Io =
-    open ArgValidation.Types
-    open Errors
-    open Printing
-    open StringGeneration
-    open Utilities
-    open System
-    open System.IO
-    open System.Threading
+open ArgTypes
+open Errors
+open Printing
+open StringGeneration
+open Utilities
+open System
+open System.IO
+open System.Threading
 
+module Io =
     let private sleep (ms: int) x =
         Thread.Sleep ms
         x
