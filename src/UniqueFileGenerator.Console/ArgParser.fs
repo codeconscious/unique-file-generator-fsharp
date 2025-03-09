@@ -186,12 +186,14 @@ module ArgValidation =
 
             let optionPairs = optionArgs |> toPairs
             do! verifyFlags optionPairs
-            let p = Prefix.Create (optionPairs |> Map.tryFind flags[Prefix])
-            let! b = NameBaseLength.TryCreate (optionPairs |> Map.tryFind flags[NameBaseLength])
-            let e = Extension.Create (optionPairs |> Map.tryFind flags[Extension])
-            let o = OutputDirectory.Create (optionPairs |> Map.tryFind flags[OutputDirectory])
-            let! s = Size.TryCreate (optionPairs |> Map.tryFind flags[Size])
-            let! d = Delay.TryCreate (optionPairs |> Map.tryFind flags[Delay])
+
+            let readArg x = optionPairs |> Map.tryFind flags[x]
+            let p = Prefix.Create (readArg Prefix)
+            let! b = NameBaseLength.TryCreate (readArg NameBaseLength)
+            let e = Extension.Create (readArg Extension)
+            let o = OutputDirectory.Create (readArg OutputDirectory)
+            let! s = Size.TryCreate (readArg Size)
+            let! d = Delay.TryCreate (readArg Delay)
 
             return {
                 FileCount = fileCount
