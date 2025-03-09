@@ -9,22 +9,25 @@ module ArgValidation =
     module Types =
         let supportedSeparators = [ ","; "_" ]
 
-        let private parseAndMapInvalidNumberError (floor, ceiling) (arg: string) =
+        let private parseNumberInRange (floor, ceiling) (arg: string) =
             arg
             |> parseInRange (floor, ceiling)
             |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
 
         type FileCount = private FileCount of string with
-            static member val AllowedRange = (1, Int32.MaxValue)
+            static member val AllowedRange = 1, Int32.MaxValue
 
             static member Create (input: string) =
                 input
                 |> stripSubStrings supportedSeparators
-                |> parseInRange (fst FileCount.AllowedRange, snd FileCount.AllowedRange)
+                |> parseInRange (fst FileCount.AllowedRange,
+                                 snd FileCount.AllowedRange)
                 |> Result.mapError (fun _ ->
-                    InvalidNumber (input, fst FileCount.AllowedRange, snd FileCount.AllowedRange))
+                    InvalidNumber (input,
+                                   fst FileCount.AllowedRange,
+                                   snd FileCount.AllowedRange))
 
-            member this.Value = let (FileCount prefix) = this in prefix
+            member this.Value = let (FileCount count) = this in count
 
         type Prefix = private Prefix of string with
             static member val DefaultValue = String.Empty
@@ -41,13 +44,13 @@ module ArgValidation =
             static member val DefaultValue = 50
 
             static member TryCreate (input: string option) =
-                let allowedRange = (1, 100)
+                let allowedRange = 1, 100
 
                 input
                 |> Option.map (stripSubStrings supportedSeparators)
                 |> Option.map (fun arg ->
                     arg
-                    |> parseAndMapInvalidNumberError allowedRange
+                    |> parseNumberInRange allowedRange
                     |> Result.map NameBaseLength)
                 |> Option.defaultValue (Ok (NameBaseLength NameBaseLength.DefaultValue))
 
@@ -76,12 +79,12 @@ module ArgValidation =
             member this.Value = let (OutputDirectory dir) = this in dir
 
         type Size = private Size of int option with
-          static member val AllowedRange = (1, Int32.MaxValue)
+          static member val AllowedRange = 1, Int32.MaxValue
 
           static member TryCreate (input: string option) =
               input
               |> Option.map (stripSubStrings supportedSeparators)
-              |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError Size.AllowedRange)
+              |> Option.map (fun arg -> arg |> parseNumberInRange Size.AllowedRange)
               |> function
                   | Some (Ok i) -> Ok (Size (Some i))
                   | Some (Error e) -> Error e
@@ -90,13 +93,13 @@ module ArgValidation =
           member this.Value = let (Size length) = this in length
 
         type Delay = private Delay of int with
-            static member val AllowedRange = (0, Int32.MaxValue)
+            static member val AllowedRange = 0, Int32.MaxValue
             static member val DefaultValue = 0
 
             static member TryCreate (input: string option) =
                 input
                 |> Option.map (stripSubStrings supportedSeparators)
-                |> Option.map (fun arg -> arg |> parseAndMapInvalidNumberError Delay.AllowedRange |> Result.map Delay)
+                |> Option.map (fun arg -> arg |> parseNumberInRange Delay.AllowedRange |> Result.map Delay)
                 |> Option.defaultValue (Ok (Delay Delay.DefaultValue))
 
             member this.Value = let (Delay length) = this in length
