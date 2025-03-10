@@ -58,6 +58,7 @@ module ArgValidation =
             do! verifyFlags optionPairs
 
             let readArg x = optionPairs |> Map.tryFind flags[x]
+
             let p = Prefix.Create (readArg Prefix)
             let! b = NameBaseLength.TryCreate (readArg NameBaseLength)
             let e = Extension.Create (readArg Extension)
@@ -66,7 +67,7 @@ module ArgValidation =
             let! d = Delay.TryCreate (readArg Delay)
 
             return {
-                FileCount = fileCount
+                FileCount = fileCount.Value
                 Options = {
                      Prefix = p.Value
                      NameBaseLength = b.Value

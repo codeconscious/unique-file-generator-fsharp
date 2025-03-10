@@ -13,7 +13,7 @@ module ArgTypes =
         |> parseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
 
-    type FileCount = private FileCount of string with
+    type FileCount = private FileCount of int with
         static member val AllowedRange = 1, Int32.MaxValue
 
         static member Create (input: string) =
@@ -25,6 +25,7 @@ module ArgTypes =
                 InvalidNumber (input,
                                fst FileCount.AllowedRange,
                                snd FileCount.AllowedRange))
+            |> Result.map FileCount
 
         member this.Value = let (FileCount count) = this in count
 
@@ -49,9 +50,9 @@ module ArgTypes =
             |> Option.map (stripSubStrings supportedSeparators)
             |> Option.map (fun arg ->
                 arg
-                |> parseNumberInRange allowedRange
-                |> Result.map NameBaseLength)
-            |> Option.defaultValue (Ok (NameBaseLength NameBaseLength.DefaultValue))
+                |> parseNumberInRange allowedRange)
+            |> Option.defaultValue (Ok NameBaseLength.DefaultValue)
+            |> Result.map NameBaseLength
 
         member this.Value = let (NameBaseLength length) = this in length
 
@@ -98,8 +99,9 @@ module ArgTypes =
         static member TryCreate (input: string option) =
             input
             |> Option.map (stripSubStrings supportedSeparators)
-            |> Option.map (fun arg -> arg |> parseNumberInRange Delay.AllowedRange |> Result.map Delay)
-            |> Option.defaultValue (Ok (Delay Delay.DefaultValue))
+            |> Option.map (fun arg -> arg |> parseNumberInRange Delay.AllowedRange)
+            |> Option.defaultValue (Ok Delay.DefaultValue)
+            |> Result.map Delay
 
         member this.Value = let (Delay length) = this in length
 
