@@ -1,15 +1,15 @@
 namespace UniqueFileGenerator.Console
 
-module Io =
-    open ArgValidation.Types
-    open Errors
-    open Printing
-    open StringGeneration
-    open Utilities
-    open System
-    open System.IO
-    open System.Threading
+open ArgTypes
+open Errors
+open Printing
+open StringGeneration
+open Utilities
+open System
+open System.IO
+open System.Threading
 
+module Io =
     let private sleep (ms: int) x =
         Thread.Sleep ms
         x
@@ -26,6 +26,7 @@ module Io =
         | _ when bytes >= megabyte -> sprintf "%s MB" ((float bytes / float megabyte) |> formatFloat)
         | _ when bytes >= kilobyte -> sprintf "%s KB" ((float bytes / float kilobyte) |> formatFloat)
         | _ -> sprintf "%s bytes" (bytes |> formatInt64)
+
 
     let verifyDriveSpace (args: Args) =
         let bytesToKeepAvailable = 536_870_912L // 0.5 GB
