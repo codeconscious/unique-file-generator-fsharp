@@ -15,13 +15,21 @@ module ArgValidation =
         | l when isEven l -> Error ArgCountInvalid
         | _ -> Ok ()
 
-    let private toPairs argPairs =
+    let private toPairs (argPairs: string array) =
+        let hasDuplicate xs =
+            let originalLength = Seq.length xs
+            let uniqueLength = xs |> Set.ofSeq |> Set.count
+            originalLength <> uniqueLength
+
         argPairs
         |> Array.chunkBySize 2 // Will throw if array length is odd!
-        |> Array.map (fun x -> x[0], x[1])
-        |> Map.ofArray
+        |> Array.map (fun x -> x[0].ToLowerInvariant(), x[1])
+        |> fun pairs ->
+            match pairs |> Array.map fst |> hasDuplicate with
+            | true -> Error DuplicateFlags
+            | false -> Ok (Map.ofArray pairs)
 
-    let private verifyFlags (optionPairs: RawOptionPairs) =
+    let private verifyOptionFlags (optionPairs: RawOptionPairs) =
         let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
                 o.Length = 2 &&
@@ -54,8 +62,8 @@ module ArgValidation =
 
             let! fileCount = FileCount.Create fileCountArg
 
-            let optionPairs = optionArgs |> toPairs
-            do! verifyFlags optionPairs
+            let! optionPairs = optionArgs |> toPairs
+            do! verifyOptionFlags optionPairs
 
             let tryExtractArg x = optionPairs |> Map.tryFind flags[x]
 

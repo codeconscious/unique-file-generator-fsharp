@@ -18,7 +18,7 @@ module Main =
                 do! verifyDirectory args.Options.OutputDirectory
                 let! spaceNeeded = verifyDriveSpace args
 
-                printLine $"This operation will use %s{spaceNeeded} of drive space."
+                printLine $"This operation will use approximately %s{spaceNeeded} of drive space."
                 return generateFiles args
             }
 
