@@ -19,8 +19,7 @@ module ArgTypes =
         static member Create (input: string) =
             input
             |> stripSubStrings supportedSeparators
-            |> parseInRange (fst FileCount.AllowedRange,
-                             snd FileCount.AllowedRange)
+            |> parseInRange FileCount.AllowedRange
             |> Result.mapError (fun _ ->
                 InvalidNumber (input,
                                fst FileCount.AllowedRange,
