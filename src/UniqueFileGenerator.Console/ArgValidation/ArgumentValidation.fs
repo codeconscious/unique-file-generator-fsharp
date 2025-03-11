@@ -57,14 +57,14 @@ module ArgValidation =
             let optionPairs = optionArgs |> toPairs
             do! verifyFlags optionPairs
 
-            let readArg x = optionPairs |> Map.tryFind flags[x]
+            let tryExtractArg x = optionPairs |> Map.tryFind flags[x]
 
-            let p = Prefix.Create (readArg Prefix)
-            let! b = NameBaseLength.TryCreate (readArg NameBaseLength)
-            let e = Extension.Create (readArg Extension)
-            let o = OutputDirectory.Create (readArg OutputDirectory)
-            let! s = Size.TryCreate (readArg Size)
-            let! d = Delay.TryCreate (readArg Delay)
+            let p = Prefix.Create (tryExtractArg Prefix)
+            let! b = NameBaseLength.TryCreate (tryExtractArg NameBaseLength)
+            let e = Extension.Create (tryExtractArg Extension)
+            let o = OutputDirectory.Create (tryExtractArg OutputDirectory)
+            let! s = Size.TryCreate (tryExtractArg Size)
+            let! d = Delay.TryCreate (tryExtractArg Delay)
 
             return {
                 FileCount = fileCount.Value

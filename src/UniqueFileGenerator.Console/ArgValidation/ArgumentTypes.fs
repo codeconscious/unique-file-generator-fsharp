@@ -1,27 +1,27 @@
 namespace UniqueFileGenerator.Console
 
-open System
 open Errors
 open Utilities
+open System
 open FsToolkit.ErrorHandling
 
 module ArgTypes =
     let supportedSeparators = [ ","; "_" ]
 
-    let private parseNumberInRange (floor, ceiling) (arg: string) =
-        arg
+    let private tryParseIntInRange (floor, ceiling) (text: string) =
+        text
         |> parseInRange (floor, ceiling)
-        |> Result.mapError (fun _ -> InvalidNumber (arg, floor, ceiling))
+        |> Result.mapError (fun _ -> InvalidNumber (text, floor, ceiling))
 
     type FileCount = private FileCount of int with
         static member val AllowedRange = 1, Int32.MaxValue
 
-        static member Create (input: string) =
-            input
+        static member Create (text: string) =
+            text
             |> stripSubStrings supportedSeparators
             |> parseInRange FileCount.AllowedRange
             |> Result.mapError (fun _ ->
-                InvalidNumber (input,
+                InvalidNumber (text,
                                fst FileCount.AllowedRange,
                                snd FileCount.AllowedRange))
             |> Result.map FileCount
@@ -29,49 +29,46 @@ module ArgTypes =
         member this.Value = let (FileCount count) = this in count
 
     type Prefix = private Prefix of string with
-        static member val DefaultValue = String.Empty
+        static member val Default = String.Empty
 
-        static member Create (input: string option) =
-            match input with
-            | None -> Prefix.DefaultValue
+        static member Create (text: string option) =
+            match text with
+            | None -> Prefix.Default
             | Some x -> x
             |> Prefix
 
         member this.Value = let (Prefix prefix) = this in prefix
 
     type NameBaseLength = private NameBaseLength of int with
-        static member val DefaultValue = 50
+        static member val AllowedRange = 1, 100
+        static member val Default = 50
 
-        static member TryCreate (input: string option) =
-            let allowedRange = 1, 100
-
-            input
+        static member TryCreate (text: string option) =
+            text
             |> Option.map (stripSubStrings supportedSeparators)
-            |> Option.map (fun arg ->
-                arg
-                |> parseNumberInRange allowedRange)
-            |> Option.defaultValue (Ok NameBaseLength.DefaultValue)
+            |> Option.map (fun arg -> arg |> tryParseIntInRange NameBaseLength.AllowedRange)
+            |> Option.defaultValue (Ok NameBaseLength.Default)
             |> Result.map NameBaseLength
 
         member this.Value = let (NameBaseLength length) = this in length
 
     type Extension = private Extension of string with
-        static member val DefaultValue = String.Empty
+        static member val Default = String.Empty
 
-        static member Create (input: string option) =
-            match input with
-            | None -> Extension.DefaultValue
+        static member Create (text: string option) =
+            match text with
+            | None -> Extension.Default
             | Some x -> x.Trim()
             |> Extension
 
         member this.Value = let (Extension extension) = this in extension
 
     type OutputDirectory = private OutputDirectory of string with
-        static member val DefaultValue = "output"
+        static member val Default = "output"
 
-        static member Create (input: string option) =
-            match input with
-            | None -> OutputDirectory.DefaultValue
+        static member Create (text: string option) =
+            match text with
+            | None -> OutputDirectory.Default
             | Some x -> x.Trim()
             |> OutputDirectory
 
@@ -80,26 +77,26 @@ module ArgTypes =
     type Size = private Size of int option with
       static member val AllowedRange = 1, Int32.MaxValue
 
-      static member TryCreate (input: string option) =
-          input
+      static member TryCreate (text: string option) =
+          text
           |> Option.map (stripSubStrings supportedSeparators)
-          |> Option.map (fun arg -> arg |> parseNumberInRange Size.AllowedRange)
+          |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange Size.AllowedRange)
           |> function
-              | Some (Ok i) -> Ok (Size (Some i))
               | Some (Error e) -> Error e
+              | Some (Ok i) -> Ok (Size (Some i))
               | None -> Ok (Size None)
 
-      member this.Value = let (Size length) = this in length
+      member this.Value = let (Size size) = this in size
 
     type Delay = private Delay of int with
         static member val AllowedRange = 0, Int32.MaxValue
-        static member val DefaultValue = 0
+        static member val Default = 0
 
-        static member TryCreate (input: string option) =
-            input
+        static member TryCreate (text: string option) =
+            text
             |> Option.map (stripSubStrings supportedSeparators)
-            |> Option.map (fun arg -> arg |> parseNumberInRange Delay.AllowedRange)
-            |> Option.defaultValue (Ok Delay.DefaultValue)
+            |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange Delay.AllowedRange)
+            |> Option.defaultValue (Ok Delay.Default)
             |> Result.map Delay
 
         member this.Value = let (Delay length) = this in length
