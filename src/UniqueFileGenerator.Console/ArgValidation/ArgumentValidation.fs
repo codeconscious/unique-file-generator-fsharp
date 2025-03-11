@@ -29,7 +29,7 @@ module ArgValidation =
             | true -> Error DuplicateFlags
             | false -> Ok (Map.ofArray pairs)
 
-    let private verifyOptionFlags (optionPairs: RawOptionPairs) =
+    let private verifyOptionFlags (optionPairs: Map<string, string>) =
         let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
                 o.Length = 2 &&

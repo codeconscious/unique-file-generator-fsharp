@@ -125,8 +125,6 @@ module ArgTypes =
         { FileCount: int
           Options: Options }
 
-    type RawOptionPairs = Map<string,string>
-
     let flags: Map<OptionType, string> =
         [ Prefix, "-p"
           NameBaseLength, "-b"
