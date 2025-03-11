@@ -6,7 +6,11 @@ open System
 open FsToolkit.ErrorHandling
 
 module ArgTypes =
-    let supportedSeparators = [ ","; "_" ]
+    let stripSeparators text : string =
+        let supportedSeparators = [ ","; "_" ]
+
+        supportedSeparators
+        |> List.fold (fun acc s -> acc.Replace(s, String.Empty)) text
 
     let private tryParseIntInRange (floor, ceiling) (text: string) =
         text
@@ -18,7 +22,7 @@ module ArgTypes =
 
         static member Create (text: string) =
             text
-            |> stripSubStrings supportedSeparators
+            |> stripSeparators
             |> parseInRange FileCount.AllowedRange
             |> Result.mapError (fun _ ->
                 InvalidNumber (text,
@@ -45,7 +49,7 @@ module ArgTypes =
 
         static member TryCreate (text: string option) =
             text
-            |> Option.map (stripSubStrings supportedSeparators)
+            |> Option.map stripSeparators
             |> Option.map (fun arg -> arg |> tryParseIntInRange NameBaseLength.AllowedRange)
             |> Option.defaultValue (Ok NameBaseLength.Default)
             |> Result.map NameBaseLength
@@ -75,18 +79,18 @@ module ArgTypes =
         member this.Value = let (OutputDirectory dir) = this in dir
 
     type Size = private Size of int option with
-      static member val AllowedRange = 1, Int32.MaxValue
+        static member val AllowedRange = 1, Int32.MaxValue
 
-      static member TryCreate (text: string option) =
-          text
-          |> Option.map (stripSubStrings supportedSeparators)
-          |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange Size.AllowedRange)
-          |> function
-              | Some (Error e) -> Error e
-              | Some (Ok i) -> Ok (Size (Some i))
-              | None -> Ok (Size None)
+        static member TryCreate (text: string option) =
+            text
+            |> Option.map stripSeparators
+            |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange Size.AllowedRange)
+            |> function
+               | Some (Error e) -> Error e
+               | Some (Ok i) -> Ok (Size (Some i))
+               | None -> Ok (Size None)
 
-      member this.Value = let (Size size) = this in size
+        member this.Value = let (Size size) = this in size
 
     type Delay = private Delay of int with
         static member val AllowedRange = 0, Int32.MaxValue
@@ -94,7 +98,7 @@ module ArgTypes =
 
         static member TryCreate (text: string option) =
             text
-            |> Option.map (stripSubStrings supportedSeparators)
+            |> Option.map stripSeparators
             |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange Delay.AllowedRange)
             |> Option.defaultValue (Ok Delay.Default)
             |> Result.map Delay

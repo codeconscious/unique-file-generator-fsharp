@@ -15,11 +15,6 @@ module Utilities =
 
     let inline (>=<) a (floor, ceiling) = a >= floor && a <= ceiling
 
-    let stripSubStrings strings text : string =
-        strings
-        |> List.fold (fun acc s ->
-            acc.Replace(s, String.Empty)) text
-
     let tryParseInt (input: string) : int option =
         match Int32.TryParse input with
         | true, i -> Some i
