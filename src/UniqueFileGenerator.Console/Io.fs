@@ -10,10 +10,6 @@ open System.IO
 open System.Threading
 
 module Io =
-    let private sleep (ms: int) x =
-        Thread.Sleep ms
-        x
-
     let private formatBytes (bytes: int64) : string =
         let kilobyte = 1024L
         let megabyte = kilobyte * 1024L
@@ -85,6 +81,10 @@ module Io =
         let updateFileName baseName =
             baseName
             |> toFileName prefix extension
+
+        let sleep (ms: int) x =
+            Thread.Sleep ms
+            x
 
         let writeFile fileName =
             fileName
