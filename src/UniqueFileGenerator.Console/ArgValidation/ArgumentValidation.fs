@@ -5,6 +5,7 @@ open System
 open Errors
 open FsToolkit.ErrorHandling
 open ArgTypes
+open UniqueFileGenerator.Console.ArgTypes
 
 module ArgValidation =
     let private verifyArgCount (args: string array) =
@@ -60,7 +61,7 @@ module ArgValidation =
             do! verifyArgCount args
             let fileCountArg, optionArgs = args[0], args[1..]
 
-            let! fileCount = FileCount.Create fileCountArg
+            let! count = FileCount.Create fileCountArg
 
             let! optionPairs = optionArgs |> toPairs
             do! verifyOptionFlags optionPairs
@@ -74,15 +75,5 @@ module ArgValidation =
             let! s = Size.TryCreate (tryExtractArg Size)
             let! d = Delay.TryCreate (tryExtractArg Delay)
 
-            return {
-                FileCount = fileCount.Value
-                Options = {
-                     Prefix = p.Value
-                     NameBaseLength = b.Value
-                     Extension = e.Value
-                     OutputDirectory = o.Value
-                     Size = s.Value
-                     Delay = d.Value
-                }
-            }
+            return GetArgs.Create(count, p, b, e, o, s, d)
         }

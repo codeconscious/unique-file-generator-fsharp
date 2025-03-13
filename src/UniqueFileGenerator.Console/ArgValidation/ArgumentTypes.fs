@@ -125,6 +125,19 @@ module ArgTypes =
         { FileCount: int
           Options: Options }
 
+    type GetArgs = private GetArgs of Args with
+        static member Create (count: FileCount, p: Prefix, b: NameBaseLength,
+                              e: Extension, o: OutputDirectory, s: Size, d: Delay) =
+            { FileCount = count.Value
+              Options =
+                { Prefix = p.Value
+                  NameBaseLength = b.Value
+                  Extension = e.Value
+                  OutputDirectory = o.Value
+                  Size = s.Value
+                  Delay = d.Value }
+            }
+
     let flags: Map<OptionType, string> =
         [ Prefix, "-p"
           NameBaseLength, "-b"
