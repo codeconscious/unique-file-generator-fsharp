@@ -28,12 +28,12 @@ let defaultOptions =
       OutputDirectory = OutputDirectory.Create None |> _.Value
       Size = Size.TryCreate None
              |> function
-             | Ok x -> x.Value
-             | Error e -> failwith $"Unexpected parse error: {e}"
+                 | Ok x -> x.Value
+                 | Error e -> failwith $"Unexpected parse error: {e}"
       Delay = Delay.TryCreate None
               |> function
-              | Ok x -> x.Value
-              | Error e -> failwith $"Unexpected parse error: {e}"}
+                  | Ok x -> x.Value
+                  | Error e -> failwith $"Unexpected parse error: {e}"}
 
 [<Fact>]
 let ``Appropriate error when no args`` () =
