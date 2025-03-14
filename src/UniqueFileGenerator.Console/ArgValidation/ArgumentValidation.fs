@@ -5,7 +5,6 @@ open System
 open Errors
 open FsToolkit.ErrorHandling
 open ArgTypes
-open UniqueFileGenerator.Console.ArgTypes
 
 module ArgValidation =
     let private verifyArgCount (args: string array) =
@@ -30,7 +29,7 @@ module ArgValidation =
             | true -> Error DuplicateFlags
             | false -> Ok (Map.ofArray pairs)
 
-    let private verifyOptionFlags (optionPairs: Map<string, string>) =
+    let private verifyOptionArgs (optionPairs: Map<string, string>) =
         let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
                 o.Length = 2 &&
@@ -63,17 +62,16 @@ module ArgValidation =
 
             let! count = FileCount.Create fileCountArg
 
-            let! optionPairs = optionArgs |> toPairs
-            do! verifyOptionFlags optionPairs
+            let! optionArgPairs = optionArgs |> toPairs
+            do! verifyOptionArgs optionArgPairs
+            let tryGetArg x = optionArgPairs |> Map.tryFind flags[x]
 
-            let tryExtractArg x = optionPairs |> Map.tryFind flags[x]
-
-            let p = Prefix.Create (tryExtractArg Prefix)
-            let! b = NameBaseLength.TryCreate (tryExtractArg NameBaseLength)
-            let e = Extension.Create (tryExtractArg Extension)
-            let o = OutputDirectory.Create (tryExtractArg OutputDirectory)
-            let! s = Size.TryCreate (tryExtractArg Size)
-            let! d = Delay.TryCreate (tryExtractArg Delay)
+            let p = Prefix.Create (tryGetArg Prefix)
+            let! b = NameBaseLength.TryCreate (tryGetArg NameBaseLength)
+            let e = Extension.Create (tryGetArg Extension)
+            let o = OutputDirectory.Create (tryGetArg OutputDirectory)
+            let! s = Size.TryCreate (tryGetArg Size)
+            let! d = Delay.TryCreate (tryGetArg Delay)
 
             return GetArgs.Create(count, p, b, e, o, s, d)
         }

@@ -135,8 +135,7 @@ module ArgTypes =
                   Extension = e.Value
                   OutputDirectory = o.Value
                   Size = s.Value
-                  Delay = d.Value }
-            }
+                  Delay = d.Value } }
 
     let flags: Map<OptionType, string> =
         [ Prefix, "-p"
