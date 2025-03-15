@@ -68,7 +68,7 @@ module Io =
         with
             | e -> Error $"%s{e.Message}"
 
-    let generateFiles args =
+    let generateFiles (args: Args) =
         let count, prefix, baseLength, extension, outputDir, size, delay =
             (args.FileCount,
              args.Options.Prefix,

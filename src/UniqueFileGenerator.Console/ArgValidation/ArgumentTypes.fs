@@ -12,7 +12,7 @@ module ArgTypes =
         (text, supportedSeparators)
         ||> List.fold (fun acc s -> acc.Replace(s, String.Empty))
 
-    let private tryParseIntInRange (floor, ceiling) (text: string) =
+    let private tryParseIntInRange (floor, ceiling) text =
         text
         |> parseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> InvalidNumber (text, floor, ceiling))
@@ -50,7 +50,7 @@ module ArgTypes =
         static member TryCreate (text: string option) =
             text
             |> Option.map stripSeparators
-            |> Option.map (fun arg -> arg |> tryParseIntInRange NameBaseLength.AllowedRange)
+            |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange NameBaseLength.AllowedRange)
             |> Option.defaultValue (Ok NameBaseLength.Default)
             |> Result.map NameBaseLength
 
@@ -86,9 +86,9 @@ module ArgTypes =
             |> Option.map stripSeparators
             |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange Size.AllowedRange)
             |> function
-               | Some (Error e) -> Error e
                | Some (Ok i) -> Ok (Size (Some i))
-               | None -> Ok (Size None)
+               | Some (Error e) -> Error e // Parse error.
+               | None -> Ok (Size None) // No size entered.
 
         member this.Value = let (Size size) = this in size
 
