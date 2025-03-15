@@ -73,5 +73,13 @@ module ArgValidation =
             let! s = Size.TryCreate (tryGetArg Size)
             let! d = Delay.TryCreate (tryGetArg Delay)
 
-            return GetArgs.Create(count, p, b, e, o, s, d)
+            let options =
+                { Prefix = p.Value
+                  NameBaseLength = b.Value
+                  Extension = e.Value
+                  OutputDirectory = o.Value
+                  Size = s.Value
+                  Delay = d.Value }
+
+            return Args.Create(count, options)
         }

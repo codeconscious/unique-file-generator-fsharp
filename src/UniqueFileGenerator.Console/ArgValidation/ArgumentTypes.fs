@@ -122,20 +122,22 @@ module ArgTypes =
           Delay: int }
 
     type Args =
-        { FileCount: int
-          Options: Options }
+        private
+            { fileCount: int
+              options: Options }
+        member x.FileCount = x.fileCount
+        member x.Options = x.options
 
-    type GetArgs = private GetArgs of Args with
-        static member Create (count: FileCount, p: Prefix, b: NameBaseLength,
-                              e: Extension, o: OutputDirectory, s: Size, d: Delay) =
-            { FileCount = count.Value
-              Options =
-                { Prefix = p.Value
-                  NameBaseLength = b.Value
-                  Extension = e.Value
-                  OutputDirectory = o.Value
-                  Size = s.Value
-                  Delay = d.Value } }
+        static member Create(count: FileCount, options: Options) =
+            { fileCount = count.Value
+              options =
+                { Prefix = options.Prefix
+                  NameBaseLength = options.NameBaseLength
+                  Extension = options.Extension
+                  OutputDirectory = options.OutputDirectory
+                  Size = options.Size
+                  Delay = options.Delay } }
+
 
     let flags: Map<OptionType, string> =
         [ Prefix, "-p"
