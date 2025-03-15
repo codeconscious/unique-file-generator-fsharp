@@ -9,8 +9,8 @@ module ArgTypes =
     let stripSeparators text : string =
         let supportedSeparators = [ ","; "_" ]
 
-        supportedSeparators
-        |> List.fold (fun acc s -> acc.Replace(s, String.Empty)) text
+        (text, supportedSeparators)
+        ||> List.fold (fun acc s -> acc.Replace(s, String.Empty))
 
     let private tryParseIntInRange (floor, ceiling) (text: string) =
         text
