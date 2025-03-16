@@ -10,7 +10,8 @@
         <Compile Include="Utilities.fs" />
         <Compile Include="Printing.fs" />
         <Compile Include="Errors.fs" />
-        <Compile Include="ArgParser.fs" />
+        <Compile Include="Arguments\ArgumentTypes.fs" />
+        <Compile Include="Arguments\ArgumentValidation.fs" />
         <Compile Include="StringGeneration.fs" />
         <Compile Include="Io.fs" />
         <Compile Include="Help.fs" />

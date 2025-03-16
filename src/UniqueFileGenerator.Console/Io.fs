@@ -1,19 +1,15 @@
 namespace UniqueFileGenerator.Console
 
+open ArgTypes
+open Errors
+open Printing
+open StringGeneration
+open Utilities
+open System
+open System.IO
+open System.Threading
+
 module Io =
-    open ArgValidation.Types
-    open Errors
-    open Printing
-    open StringGeneration
-    open Utilities
-    open System
-    open System.IO
-    open System.Threading
-
-    let private sleep (ms: int) x =
-        Thread.Sleep ms
-        x
-
     let private formatBytes (bytes: int64) : string =
         let kilobyte = 1024L
         let megabyte = kilobyte * 1024L
@@ -26,6 +22,7 @@ module Io =
         | _ when bytes >= megabyte -> sprintf "%s MB" ((float bytes / float megabyte) |> formatFloat)
         | _ when bytes >= kilobyte -> sprintf "%s KB" ((float bytes / float kilobyte) |> formatFloat)
         | _ -> sprintf "%s bytes" (bytes |> formatInt64)
+
 
     let verifyDriveSpace (args: Args) =
         let bytesToKeepAvailable = 536_870_912L // 0.5 GB
@@ -71,7 +68,7 @@ module Io =
         with
             | e -> Error $"%s{e.Message}"
 
-    let generateFiles args =
+    let generateFiles (args: Args) =
         let count, prefix, baseLength, extension, outputDir, size, delay =
             (args.FileCount,
              args.Options.Prefix,
@@ -84,6 +81,10 @@ module Io =
         let updateFileName baseName =
             baseName
             |> toFileName prefix extension
+
+        let sleep (ms: int) x =
+            Thread.Sleep ms
+            x
 
         let writeFile fileName =
             fileName

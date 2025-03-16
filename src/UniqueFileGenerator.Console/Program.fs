@@ -1,7 +1,7 @@
 ﻿namespace UniqueFileGenerator.Console
 
 open ArgValidation
-open ArgValidation.Types
+open ArgTypes
 open Errors
 open Printing
 open Io
@@ -17,7 +17,8 @@ module Main =
                 let! args = validate rawArgs
                 do! verifyDirectory args.Options.OutputDirectory
                 let! spaceNeeded = verifyDriveSpace args
-                printLine $"This operation will use %s{spaceNeeded} of drive space."
+
+                printLine $"This operation will use approximately %s{spaceNeeded} of drive space."
                 return generateFiles args
             }
 
