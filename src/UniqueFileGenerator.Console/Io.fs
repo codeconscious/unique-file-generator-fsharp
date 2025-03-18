@@ -23,9 +23,9 @@ module Io =
         | _ when bytes >= kilobyte -> sprintf "%s KB" ((float bytes / float kilobyte) |> formatFloat)
         | _ -> sprintf "%s bytes" (bytes |> formatInt64)
 
-
     let verifyDriveSpace (args: Args) =
         let bytesToKeepAvailable = 536_870_912L // 0.5 GB
+        let largeOperationBorderline = 1073741824L // 1 GB
 
         let necessaryDriveSpace =
             let singleFileSize =
@@ -38,6 +38,18 @@ module Io =
 
             singleFileSize * int64 args.FileCount // Rough estimation
 
+        let confirmShouldContinueDespiteLargeSize () =
+            let confirm () =
+                Console.Write($"This operation will take %d{necessaryDriveSpace} bytes. Continue? (Y/n)  ")
+                let answer = Console.ReadLine()
+
+                [| "y"; "yes" |]
+                |> Array.exists (fun x -> answer.Equals(x.Trim(), StringComparison.InvariantCultureIgnoreCase))
+
+            if necessaryDriveSpace > largeOperationBorderline
+            then confirm ()
+            else true
+
         try
             let appDir = AppContext.BaseDirectory
             let root = Path.GetPathRoot appDir
@@ -48,12 +60,15 @@ module Io =
                 let driveInfo = DriveInfo path
                 let usableFreeSpace = driveInfo.AvailableFreeSpace - bytesToKeepAvailable
 
-                if necessaryDriveSpace < usableFreeSpace
-                then Ok <| formatBytes necessaryDriveSpace
-                else Error <| DriveSpaceInsufficient (formatBytes necessaryDriveSpace,
+                if necessaryDriveSpace > usableFreeSpace
+                then Error <| DriveSpaceInsufficient (formatBytes necessaryDriveSpace,
                                                       formatBytes usableFreeSpace)
+                else
+                    if confirmShouldContinueDespiteLargeSize ()
+                    then Ok (formatBytes necessaryDriveSpace)
+                    else Error (UnknownError "Cancelled") // TODO: Make new ErrorType type.
         with
-            | e -> Error <| UnknownError $"%s{e.Message}"
+            | e -> Error (UnknownError $"%s{e.Message}") // TODO: Make new ErrorType type.
 
     let verifyDirectory dir =
         match Directory.Exists dir with
