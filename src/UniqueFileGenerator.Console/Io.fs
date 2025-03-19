@@ -25,7 +25,7 @@ module Io =
 
     let verifyDriveSpace (args: Args) =
         let bytesToKeepAvailable = 536_870_912L // 0.5 GB
-        let largeOperationBorderline = 1073741824L // 1 GB
+        let largeOperationBorderline = 1_073_741_824L // 1 GB
 
         let necessaryDriveSpace =
             let singleFileSize =
@@ -38,13 +38,13 @@ module Io =
 
             singleFileSize * int64 args.FileCount // Rough estimation
 
-        let confirmShouldContinueDespiteLargeSize () =
+        let askContinueDespiteLargeSize () =
             let confirm () =
-                Console.Write($"This operation will take %d{necessaryDriveSpace} bytes. Continue? (Y/n)  ")
-                let answer = Console.ReadLine()
+                Console.Write($"This operation will require %s{formatBytes necessaryDriveSpace} of drive space. Continue? (Y/n)  ")
+                let reply = Console.ReadLine()
 
                 [| "y"; "yes" |]
-                |> Array.exists (fun x -> answer.Equals(x.Trim(), StringComparison.InvariantCultureIgnoreCase))
+                |> Array.exists (fun x -> reply.Equals(x.Trim(), StringComparison.InvariantCultureIgnoreCase))
 
             if necessaryDriveSpace > largeOperationBorderline
             then confirm ()
@@ -64,11 +64,11 @@ module Io =
                 then Error <| DriveSpaceInsufficient (formatBytes necessaryDriveSpace,
                                                       formatBytes usableFreeSpace)
                 else
-                    if confirmShouldContinueDespiteLargeSize ()
+                    if askContinueDespiteLargeSize ()
                     then Ok (formatBytes necessaryDriveSpace)
-                    else Error (UnknownError "Cancelled") // TODO: Make new ErrorType type.
+                    else Error CancelledByUser
         with
-            | e -> Error (UnknownError $"%s{e.Message}") // TODO: Make new ErrorType type.
+            | e -> Error (UnknownError $"%s{e.Message}")
 
     let verifyDirectory dir =
         match Directory.Exists dir with

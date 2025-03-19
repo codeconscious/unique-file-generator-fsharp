@@ -13,6 +13,7 @@ module Errors =
         | DirectoryMissing of string
         | DriveSpaceConfirmationFailure
         | DriveSpaceInsufficient of Needed: string * Actual: string
+        | CancelledByUser
         | UnknownError of string
 
     let getMessage error =
@@ -28,5 +29,6 @@ module Errors =
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
         | DriveSpaceInsufficient (needed, actual) ->
             $"Insufficient drive space. Though %s{needed} is necessary, only %s{actual} is available."
+        | CancelledByUser -> "Cancelled."
         | UnknownError e -> e
 
