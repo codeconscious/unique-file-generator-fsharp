@@ -10,6 +10,11 @@ open System.IO
 open System.Threading
 
 module Io =
+    let driveSpaceToKeepAvailable = 536_870_912L // 0.5 GB
+
+    let largeOperationSize = 1_073_741_824L // 1 GB
+    let largeOperationRatio = 0.5
+
     let private formatBytes (bytes: int64) : string =
         let kilobyte = 1024L
         let megabyte = kilobyte * 1024L
@@ -24,9 +29,6 @@ module Io =
         | _ -> sprintf "%s bytes" (bytes |> formatInt64)
 
     let verifyDriveSpace (args: Args) =
-        let bytesToKeepAvailable = 536_870_912L // 0.5 GB
-        let largeOperationBorderline = 1_073_741_824L // 1 GB
-
         let necessaryDriveSpace =
             let singleFileSize =
                 args.Options.Size
@@ -38,7 +40,7 @@ module Io =
 
             singleFileSize * int64 args.FileCount // Rough estimation
 
-        let askContinueDespiteLargeSize () =
+        let askContinueDespiteLargeSize usableFreeSpace =
             let confirm () =
                 Console.Write($"This operation will require %s{formatBytes necessaryDriveSpace} of drive space. Continue? (Y/n)  ")
                 let reply = Console.ReadLine()
@@ -46,7 +48,8 @@ module Io =
                 [| "y"; "yes" |]
                 |> Array.exists (fun x -> reply.Equals(x.Trim(), StringComparison.InvariantCultureIgnoreCase))
 
-            if necessaryDriveSpace > largeOperationBorderline
+            if necessaryDriveSpace > largeOperationSize ||
+               (float necessaryDriveSpace / float usableFreeSpace) > largeOperationRatio
             then confirm ()
             else true
 
@@ -58,13 +61,13 @@ module Io =
             | null -> Error DriveSpaceConfirmationFailure
             | path ->
                 let driveInfo = DriveInfo path
-                let usableFreeSpace = driveInfo.AvailableFreeSpace - bytesToKeepAvailable
+                let usableFreeSpace = driveInfo.AvailableFreeSpace - driveSpaceToKeepAvailable
 
                 if necessaryDriveSpace > usableFreeSpace
                 then Error <| DriveSpaceInsufficient (formatBytes necessaryDriveSpace,
                                                       formatBytes usableFreeSpace)
                 else
-                    if askContinueDespiteLargeSize ()
+                    if askContinueDespiteLargeSize usableFreeSpace
                     then Ok (formatBytes necessaryDriveSpace)
                     else Error CancelledByUser
         with
