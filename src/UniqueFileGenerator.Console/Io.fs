@@ -30,10 +30,9 @@ module Io =
 
     let verifyDriveSpace (args: Args) =
         let driveSpaceToKeepAvailable = 536_870_912L // 0.5 GB
-        let largeOperationSize = 1_073_741_824L // 1 GB
-        let largeOperationRatio = 0.5
+        let warningRatio = 0.75
 
-        let necessaryDriveSpace =
+        let necessarySpace =
             let singleFileSize =
                 args.Options.Size
                 |> Option.defaultValue
@@ -45,17 +44,17 @@ module Io =
             singleFileSize * int64 args.FileCount // Rough estimation
 
         let confirmContinueDespiteLargeSize usableFreeSpace : bool =
-            let insufficientSpace = necessaryDriveSpace > largeOperationSize
-            let ratioTooLarge = (float necessaryDriveSpace / float usableFreeSpace) > largeOperationRatio
+            let ratio = float necessarySpace / float usableFreeSpace
+            let isLargeRatio = ratio > warningRatio
 
             let confirm () =
-                Console.Write($"This operation will require %s{formatBytes necessaryDriveSpace} of drive space. Continue? (Y/n)  ")
-                let reply = Console.ReadLine()
+                Console.Write($"This operation requires %s{formatBytes necessarySpace}, %g{ratio * 100.0}%% of remaining drive space. Continue? (Y/n)  ")
+                let reply = Console.ReadLine().Trim()
 
                 [| "y"; "yes" |]
-                |> Array.exists (fun x -> reply.Equals(x.Trim(), StringComparison.InvariantCultureIgnoreCase))
+                |> Array.exists (fun yesAnswer -> reply.Equals(yesAnswer, StringComparison.InvariantCultureIgnoreCase))
 
-            if insufficientSpace || ratioTooLarge
+            if isLargeRatio
             then confirm ()
             else true
 
@@ -69,12 +68,12 @@ module Io =
                 let driveInfo = DriveInfo path
                 let usableFreeSpace = driveInfo.AvailableFreeSpace - driveSpaceToKeepAvailable
 
-                if necessaryDriveSpace > usableFreeSpace
-                then Error <| DriveSpaceInsufficient (formatBytes necessaryDriveSpace,
+                if necessarySpace > usableFreeSpace
+                then Error <| DriveSpaceInsufficient (formatBytes necessarySpace,
                                                       formatBytes usableFreeSpace)
                 else
                     if confirmContinueDespiteLargeSize usableFreeSpace
-                    then Ok (formatBytes necessaryDriveSpace)
+                    then Ok (formatBytes necessarySpace)
                     else Error CancelledByUser
         with
             | e -> Error (UnknownError $"%s{e.Message}")
