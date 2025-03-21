@@ -10,7 +10,12 @@ open System.IO
 open System.Threading
 
 module Io =
-    let private formatBytes (bytes: int64) : string =
+    let verifyDirectory dir =
+        match Directory.Exists dir with
+        | true -> Ok ()
+        | false -> Error (DirectoryMissing dir)
+
+    let private formatBytes (bytes: int64) =
         let kilobyte = 1024L
         let megabyte = kilobyte * 1024L
         let gigabyte = megabyte * 1024L
@@ -23,11 +28,11 @@ module Io =
         | _ when bytes >= kilobyte -> sprintf "%s KB" ((float bytes / float kilobyte) |> formatFloat)
         | _ -> sprintf "%s bytes" (bytes |> formatInt64)
 
-
     let verifyDriveSpace (args: Args) =
-        let bytesToKeepAvailable = 536_870_912L // 0.5 GB
+        let driveSpaceToKeepAvailable = 536_870_912L // 0.5 GB
+        let warningRatio = 0.75
 
-        let necessaryDriveSpace =
+        let necessarySpace =
             let singleFileSize =
                 args.Options.Size
                 |> Option.defaultValue
@@ -38,6 +43,25 @@ module Io =
 
             singleFileSize * int64 args.FileCount // Rough estimation
 
+        let confirmContinueDespiteLargeSize usableFreeSpace : bool =
+            let ratio = float necessarySpace / float usableFreeSpace
+            let isLargeRatio = ratio > warningRatio
+
+            let confirm () =
+                Console.Write(
+                    sprintf "This operation requires %s, which is %.2f%% of remaining drive space. Continue? (Y/n)  "
+                        (formatBytes necessarySpace)
+                        (ratio * 100.0))
+
+                let reply = Console.ReadLine().Trim()
+
+                [| "y"; "yes" |]
+                |> Array.exists (fun yesAnswer -> reply.Equals(yesAnswer, StringComparison.InvariantCultureIgnoreCase))
+
+            if isLargeRatio
+            then confirm ()
+            else true
+
         try
             let appDir = AppContext.BaseDirectory
             let root = Path.GetPathRoot appDir
@@ -46,19 +70,15 @@ module Io =
             | null -> Error DriveSpaceConfirmationFailure
             | path ->
                 let driveInfo = DriveInfo path
-                let usableFreeSpace = driveInfo.AvailableFreeSpace - bytesToKeepAvailable
+                let usableFreeSpace = driveInfo.AvailableFreeSpace - driveSpaceToKeepAvailable
 
-                if necessaryDriveSpace < usableFreeSpace
-                then Ok <| formatBytes necessaryDriveSpace
-                else Error <| DriveSpaceInsufficient (formatBytes necessaryDriveSpace,
-                                                      formatBytes usableFreeSpace)
+                if necessarySpace > usableFreeSpace
+                then Error (DriveSpaceInsufficient (formatBytes necessarySpace, formatBytes usableFreeSpace))
+                elif confirmContinueDespiteLargeSize usableFreeSpace
+                then Ok (formatBytes necessarySpace)
+                else Error CancelledByUser
         with
-            | e -> Error <| UnknownError $"%s{e.Message}"
-
-    let verifyDirectory dir =
-        match Directory.Exists dir with
-        | true -> Ok ()
-        | false -> Error (DirectoryMissing dir)
+            | e -> Error (IoError $"%s{e.Message}")
 
     let private createFile directory fileName (contents: string) =
         try

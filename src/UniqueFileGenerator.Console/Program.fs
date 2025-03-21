@@ -18,8 +18,8 @@ module Main =
                 do! verifyDirectory args.Options.OutputDirectory
                 let! spaceNeeded = verifyDriveSpace args
 
-                printLine $"This operation will use approximately %s{spaceNeeded} of drive space."
-                return generateFiles args
+                generateFiles args
+                return spaceNeeded
             }
 
         if Help.wasRequested rawArgs then
@@ -27,8 +27,8 @@ module Main =
             0
         else
             match run rawArgs with
-            | Ok _ ->
-                printLine $"Done after %s{watch.ElapsedFriendly}"
+            | Ok spaceUsed ->
+                printLine $"Done after %s{watch.ElapsedFriendly}. Used approximately %s{spaceUsed} of drive space."
                 0
             | Error e ->
                 printError <| getMessage e
