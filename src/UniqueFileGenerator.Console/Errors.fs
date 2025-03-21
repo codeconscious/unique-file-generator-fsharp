@@ -29,6 +29,6 @@ module Errors =
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
         | DriveSpaceInsufficient (needed, actual) ->
             $"Insufficient drive space. Though %s{needed} is necessary, only %s{actual} is available."
-        | IoError e -> e
+        | IoError e -> $"IO error: %s{e}"
         | CancelledByUser -> "Cancelled."
 
