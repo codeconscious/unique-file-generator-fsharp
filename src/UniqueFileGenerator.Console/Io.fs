@@ -48,7 +48,11 @@ module Io =
             let isLargeRatio = ratio > warningRatio
 
             let confirm () =
-                Console.Write($"This operation requires %s{formatBytes necessarySpace}, %g{ratio * 100.0}%% of remaining drive space. Continue? (Y/n)  ")
+                Console.Write(
+                    sprintf "This operation requires %s, which is %.2f%% of remaining drive space. Continue? (Y/n)  "
+                        (formatBytes necessarySpace)
+                        (ratio * 100.0))
+
                 let reply = Console.ReadLine().Trim()
 
                 [| "y"; "yes" |]
@@ -69,12 +73,10 @@ module Io =
                 let usableFreeSpace = driveInfo.AvailableFreeSpace - driveSpaceToKeepAvailable
 
                 if necessarySpace > usableFreeSpace
-                then Error <| DriveSpaceInsufficient (formatBytes necessarySpace,
-                                                      formatBytes usableFreeSpace)
-                else
-                    if confirmContinueDespiteLargeSize usableFreeSpace
-                    then Ok (formatBytes necessarySpace)
-                    else Error CancelledByUser
+                then Error (DriveSpaceInsufficient (formatBytes necessarySpace, formatBytes usableFreeSpace))
+                elif confirmContinueDespiteLargeSize usableFreeSpace
+                then Ok (formatBytes necessarySpace)
+                else Error CancelledByUser
         with
             | e -> Error (IoError $"%s{e.Message}")
 
