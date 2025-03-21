@@ -25,9 +25,7 @@ module ArgTypes =
             |> stripSeparators
             |> parseInRange FileCount.AllowedRange
             |> Result.mapError (fun _ ->
-                ParseNumberFailure (text,
-                                    fst FileCount.AllowedRange,
-                                    snd FileCount.AllowedRange))
+                ParseNumberFailure (text, fst FileCount.AllowedRange, snd FileCount.AllowedRange))
             |> Result.map FileCount
 
         member this.Value = let (FileCount count) = this in count
@@ -125,10 +123,11 @@ module ArgTypes =
         private
             { fileCount: int
               options: Options }
+
         member x.FileCount = x.fileCount
         member x.Options = x.options
 
-        static member Create(count: FileCount, options: Options) =
+        static member Create (count: FileCount, options: Options) =
             { fileCount = count.Value
               options =
                 { Prefix = options.Prefix
