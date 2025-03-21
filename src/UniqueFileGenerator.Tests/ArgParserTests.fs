@@ -64,21 +64,21 @@ let ``Appropriate error when invalid arg count (second pair incomplete)`` () =
 [<Fact>]
 let ``Appropriate error when invalid file count`` () =
     let args = [| "notNumeric" |]
-    let expected = Error <| InvalidNumber(args[0], 1, Int32.MaxValue)
+    let expected = Error <| ParseNumberFailure(args[0], 1, Int32.MaxValue)
     let actual = validate args
     Assert.Equal(expected, actual)
 
 [<Fact>]
 let ``Appropriate error when negative file count`` () =
     let args = [| "-1" |]
-    let expected = Error <| InvalidNumber(args[0], 1, Int32.MaxValue)
+    let expected = Error <| ParseNumberFailure(args[0], 1, Int32.MaxValue)
     let actual = validate args
     Assert.Equal(expected, actual)
 
 [<Fact>]
 let ``Appropriate error when zero file count`` () =
     let args = [| "0" |]
-    let expected = Error <| InvalidNumber(args[0], 1, Int32.MaxValue)
+    let expected = Error <| ParseNumberFailure(args[0], 1, Int32.MaxValue)
     let actual = validate args
     Assert.Equal(expected, actual)
 
