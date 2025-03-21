@@ -76,7 +76,7 @@ module Io =
                     then Ok (formatBytes necessarySpace)
                     else Error CancelledByUser
         with
-            | e -> Error (UnknownError $"%s{e.Message}")
+            | e -> Error (IoError $"%s{e.Message}")
 
     let private createFile directory fileName (contents: string) =
         try
