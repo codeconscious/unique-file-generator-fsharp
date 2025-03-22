@@ -11,7 +11,7 @@ module Utilities =
         i.ToString("#,##0", CultureInfo.InvariantCulture)
 
     let formatFloat (f: float) : string =
-        f.ToString("#,##0.##", CultureInfo.InvariantCulture)
+        f.ToString("#,##0.00", CultureInfo.InvariantCulture)
 
     let inline (>=<) a (floor, ceiling) = a >= floor && a <= ceiling
 

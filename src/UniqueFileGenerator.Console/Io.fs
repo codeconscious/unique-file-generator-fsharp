@@ -49,9 +49,9 @@ module Io =
 
             let confirm () =
                 Console.Write(
-                    sprintf "This operation requires %s, which is %.2f%% of remaining drive space. Continue? (Y/n)  "
-                        (formatBytes necessarySpace)
-                        (ratio * 100.0))
+                    sprintf "This operation requires %s, which is %s%% of remaining drive space. Continue? (Y/n)  "
+                        (necessarySpace |> formatBytes)
+                        (ratio * 100.0 |> formatFloat))
 
                 let reply = Console.ReadLine().Trim()
 
