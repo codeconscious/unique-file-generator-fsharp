@@ -3,6 +3,8 @@ namespace UniqueFileGenerator.Console
 open System
 
 module StringGeneration =
+    type FileNameParts = { Prefix: string; BaseName: string; Extension: string; }
+
     let private charBank =
         [ 'A' .. 'Z' ] @ [ 'a' .. 'z' ] @ [ '0' .. '9' ]
         |> List.map string
@@ -17,14 +19,14 @@ module StringGeneration =
     let generateMultiple itemLength count : string array =
         Array.init count (fun _ -> generateSingle itemLength)
 
-    let toFileName (prefix: string) (extension: string) (baseName: string) : string =
-        let safeExtension =
-            match extension.Trim() with
+    let toFileName parts : string =
+        let sanitizedExtension =
+            match parts.Extension.Trim() with
             | ext when String.IsNullOrWhiteSpace ext -> String.Empty
             | ext when ext.StartsWith '.' -> ext
             | ext -> $".%s{ext}"
 
-        $"%s{prefix}%s{baseName}%s{safeExtension}"
+        $"%s{parts.Prefix.Trim()}%s{parts.BaseName}%s{sanitizedExtension}"
 
     let generateFileContent sizeInBytes fallback : string =
         sizeInBytes
