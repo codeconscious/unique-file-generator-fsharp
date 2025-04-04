@@ -9,14 +9,11 @@ module StringGeneration =
         |> List.map string
         |> String.concat String.Empty
 
-    let private rnd = Random()
-
-    let private generateSingle (length: int) : string =
-        let sb = StringBuilder length
-        for _ in 1 .. length do
-            let nextChar = rnd.Next(0, charBank.Length - 1)
-            sb.Append charBank[nextChar] |> ignore
-        sb.ToString()
+    let private generateSingle length : string =
+        let rnd = Random()
+        let getRndChar () = charBank[rnd.Next charBank.Length]
+        let chars = Array.init length (fun _ -> getRndChar ())
+        new string(chars)
 
     let generateMultiple itemLength count : string array =
         Array.init count (fun _ -> generateSingle itemLength)
@@ -33,4 +30,3 @@ module StringGeneration =
         sizeInBytes
         |> Option.map generateSingle
         |> Option.defaultValue fallback
-
