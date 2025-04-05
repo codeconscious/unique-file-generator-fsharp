@@ -90,17 +90,16 @@ module Io =
 
     let generateFiles (args: Args) =
         let count, prefix, baseLength, extension, outputDir, size, delay =
-            (args.FileCount,
-             args.Options.Prefix,
-             args.Options.NameBaseLength,
-             args.Options.Extension,
-             args.Options.OutputDirectory,
-             args.Options.Size,
-             args.Options.Delay)
+            args.FileCount,
+            args.Options.Prefix,
+            args.Options.NameBaseLength,
+            args.Options.Extension,
+            args.Options.OutputDirectory,
+            args.Options.Size,
+            args.Options.Delay
 
         let updateFileName baseName =
-            baseName
-            |> toFileName prefix extension
+            toFileName { Prefix = prefix; BaseName = baseName; Extension = extension }
 
         let sleep (ms: int) x =
             Thread.Sleep ms
@@ -114,5 +113,5 @@ module Io =
             |> printResult
 
         generateMultiple baseLength count
-            |> Array.map updateFileName
-            |> Array.iter writeFile
+        |> Array.map updateFileName
+        |> Array.iter writeFile

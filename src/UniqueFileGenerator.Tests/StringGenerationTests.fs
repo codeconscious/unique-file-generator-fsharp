@@ -38,7 +38,7 @@ module Strings =
 
     [<Fact>]
     let ``Throws with negative item length`` () =
-        Assert.Throws<ArgumentOutOfRangeException>(fun () ->
+        Assert.Throws<ArgumentException>(fun () ->
             (generateMultiple -1 5000) :> obj)
 
 module FileNames =
@@ -50,8 +50,7 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x ->
-                x |> toFileName prefix extension)
+            |> Array.map (fun x -> toFileName { Prefix = prefix; BaseName = x; Extension = extension })
 
         Assert.Equal<string[]>(generated, fileNames)
 
@@ -63,8 +62,7 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x ->
-                x |> toFileName prefix extension)
+            |> Array.map (fun x -> toFileName { Prefix = prefix; BaseName = x; Extension = extension })
 
         Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
 
@@ -76,8 +74,7 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x ->
-                x |> toFileName prefix extension)
+            |> Array.map (fun x -> toFileName { Prefix = prefix; BaseName = x; Extension = extension })
 
         Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))
 
@@ -89,8 +86,7 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x ->
-                x |> toFileName prefix extension)
+            |> Array.map (fun x -> toFileName { Prefix = prefix; BaseName = x; Extension = extension })
 
         Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
         Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))

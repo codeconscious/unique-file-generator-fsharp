@@ -1,36 +1,34 @@
 namespace UniqueFileGenerator.Console
 
 open System
-open System.Text
 
 module StringGeneration =
+    type FileNameParts = { Prefix: string; BaseName: string; Extension: string; }
+
     let private charBank =
         [ 'A' .. 'Z' ] @ [ 'a' .. 'z' ] @ [ '0' .. '9' ]
         |> List.map string
         |> String.concat String.Empty
 
-    let private rnd = Random()
-
-    let private generateSingle (length: int) : string =
-        let sb = StringBuilder length
-        for _ in 1 .. length do
-            let nextChar = rnd.Next(0, charBank.Length - 1)
-            sb.Append charBank[nextChar] |> ignore
-        sb.ToString()
+    let private generateSingle length : string =
+        let rnd = Random()
+        let getRndChar () = charBank[rnd.Next charBank.Length]
+        let chars = Array.init length (fun _ -> getRndChar ())
+        new string(chars)
 
     let generateMultiple itemLength count : string array =
         Array.init count (fun _ -> generateSingle itemLength)
 
-    let toFileName prefix extension baseName : string =
-        let ensureValidExtension ext =
-            if String.IsNullOrWhiteSpace ext then String.Empty
-            elif ext.StartsWith '.' then ext.Trim()
-            else $".%s{ext.Trim()}"
+    let toFileName parts : string =
+        let sanitizedExtension =
+            match parts.Extension.Trim() with
+            | ext when String.IsNullOrWhiteSpace ext -> String.Empty
+            | ext when ext.StartsWith '.' -> ext
+            | ext -> $".%s{ext}"
 
-        $"%s{prefix}%s{baseName}%s{ensureValidExtension extension}"
+        $"%s{parts.Prefix.Trim()}%s{parts.BaseName}%s{sanitizedExtension}"
 
     let generateFileContent sizeInBytes fallback : string =
         sizeInBytes
         |> Option.map generateSingle
         |> Option.defaultValue fallback
-
