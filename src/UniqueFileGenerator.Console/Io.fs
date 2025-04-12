@@ -89,7 +89,7 @@ module Io =
             | e -> Error $"%s{e.Message}"
 
     let generateFiles (args: Args) =
-        let count, prefix, baseLength, extension, outputDir, size, delay =
+        let count, prefix, baseLength, ext, outputDir, size, delay =
             args.FileCount,
             args.Options.Prefix,
             args.Options.NameBaseLength,
@@ -99,7 +99,7 @@ module Io =
             args.Options.Delay
 
         let updateFileName baseName =
-            toFileName { Prefix = prefix; BaseName = baseName; Extension = extension }
+            toFileName { Prefix = prefix; Base = baseName; Ext = ext }
 
         let sleep (ms: int) x =
             Thread.Sleep ms
