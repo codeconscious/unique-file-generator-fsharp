@@ -15,11 +15,11 @@ module StringGeneration =
 
     let private rnd = Random()
 
-    let private generate length : string =
+    let private generateSingle length : string =
         String(Array.init length (fun _ -> charBank[rnd.Next(charBank.Length)]))
 
     let generateMultiple eachLength count : string array =
-        Array.init count (fun _ -> generate eachLength)
+        Array.init count (fun _ -> generateSingle eachLength)
 
     let toFileName parts : string =
         let sanitizedExtension =
@@ -32,5 +32,5 @@ module StringGeneration =
 
     let generateFileContent sizeInBytes fallback : string =
         sizeInBytes
-        |> Option.map generate
+        |> Option.map generateSingle
         |> Option.defaultValue fallback
