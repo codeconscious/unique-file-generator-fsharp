@@ -95,7 +95,7 @@ module Io =
             args.Options.Size,
             args.Options.Delay
 
-        let updateFileName baseName =
+        let generateFileName baseName =
             toFileName { Prefix = prefix; Base = baseName; Ext = ext }
 
         let sleep (ms: int) x =
@@ -110,5 +110,5 @@ module Io =
             |> printResult
 
         generateMultiple baseLength count
-        |> Array.map updateFileName
+        |> Array.map generateFileName
         |> Array.iter writeFile
