@@ -35,13 +35,10 @@ module Io =
         let necessarySpace =
             let singleFileSize =
                 args.Options.Size
-                |> Option.defaultValue
-                       (args.Options.Prefix.Length +
-                        args.Options.NameBaseLength +
-                        args.Options.Extension.Length)
+                |> Option.defaultValue (fileNameLength args.Options)
                 |> int64
 
-            singleFileSize * int64 args.FileCount // Rough estimation
+            singleFileSize * (int64 args.FileCount) // Rough estimation
 
         let confirmContinueDespiteLargeSize usableFreeSpace : bool =
             let ratio = float necessarySpace / float usableFreeSpace
