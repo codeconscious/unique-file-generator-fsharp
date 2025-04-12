@@ -28,7 +28,10 @@ module StringGeneration =
             | ext when ext.StartsWith '.' -> ext
             | ext -> $".%s{ext}"
 
-        $"%s{parts.Prefix.Trim()}%s{parts.Base}%s{sanitizedExtension}"
+        String.Concat(
+            parts.Prefix.Trim(),
+            parts.Base,
+            sanitizedExtension)
 
     let generateFileContent sizeInBytes fallback : string =
         sizeInBytes
