@@ -32,22 +32,20 @@ module Io =
         let driveSpaceToKeepAvailable = 536_870_912L // 0.5 GB
         let warningRatio = 0.75
 
-        let necessarySpace =
-            let singleFileSize =
-                args.Options.Size
-                |> Option.defaultValue (fileNameLength args.Options)
-                |> int64
+        let neededSpace =
+            args.Options.Size
+            |> Option.defaultValue (fileNameLength args.Options)
+            |> int64
+            |> (*) (int64 args.FileCount) // Rough estimation
 
-            singleFileSize * (int64 args.FileCount) // Rough estimation
-
-        let confirmContinueDespiteLargeSize usableFreeSpace : bool =
-            let ratio = float necessarySpace / float usableFreeSpace
+        let confirmContinueDespiteLargeSize availableSpace : bool =
+            let ratio = float neededSpace / float availableSpace
             let isLargeRatio = ratio > warningRatio
 
             let confirm () =
                 Console.Write(
                     sprintf "This operation requires %s, which is %s%% of remaining drive space. Continue? (Y/n)  "
-                        (necessarySpace |> formatBytes)
+                        (neededSpace |> formatBytes)
                         (ratio * 100.0 |> formatFloat))
 
                 let reply = Console.ReadLine().Trim()
@@ -69,10 +67,10 @@ module Io =
                 let driveInfo = DriveInfo path
                 let usableFreeSpace = driveInfo.AvailableFreeSpace - driveSpaceToKeepAvailable
 
-                if necessarySpace > usableFreeSpace
-                then Error (DriveSpaceInsufficient (formatBytes necessarySpace, formatBytes usableFreeSpace))
+                if neededSpace > usableFreeSpace
+                then Error (DriveSpaceInsufficient (formatBytes neededSpace, formatBytes usableFreeSpace))
                 elif confirmContinueDespiteLargeSize usableFreeSpace
-                then Ok (formatBytes necessarySpace)
+                then Ok (formatBytes neededSpace)
                 else Error CancelledByUser
         with
             | e -> Error (IoError $"%s{e.Message}")
