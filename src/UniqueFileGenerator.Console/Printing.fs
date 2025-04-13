@@ -16,11 +16,11 @@ module Printing =
     let printLine msg =
         printLineColor None msg
 
+    let printEmptyLine () =
+        printLine String.Empty
+
     let printError msg =
         printLineColor (Some ConsoleColor.Red) msg
-
-    let printEmptyLine () =
-        printLineColor None String.Empty
 
     let printResult = function
         | Ok x -> printLine $"OK: %s{x}"

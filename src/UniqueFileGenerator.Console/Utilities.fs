@@ -13,7 +13,7 @@ module Utilities =
     let formatFloat (f: float) : string =
         f.ToString("#,##0.00", CultureInfo.InvariantCulture)
 
-    let inline (>=<) a (floor, ceiling) = a >= floor && a <= ceiling
+    let inline (>=<) x (floor, ceiling) = x >= floor && x <= ceiling
 
     let tryParseInt (input: string) : int option =
         match Int32.TryParse input with

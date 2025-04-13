@@ -137,7 +137,6 @@ module ArgTypes =
                   Size = options.Size
                   Delay = options.Delay } }
 
-
     let flags: Map<OptionType, string> =
         [ Prefix, "-p"
           NameBaseLength, "-b"
@@ -146,3 +145,6 @@ module ArgTypes =
           Size, "-s"
           Delay, "-d" ]
         |> Map.ofList
+
+    let fileNameLength options =
+        (options.Prefix.Length + options.NameBaseLength + options.Extension.Length)

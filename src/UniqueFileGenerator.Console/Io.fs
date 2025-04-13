@@ -32,25 +32,20 @@ module Io =
         let driveSpaceToKeepAvailable = 536_870_912L // 0.5 GB
         let warningRatio = 0.75
 
-        let necessarySpace =
-            let singleFileSize =
-                args.Options.Size
-                |> Option.defaultValue
-                       (args.Options.Prefix.Length +
-                        args.Options.NameBaseLength +
-                        args.Options.Extension.Length)
-                |> int64
+        let neededSpace =
+            args.Options.Size
+            |> Option.defaultValue (fileNameLength args.Options)
+            |> int64
+            |> (*) (int64 args.FileCount) // Rough estimation
 
-            singleFileSize * int64 args.FileCount // Rough estimation
-
-        let confirmContinueDespiteLargeSize usableFreeSpace : bool =
-            let ratio = float necessarySpace / float usableFreeSpace
+        let confirmContinueDespiteLargeSize availableSpace : bool =
+            let ratio = float neededSpace / float availableSpace
             let isLargeRatio = ratio > warningRatio
 
             let confirm () =
                 Console.Write(
                     sprintf "This operation requires %s, which is %s%% of remaining drive space. Continue? (Y/n)  "
-                        (necessarySpace |> formatBytes)
+                        (neededSpace |> formatBytes)
                         (ratio * 100.0 |> formatFloat))
 
                 let reply = Console.ReadLine().Trim()
@@ -72,10 +67,10 @@ module Io =
                 let driveInfo = DriveInfo path
                 let usableFreeSpace = driveInfo.AvailableFreeSpace - driveSpaceToKeepAvailable
 
-                if necessarySpace > usableFreeSpace
-                then Error (DriveSpaceInsufficient (formatBytes necessarySpace, formatBytes usableFreeSpace))
+                if neededSpace > usableFreeSpace
+                then Error (DriveSpaceInsufficient (formatBytes neededSpace, formatBytes usableFreeSpace))
                 elif confirmContinueDespiteLargeSize usableFreeSpace
-                then Ok (formatBytes necessarySpace)
+                then Ok (formatBytes neededSpace)
                 else Error CancelledByUser
         with
             | e -> Error (IoError $"%s{e.Message}")
@@ -89,7 +84,7 @@ module Io =
             | e -> Error $"%s{e.Message}"
 
     let generateFiles (args: Args) =
-        let count, prefix, baseLength, extension, outputDir, size, delay =
+        let count, prefix, baseLength, ext, outputDir, size, delay =
             args.FileCount,
             args.Options.Prefix,
             args.Options.NameBaseLength,
@@ -98,8 +93,8 @@ module Io =
             args.Options.Size,
             args.Options.Delay
 
-        let updateFileName baseName =
-            toFileName { Prefix = prefix; BaseName = baseName; Extension = extension }
+        let generateFileName baseName =
+            toFileName { Prefix = prefix; Base = baseName; Ext = ext }
 
         let sleep (ms: int) x =
             Thread.Sleep ms
@@ -113,5 +108,5 @@ module Io =
             |> printResult
 
         generateMultiple baseLength count
-        |> Array.map updateFileName
+        |> Array.map generateFileName
         |> Array.iter writeFile

@@ -3,30 +3,35 @@ namespace UniqueFileGenerator.Console
 open System
 
 module StringGeneration =
-    type FileNameParts = { Prefix: string; BaseName: string; Extension: string; }
+    type FileNameParts =
+        { Prefix: string
+          Base: string
+          Ext: string }
 
     let private charBank =
         [ 'A' .. 'Z' ] @ [ 'a' .. 'z' ] @ [ '0' .. '9' ]
         |> List.map string
         |> String.concat String.Empty
 
-    let private generateSingle length : string =
-        let rnd = Random()
-        let getRndChar () = charBank[rnd.Next charBank.Length]
-        let chars = Array.init length (fun _ -> getRndChar ())
-        new string(chars)
+    let private rnd = Random()
 
-    let generateMultiple itemLength count : string array =
-        Array.init count (fun _ -> generateSingle itemLength)
+    let private generateSingle length : string =
+        String(Array.init length (fun _ -> charBank[rnd.Next(charBank.Length)]))
+
+    let generateMultiple eachLength count : string array =
+        Array.init count (fun _ -> generateSingle eachLength)
 
     let toFileName parts : string =
         let sanitizedExtension =
-            match parts.Extension.Trim() with
+            match parts.Ext.Trim() with
             | ext when String.IsNullOrWhiteSpace ext -> String.Empty
             | ext when ext.StartsWith '.' -> ext
             | ext -> $".%s{ext}"
 
-        $"%s{parts.Prefix.Trim()}%s{parts.BaseName}%s{sanitizedExtension}"
+        String.Concat(
+            parts.Prefix.Trim(),
+            parts.Base,
+            sanitizedExtension)
 
     let generateFileContent sizeInBytes fallback : string =
         sizeInBytes
