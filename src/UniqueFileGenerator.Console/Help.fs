@@ -71,4 +71,4 @@ module Help =
             blockLines |> List.iter printLine)
 
     let suggest () =
-        printfn "Pass \"--help\" to see the program instructions."
+        printfn "Pass \"--help\" to see the full instructions."
