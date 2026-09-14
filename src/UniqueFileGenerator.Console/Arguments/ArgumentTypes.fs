@@ -19,7 +19,7 @@ module ArgTypes =
     type FileCount = private FileCount of int with
         static member val AllowedRange = 1, Int32.MaxValue
 
-        static member Create (text: string) =
+        static member Create(text: string) : Result<FileCount,ErrorType> =
             text
             |> stripSeparators
             |> parseInRange FileCount.AllowedRange
@@ -45,8 +45,9 @@ module ArgTypes =
 
         static member TryCreate (text: string option) =
             text
-            |> Option.map stripSeparators
-            |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange NameBaseLength.AllowedRange)
+            |> Option.map (stripSeparators
+                           >> String.trim
+                           >> tryParseIntInRange NameBaseLength.AllowedRange)
             |> Option.defaultValue (Ok NameBaseLength.Default)
             |> Result.map NameBaseLength
 
