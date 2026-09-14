@@ -4,13 +4,12 @@ open Errors
 open Utilities
 open System
 open FsToolkit.ErrorHandling
+open CCFSharpUtils.Text
 
 module ArgTypes =
-    let stripSeparators text : string =
-        let supportedSeparators = [ ","; "_" ]
+    let supportedSeparators = [ ","; "_" ]
 
-        (text, supportedSeparators)
-        ||> List.fold (fun acc s -> acc.Replace(s, String.Empty))
+    let stripSeparators = String.stripSubstrings supportedSeparators
 
     let private tryParseIntInRange (floor, ceiling) text =
         text
