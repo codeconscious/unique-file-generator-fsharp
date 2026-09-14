@@ -3,7 +3,7 @@ namespace UniqueFileGenerator.Console
 open Errors
 open Utilities
 open System
-open FsToolkit.ErrorHandling
+open FSharpPlus
 open CCFSharpUtils.Text
 
 module ArgTypes =
@@ -19,7 +19,7 @@ module ArgTypes =
     type FileCount = private FileCount of int with
         static member val AllowedRange = 1, Int32.MaxValue
 
-        static member Create(text: string) : Result<FileCount,ErrorType> =
+        static member Create text : Result<FileCount,ErrorType> =
             text
             |> stripSeparators
             |> parseInRange FileCount.AllowedRange
@@ -31,10 +31,9 @@ module ArgTypes =
     type Prefix = private Prefix of string with
         static member val Default = String.Empty
 
-        static member Create (text: string option) =
-            match text with
-            | None -> Prefix.Default
-            | Some x -> x
+        static member Create text =
+            text
+            |> option id Prefix.Default
             |> Prefix
 
         member this.Value = let (Prefix prefix) = this in prefix
@@ -43,12 +42,13 @@ module ArgTypes =
         static member val AllowedRange = 1, 100
         static member val Default = 50
 
-        static member TryCreate (text: string option) =
+        static member TryCreate text =
             text
-            |> Option.map (stripSeparators
-                           >> String.trim
-                           >> tryParseIntInRange NameBaseLength.AllowedRange)
-            |> Option.defaultValue (Ok NameBaseLength.Default)
+            |> option
+                (stripSeparators
+                    >> String.trim
+                    >> tryParseIntInRange NameBaseLength.AllowedRange)
+                (Ok NameBaseLength.Default)
             |> Result.map NameBaseLength
 
         member this.Value = let (NameBaseLength length) = this in length
@@ -56,10 +56,9 @@ module ArgTypes =
     type Extension = private Extension of string with
         static member val Default = String.Empty
 
-        static member Create (text: string option) =
-            match text with
-            | None -> Extension.Default
-            | Some x -> x.Trim()
+        static member Create text =
+            text
+            |> option String.trim Extension.Default
             |> Extension
 
         member this.Value = let (Extension extension) = this in extension
@@ -67,10 +66,9 @@ module ArgTypes =
     type OutputDirectory = private OutputDirectory of string with
         static member val Default = "output"
 
-        static member Create (text: string option) =
-            match text with
-            | None -> OutputDirectory.Default
-            | Some x -> x.Trim()
+        static member Create text =
+            text
+            |> option String.trim OutputDirectory.Default
             |> OutputDirectory
 
         member this.Value = let (OutputDirectory dir) = this in dir
@@ -78,14 +76,15 @@ module ArgTypes =
     type Size = private Size of int option with
         static member val AllowedRange = 1, Int32.MaxValue
 
-        static member TryCreate (text: string option) =
+        static member TryCreate text =
             text
-            |> Option.map stripSeparators
-            |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange Size.AllowedRange)
+            |> Option.map (stripSeparators
+                           >> String.trim
+                           >> tryParseIntInRange Size.AllowedRange)
             |> function
-               | Some (Ok i) -> Ok (Size (Some i))
+               | Some (Ok i)    -> Ok (Size (Some i))
                | Some (Error e) -> Error e // Parse error.
-               | None -> Ok (Size None) // No size entered.
+               | None           -> Ok (Size None) // No size entered.
 
         member this.Value = let (Size size) = this in size
 
@@ -93,11 +92,13 @@ module ArgTypes =
         static member val AllowedRange = 0, Int32.MaxValue
         static member val Default = 0
 
-        static member TryCreate (text: string option) =
+        static member TryCreate text =
             text
-            |> Option.map stripSeparators
-            |> Option.map (fun arg -> arg.Trim() |> tryParseIntInRange Delay.AllowedRange)
-            |> Option.defaultValue (Ok Delay.Default)
+            |> option
+                (stripSeparators
+                    >> String.trim
+                    >> tryParseIntInRange Delay.AllowedRange)
+                (Ok Delay.Default)
             |> Result.map Delay
 
         member this.Value = let (Delay length) = this in length
