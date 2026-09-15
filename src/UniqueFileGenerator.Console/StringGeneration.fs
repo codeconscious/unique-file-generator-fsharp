@@ -37,6 +37,4 @@ module StringGeneration =
             sanitizedExtension)
 
     let generateFileContent sizeInBytes fallback : string =
-        sizeInBytes
-        |> Option.map generateSingle
-        |> Option.defaultValue fallback
+        sizeInBytes |> option generateSingle fallback
