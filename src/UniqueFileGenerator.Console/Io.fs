@@ -8,6 +8,7 @@ open Utilities
 open System
 open System.IO
 open System.Threading
+open FSharpPlus.Operators
 open CCFSharpUtils.Operators
 open CCFSharpUtils.Text
 
@@ -77,7 +78,7 @@ module Io =
         with
             | e -> Error (IoError $"%s{e.Message}")
 
-    let private createFile directory fileName (contents: string) =
+    let private writeFile directory fileName (contents: string) =
         try
             let path = Path.Combine(directory, fileName)
             File.WriteAllText(path, contents)
@@ -101,10 +102,10 @@ module Io =
         let writeFile fileName =
             fileName
             |> generateFileContent size
-            |> createFile outputDir fileName
+            |> writeFile outputDir fileName
             |-- (fun _ -> Thread.Sleep delay)
             |> printResult
 
         generateMultiple baseLength count
-        |> Array.map generateFileName
-        |> Array.iter writeFile
+        |> map generateFileName
+        |> iter writeFile

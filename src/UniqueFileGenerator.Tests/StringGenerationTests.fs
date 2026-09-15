@@ -3,6 +3,7 @@ module StringGenerationTests
 open UniqueFileGenerator.Console.StringGeneration
 open System
 open Xunit
+open FSharpPlus.Operators
 
 module Strings =
     [<Fact>]
@@ -50,7 +51,7 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
+            |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
         Assert.Equal<string[]>(generated, fileNames)
 
@@ -62,7 +63,7 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
+            |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
         Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
 
@@ -74,7 +75,7 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
+            |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
         Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))
 
@@ -86,7 +87,7 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
+            |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
         Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
         Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))

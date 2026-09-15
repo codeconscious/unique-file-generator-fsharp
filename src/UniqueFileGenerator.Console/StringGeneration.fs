@@ -12,7 +12,7 @@ module StringGeneration =
 
     let private charBank =
         [ 'A' .. 'Z' ] @ [ 'a' .. 'z' ] @ [ '0' .. '9' ]
-        |> List.map string
+        |> map string
         |> String.concat String.Empty
 
     let private rnd = Random()
