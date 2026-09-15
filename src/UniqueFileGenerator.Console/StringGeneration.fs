@@ -1,6 +1,8 @@
 namespace UniqueFileGenerator.Console
 
 open System
+open FSharpPlus
+open CCFSharpUtils.Text
 
 module StringGeneration =
     type FileNameParts =
@@ -21,10 +23,11 @@ module StringGeneration =
     let generateMultiple eachLength count : string array =
         Array.init count (fun _ -> generateSingle eachLength)
 
+    // TODO: Consider returning an actual file object.
     let toFileName parts : string =
         let sanitizedExtension =
             match parts.Ext.Trim() with
-            | ext when String.IsNullOrWhiteSpace ext -> String.Empty
+            | ext when String.hasNoText ext -> String.Empty
             | ext when ext.StartsWith '.' -> ext
             | ext -> $".%s{ext}"
 
