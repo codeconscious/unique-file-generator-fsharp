@@ -7,7 +7,7 @@ module Errors =
         | NoArgsPassed
         | ArgCountInvalid
         | MalformedFlags
-        | UnsupportedFlags
+        | UnknownFlags
         | DuplicateFlags
         | ParseNumberFailure of Arg: string * AllowedRange: (int * int)
         | DirectoryMissing of string
@@ -21,7 +21,7 @@ module Errors =
         | NoArgsPassed -> "You must pass in at least one argument: the number of files to generate."
         | ArgCountInvalid -> "Invalid argument count."
         | MalformedFlags -> "Malformed flag(s) found."
-        | UnsupportedFlags -> "Unsupported flag(s) found."
+        | UnknownFlags -> "Unknown flag(s) found."
         | DuplicateFlags -> "Duplicate option flag(s) found. Each can only be used once."
         | ParseNumberFailure (x, (f, c)) ->
             $"Could not parse \"%s{x}\" to an integer between %s{formatInt f} and %s{formatInt c}, inclusive."

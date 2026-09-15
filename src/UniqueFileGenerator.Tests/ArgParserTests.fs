@@ -101,7 +101,7 @@ let ``Appropriate error when unsupported symbol flag found`` () =
 let ``Appropriate error when unsupported flag(s) found`` () =
     let unsupportedFlag = "-a"
     let args = [| validFileCountArg; unsupportedFlag; "0" |]
-    let expected = Error UnsupportedFlags
+    let expected = Error UnknownFlags
     let actual = validate args
     Assert.Equal(expected, actual)
 

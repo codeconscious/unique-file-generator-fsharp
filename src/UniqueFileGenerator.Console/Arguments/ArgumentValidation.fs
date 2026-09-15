@@ -24,34 +24,26 @@ module ArgValidation =
         |> Array.chunkBySize 2 // Will throw if array length is odd!
         |> Array.map (fun x -> x[0].ToLowerInvariant(), x[1])
         |> fun pairs ->
-            match pairs |> Array.map fst |> hasDuplicate with
-            | true -> Error DuplicateFlags
-            | false -> Ok (Map.ofArray pairs)
+            if pairs |> Array.map fst |> hasDuplicate
+            then Error DuplicateFlags
+            else Ok (Map.ofArray pairs)
 
     let private verifyOptionArgs (optionPairs: Map<string, string>) =
         let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
-                o.Length = 2 &&
-                o.StartsWith "-" &&
-                Char.IsLetter o[1]
+                o.Length = 2 && o.StartsWith "-" && Char.IsLetter o[1]
 
             optionPairs
             |> Seq.forall isCorrectFormat
             |> not
 
-        let hasUnsupportedOption options =
-            let isUnsupported option =
-                flags
-                |> Map.values
-                |> Seq.contains option
-                |> not
-
-            options
-            |> Seq.exists isUnsupported
+        let hasUnknownOption options =
+            let isUnknown option = flags |> Map.values |> Seq.contains option |> not
+            options |> Seq.exists isUnknown
 
         match optionPairs with
         | o when o.Keys |> hasMalformedOption -> Error MalformedFlags
-        | o when o.Keys |> hasUnsupportedOption -> Error UnsupportedFlags
+        | o when o.Keys |> hasUnknownOption   -> Error UnknownFlags
         | _ -> Ok ()
 
     let validate args =
@@ -61,14 +53,14 @@ module ArgValidation =
 
             let! count = FileCount.Create fileCountArg
 
-            let! optionArgPairs = optionArgs |> toPairs
+            let! optionArgPairs = toPairs optionArgs
             do! verifyOptionArgs optionArgPairs
-            let tryGetArg x = optionArgPairs |> Map.tryFind flags[x]
+            let tryGetArg x = Map.tryFind flags[x] optionArgPairs
 
-            let p = Prefix.Create (tryGetArg Prefix)
+            let  p = Prefix.Create (tryGetArg Prefix)
             let! b = NameBaseLength.TryCreate (tryGetArg NameBaseLength)
-            let e = Extension.Create (tryGetArg Extension)
-            let o = OutputDirectory.Create (tryGetArg OutputDirectory)
+            let  e = Extension.Create (tryGetArg Extension)
+            let  o = OutputDirectory.Create (tryGetArg OutputDirectory)
             let! s = Size.TryCreate (tryGetArg Size)
             let! d = Delay.TryCreate (tryGetArg Delay)
 
