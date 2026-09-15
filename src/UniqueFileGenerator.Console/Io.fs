@@ -8,6 +8,7 @@ open Utilities
 open System
 open System.IO
 open System.Threading
+open CCFSharpUtils.Operators
 open CCFSharpUtils.Text
 
 module Io =
@@ -84,7 +85,7 @@ module Io =
         with
             | e -> Error $"%s{e.Message}"
 
-    let generateFiles (args: Args) =
+    let generateFiles (args: Args) : unit =
         let count, prefix, baseLength, ext, outputDir, size, delay =
             args.FileCount,
             args.Options.Prefix,
@@ -97,15 +98,11 @@ module Io =
         let generateFileName baseName =
             toFileName { Prefix = prefix; Base = baseName; Ext = ext }
 
-        let sleep (ms: int) x =
-            Thread.Sleep ms
-            x
-
         let writeFile fileName =
             fileName
             |> generateFileContent size
             |> createFile outputDir fileName
-            |> sleep delay
+            |-- (fun _ -> Thread.Sleep delay)
             |> printResult
 
         generateMultiple baseLength count
