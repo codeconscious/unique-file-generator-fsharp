@@ -3,16 +3,15 @@ namespace UniqueFileGenerator.Console
 open UniqueFileGenerator.Console
 open System
 open Errors
+open CCFSharpUtils
 open FsToolkit.ErrorHandling
 open ArgTypes
 
 module ArgValidation =
     let private verifyArgCount (args: string array) =
-        let isEven i = i % 2 = 0
-
         match args.Length with
         | 0 -> Error NoArgsPassed
-        | l when isEven l -> Error ArgCountInvalid
+        | l when Num.isEven l -> Error ArgCountInvalid
         | _ -> Ok ()
 
     let private toPairs (argPairs: string array) =
