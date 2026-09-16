@@ -3,7 +3,8 @@ namespace UniqueFileGenerator.Console
 open Utilities
 
 module Errors =
-    type ErrorType =
+
+    type AppError =
         | NoArgsPassed
         | ArgCountInvalid
         | MalformedFlags
