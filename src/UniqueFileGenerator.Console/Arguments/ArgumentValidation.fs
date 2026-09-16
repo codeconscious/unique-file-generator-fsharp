@@ -8,19 +8,19 @@ open FsToolkit.ErrorHandling
 open ArgTypes
 
 module ArgValidation =
-    let private verifyArgCount (args: string array) =
+    let private validateArgCount (args: string array) =
         match args.Length with
         | 0 -> Error NoArgsPassed
         | l when Num.isEven l -> Error ArgCountInvalid
         | _ -> Ok ()
 
-    let private toPairs (argPairs: string array) =
+    let private toPairs (args: string array) =
         let hasDuplicate xs =
             let originalLength = Seq.length xs
             let uniqueLength = xs |> Set.ofSeq |> Set.count
             originalLength <> uniqueLength
 
-        argPairs
+        args
         |> Array.chunkBySize 2 // Will throw if array length is odd!
         |> Array.map (fun x -> x[0].ToLowerInvariant(), x[1])
         |> fun pairs ->
@@ -28,7 +28,7 @@ module ArgValidation =
             then Error DuplicateFlags
             else Ok (Map.ofArray pairs)
 
-    let private verifyOptionArgs (optionPairs: Map<string, string>) =
+    let private validateOptionArgs (optionPairs: Map<string, string>) =
         let hasMalformedOption optionPairs =
             let isCorrectFormat (o: string) =
                 o.Length = 2 && o.StartsWith "-" && Char.IsLetter o[1]
@@ -37,9 +37,9 @@ module ArgValidation =
             |> Seq.forall isCorrectFormat
             |> not
 
-        let hasUnknownOption options =
-            let isUnknown option = flags |> Map.values |> Seq.contains option |> not
-            options |> Seq.exists isUnknown
+        let hasUnknownOption appOptions =
+            let isUnknown appOption = flags |> Map.values |> Seq.contains appOption |> not
+            appOptions |> Seq.exists isUnknown
 
         match optionPairs.Keys with
         | keys when hasMalformedOption keys -> Error MalformedFlags
@@ -48,15 +48,15 @@ module ArgValidation =
 
     let validate args =
         result {
-            do! verifyArgCount args
+            do! validateArgCount args
             let fileCountArg, optionArgs = args[0], args[1..]
 
-            let! count = FileCount.Create fileCountArg
+            let! fileCount = FileCount.Create fileCountArg
 
             let! optionArgPairs = toPairs optionArgs
-            do! verifyOptionArgs optionArgPairs
-            let tryGetArg x = Map.tryFind flags[x] optionArgPairs
+            do! validateOptionArgs optionArgPairs
 
+            let tryGetArg x = Map.tryFind flags[x] optionArgPairs
             let  p = Prefix.Create (tryGetArg Prefix)
             let! b = NameBaseLength.TryCreate (tryGetArg NameBaseLength)
             let  e = Extension.Create (tryGetArg Extension)
@@ -72,5 +72,5 @@ module ArgValidation =
                   Size = s.Value
                   Delay = d.Value }
 
-            return Args.Create(count, options)
+            return Args.Create(fileCount, options)
         }
