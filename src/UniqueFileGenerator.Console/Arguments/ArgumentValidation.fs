@@ -41,9 +41,9 @@ module ArgValidation =
             let isUnknown option = flags |> Map.values |> Seq.contains option |> not
             options |> Seq.exists isUnknown
 
-        match optionPairs with
-        | o when o.Keys |> hasMalformedOption -> Error MalformedFlags
-        | o when o.Keys |> hasUnknownOption   -> Error UnknownFlags
+        match optionPairs.Keys with
+        | keys when hasMalformedOption keys -> Error MalformedFlags
+        | keys when hasUnknownOption keys   -> Error UnknownFlags
         | _ -> Ok ()
 
     let validate args =
