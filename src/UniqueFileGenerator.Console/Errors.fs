@@ -17,19 +17,19 @@ module Errors =
         | IoError of string
         | CancelledByUser
 
-    let getMessage error =
+    let errorMsg error =
         match error with
         | NoArgsPassed -> "You must pass in at least one argument: the number of files to generate."
         | ArgCountInvalid -> "Invalid argument count."
         | MalformedFlags -> "Malformed flag(s) found."
         | UnknownFlags -> "Unknown flag(s) found."
         | DuplicateFlags -> "Duplicate option flag(s) found. Each can only be used once."
-        | ParseNumberFailure (x, (f, c)) ->
-            $"Could not parse \"%s{x}\" to an integer between %s{formatInt f} and %s{formatInt c}, inclusive."
-        | DirectoryMissing e -> $"Directory \"%s{e}\" was not found."
+        | ParseNumberFailure (input, (floor, ceiling)) ->
+            $"Cannot parse \"%s{input}\" to an integer between %s{formatInt floor} and %s{formatInt ceiling}, inclusive."
+        | DirectoryMissing dirName -> $"Directory \"%s{dirName}\" was not found."
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
         | DriveSpaceInsufficient (needed, actual) ->
             $"Insufficient drive space. Though %s{needed} is necessary, only %s{actual} is available."
-        | IoError e -> $"IO error: %s{e}"
+        | IoError msg -> $"IO error: %s{msg}"
         | CancelledByUser -> "Cancelled."
 

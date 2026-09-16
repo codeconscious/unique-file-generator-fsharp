@@ -35,7 +35,7 @@ module Main =
                 printLine $"Done after %s{watch.ElapsedFriendly}. Used approximately %s{spaceUsed} of drive space."
                 ExitCode.Success
             | Error e ->
-                printError <| getMessage e
+                printError <| errorMsg e
                 Help.suggest ()
                 ExitCode.Error
         |> int
