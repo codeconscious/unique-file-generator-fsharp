@@ -103,7 +103,7 @@ module ArgTypes =
 
         member this.Value = let (Delay length) = this in length
 
-    type OptionType =
+    type AppOption =
         | Prefix
         | NameBaseLength
         | Extension
@@ -137,7 +137,7 @@ module ArgTypes =
                   Size = options.Size
                   Delay = options.Delay } }
 
-    let flags: Map<OptionType, string> =
+    let flags: Map<AppOption, string> =
         [ Prefix, "-p"
           NameBaseLength, "-b"
           Extension, "-e"

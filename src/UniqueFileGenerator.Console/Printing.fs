@@ -23,5 +23,5 @@ module Printing =
         printLineColor (Some ConsoleColor.Red) msg
 
     let printResult = function
-        | Ok x -> printLine $"OK: %s{x}"
+        | Ok x    -> printLine  $"OK: %s{x}"
         | Error e -> printError $"Error: %s{e}"

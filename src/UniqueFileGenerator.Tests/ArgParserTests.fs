@@ -9,7 +9,7 @@ open Xunit
 let validFileCountArg = "1000"
 
 let validOptionValues =
-    Map.ofList<OptionType, string>
+    Map.ofList<AppOption, string>
         [ Prefix, "PREFIX "
           NameBaseLength, "60"
           Extension, ".txt"
