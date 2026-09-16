@@ -49,11 +49,10 @@ module ArgValidation =
     let validate args =
         result {
             do! validateArgCount args
-            let fileCountArg, optionArgs = Array.head args, Array.tail args
 
-            let! fileCount = FileCount.Create fileCountArg
+            let! fileCount = FileCount.Create <| Array.head args
 
-            let! optionArgPairs = toPairs optionArgs
+            let! optionArgPairs = toPairs <| Array.tail args
             do! validateOptionArgs optionArgPairs
 
             let tryGetArg x = Map.tryFind flags[x] optionArgPairs
