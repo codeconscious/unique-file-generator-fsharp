@@ -7,6 +7,7 @@ open FSharpPlus
 open CCFSharpUtils.Text
 
 module ArgTypes =
+
     let supportedSeparators = [ ","; "_" ]
 
     let stripSeparators = String.stripSubstrings supportedSeparators

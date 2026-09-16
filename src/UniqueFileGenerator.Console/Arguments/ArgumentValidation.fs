@@ -21,8 +21,8 @@ module ArgValidation =
             originalLength <> uniqueLength
 
         args
-        |> Array.chunkBySize 2 // Will throw if array length is odd!
-        |> Array.map (fun x -> x[0].ToLowerInvariant(), x[1])
+        |> Array.chunkBySize 2
+        |> Array.map (fun pair -> pair[0].ToLowerInvariant(), pair[1])
         |> fun pairs ->
             if pairs |> Array.map fst |> hasDuplicate
             then Error DuplicateFlags
@@ -49,7 +49,7 @@ module ArgValidation =
     let validate args =
         result {
             do! validateArgCount args
-            let fileCountArg, optionArgs = args[0], args[1..]
+            let fileCountArg, optionArgs = Array.head args, Array.tail args
 
             let! fileCount = FileCount.Create fileCountArg
 
