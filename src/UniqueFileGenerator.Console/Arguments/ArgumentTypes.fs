@@ -10,7 +10,8 @@ module ArgTypes =
 
     let supportedSeparators = [ ","; "_" ]
 
-    let stripSeparators = String.stripSubstrings supportedSeparators
+    let stripSeparatorsAndTrim =
+        String.stripSubstrings supportedSeparators >> String.trim
 
     let private tryParseIntInRange (floor, ceiling) text =
         text
@@ -22,7 +23,7 @@ module ArgTypes =
 
         static member Create text : Result<FileCount, AppError> =
             text
-            |> stripSeparators
+            |> stripSeparatorsAndTrim
             |> tryParseInRange FileCount.AllowedRange
             |> Result.bimap
                 (fun _ -> NumberParseFailure (text, FileCount.AllowedRange))
@@ -47,9 +48,7 @@ module ArgTypes =
         static member TryCreate text =
             text
             |> option
-                (stripSeparators
-                    >> String.trim
-                    >> tryParseIntInRange NameBaseLength.AllowedRange)
+                (stripSeparatorsAndTrim >> tryParseIntInRange NameBaseLength.AllowedRange)
                 (Ok NameBaseLength.Default)
             |> Result.map NameBaseLength
 
@@ -80,9 +79,7 @@ module ArgTypes =
 
         static member TryCreate text =
             text
-            |> Option.map (stripSeparators
-                           >> String.trim
-                           >> tryParseIntInRange Size.AllowedRange)
+            |> Option.map (stripSeparatorsAndTrim >> tryParseIntInRange Size.AllowedRange)
             |> function
                | Some (Ok i)    -> Ok (Size (Some i))
                | Some (Error e) -> Error e // Parse error.
@@ -97,9 +94,7 @@ module ArgTypes =
         static member TryCreate text =
             text
             |> option
-                (stripSeparators
-                    >> String.trim
-                    >> tryParseIntInRange Delay.AllowedRange)
+                (stripSeparatorsAndTrim >> tryParseIntInRange Delay.AllowedRange)
                 (Ok Delay.Default)
             |> Result.map Delay
 
