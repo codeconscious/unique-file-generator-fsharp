@@ -25,7 +25,7 @@ module Errors =
         | UnknownFlags -> "Unknown flag(s) found."
         | DuplicateFlags -> "Duplicate option flag(s) found. Each can only be used once."
         | ParseNumberFailure (input, (floor, ceiling)) ->
-            $"Cannot parse \"%s{input}\" to an integer between %s{formatInt floor} and %s{formatInt ceiling}, inclusive."
+            $"Cannot parse \"%s{input}\" to an integer between %s{Num.Format floor} and %s{Num.Format ceiling}, inclusive."
         | DirectoryMissing dirName -> $"Directory \"%s{dirName}\" was not found."
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
         | DriveSpaceInsufficient (needed, actual) ->

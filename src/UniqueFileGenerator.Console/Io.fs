@@ -25,11 +25,11 @@ module Io =
         let tb = gb * 1024L
 
         match bytes with
-        | _ when bytes >= tb -> sprintf "%s TB" ((float bytes / float tb) |> formatFloat)
-        | _ when bytes >= gb -> sprintf "%s GB" ((float bytes / float gb) |> formatFloat)
-        | _ when bytes >= mb -> sprintf "%s MB" ((float bytes / float mb) |> formatFloat)
-        | _ when bytes >= kb -> sprintf "%s KB" ((float bytes / float kb) |> formatFloat)
-        | _ -> sprintf "%s bytes" (bytes |> formatInt64)
+        | _ when bytes >= tb -> sprintf "%s TB" ((float bytes / float tb) |> Num.Format)
+        | _ when bytes >= gb -> sprintf "%s GB" ((float bytes / float gb) |> Num.Format)
+        | _ when bytes >= mb -> sprintf "%s MB" ((float bytes / float mb) |> Num.Format)
+        | _ when bytes >= kb -> sprintf "%s KB" ((float bytes / float kb) |> Num.Format)
+        | _ -> sprintf "%s bytes" (bytes |> Num.Format)
 
     let verifyDriveSpace (args: Args) =
         let driveSpaceToKeepAvailable = 536_870_912L // 0.5 GB
@@ -50,7 +50,7 @@ module Io =
                 Console.Write(
                     sprintf "This operation requires %s, which is %s%% of remaining drive space. Continue? (Y/n)  "
                         (neededSpace |> formatBytes)
-                        (ratio * 100.0 |> formatFloat))
+                        (ratio * 100.0 |> Num.Format))
 
                 let reply = Console.ReadLine().Trim()
 
