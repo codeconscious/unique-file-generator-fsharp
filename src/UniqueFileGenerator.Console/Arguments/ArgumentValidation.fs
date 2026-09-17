@@ -1,18 +1,36 @@
 namespace UniqueFileGenerator.Console
 
-open UniqueFileGenerator.Console
-open System
+open ArgTypes
 open Errors
+open System
 open CCFSharpUtils
 open FsToolkit.ErrorHandling
-open ArgTypes
 
 module ArgValidation =
+    /// Ensure the count of args is odd, which is currently the only valid shape.
     let private validateArgCount (args: string array) =
         match args.Length with
         | 0 -> Error NoArgsPassed
         | l when Num.isEven l -> Error ArgCountInvalid
         | _ -> Ok ()
+
+    let private validateOptionArgs (optionMap: Map<string, string>) =
+        let hasMalformedOptionKey keys =
+            let isCorrectFormat (o: string) =
+                o.Length = 2 && o.StartsWith "-" && Char.IsLetter o[1]
+
+            keys
+            |> Seq.forall isCorrectFormat
+            |> not
+
+        let hasUnknownOptionKey appOptions =
+            let isUnknown appOption = flags |> Map.values |> Seq.contains appOption |> not
+            appOptions |> Seq.exists isUnknown
+
+        match optionMap.Keys with
+        | keys when hasMalformedOptionKey keys -> Error MalformedFlags
+        | keys when hasUnknownOptionKey keys   -> Error UnknownFlags
+        | _ -> Ok optionMap
 
     let private toPairs (args: string array) =
         let hasDuplicate xs =
@@ -24,38 +42,21 @@ module ArgValidation =
         |> Array.chunkBySize 2
         |> Array.map (fun pair -> pair[0].ToLowerInvariant(), pair[1])
         |> fun pairs ->
-            if pairs |> Array.map fst |> hasDuplicate
+            // Check for duplicates here because conversion to a map will
+            // silently use only the last duplicate (though that is apparently
+            // undocumented behavior with a chance of changing in the future).
+            if hasDuplicate (Array.map fst pairs)
             then Error DuplicateFlags
-            else Ok (Map.ofArray pairs)
-
-    let private validateOptionArgs (optionPairs: Map<string, string>) =
-        let hasMalformedOption optionPairs =
-            let isCorrectFormat (o: string) =
-                o.Length = 2 && o.StartsWith "-" && Char.IsLetter o[1]
-
-            optionPairs
-            |> Seq.forall isCorrectFormat
-            |> not
-
-        let hasUnknownOption appOptions =
-            let isUnknown appOption = flags |> Map.values |> Seq.contains appOption |> not
-            appOptions |> Seq.exists isUnknown
-
-        match optionPairs.Keys with
-        | keys when hasMalformedOption keys -> Error MalformedFlags
-        | keys when hasUnknownOption keys   -> Error UnknownFlags
-        | _ -> Ok ()
+            else validateOptionArgs (Map.ofArray pairs)
 
     let validate args =
         result {
             do! validateArgCount args
 
-            let! fileCount = FileCount.Create <| Array.head args
+            let! fileCount = FileCount.Create (Array.head args)
+            let! optionMap = toPairs (Array.tail args)
 
-            let! optionArgPairs = toPairs <| Array.tail args
-            do! validateOptionArgs optionArgPairs
-
-            let tryGetArg x = Map.tryFind flags[x] optionArgPairs
+            let tryGetArg x = Map.tryFind flags[x] optionMap
             let  p = Prefix.Create (tryGetArg Prefix)
             let! b = NameBaseLength.TryCreate (tryGetArg NameBaseLength)
             let  e = Extension.Create (tryGetArg Extension)
