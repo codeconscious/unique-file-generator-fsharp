@@ -28,7 +28,7 @@ module Errors =
         | DirectoryMissing dirName -> $"Directory \"%s{dirName}\" was not found."
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
         | DriveSpaceInsufficient (needed, actual) ->
-            $"Insufficient drive space. Though %s{needed} is necessary, only %s{actual} is available."
+            $"Insufficient drive space: %s{needed} is necessary, but only %s{actual} is available."
         | IoError msg -> $"IO error: %s{msg}"
         | CancelledByUser -> "Cancelled by the user."
 
