@@ -13,7 +13,7 @@ module ArgTypes =
     let stripSeparatorsAndTrim =
         String.stripSubstrings supportedSeparators >> String.trim
 
-    let private tryParseIntInRange (floor, ceiling) text =
+    let private parseInRange (floor, ceiling) text =
         text
         |> tryParseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> NumberParseFailure (text, (floor, ceiling)))
@@ -48,7 +48,7 @@ module ArgTypes =
         static member TryCreate maybeText =
             maybeText
             |> option
-                (stripSeparatorsAndTrim >> tryParseIntInRange NameBaseLength.AllowedRange)
+                (stripSeparatorsAndTrim >> parseInRange NameBaseLength.AllowedRange)
                 (Ok NameBaseLength.Default)
             |> Result.map NameBaseLength
 
@@ -79,7 +79,7 @@ module ArgTypes =
 
         static member TryCreate maybeText =
             maybeText
-            |> Option.map (stripSeparatorsAndTrim >> tryParseIntInRange Size.AllowedRange)
+            |> Option.map (stripSeparatorsAndTrim >> parseInRange Size.AllowedRange)
             |> function
                | Some (Ok i)    -> Ok (Size (Some i))
                | Some (Error e) -> Error e // Parse error.
@@ -94,7 +94,7 @@ module ArgTypes =
         static member TryCreate maybeText =
             maybeText
             |> option
-                (stripSeparatorsAndTrim >> tryParseIntInRange Delay.AllowedRange)
+                (stripSeparatorsAndTrim >> parseInRange Delay.AllowedRange)
                 (Ok Delay.Default)
             |> Result.map Delay
 
