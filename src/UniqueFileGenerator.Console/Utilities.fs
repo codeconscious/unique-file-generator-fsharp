@@ -21,11 +21,13 @@ module Utilities =
     // Numeric operations.
     type Num =
 
+        static let culture = CultureInfo.InvariantCulture
+
         static member Format(i: int) : string =
-            i.ToString("#,##0", CultureInfo.InvariantCulture)
+            i.ToString("#,##0", culture)
 
         static member Format(i: int64) : string =
-            i.ToString("#,##0", CultureInfo.InvariantCulture)
+            i.ToString("#,##0", culture)
 
         static member Format(f: float) : string =
-            f.ToString("#,##0.00", CultureInfo.InvariantCulture)
+            f.ToString("#,##0.00", culture)
