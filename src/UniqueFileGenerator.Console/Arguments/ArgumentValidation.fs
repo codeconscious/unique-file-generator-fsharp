@@ -10,7 +10,7 @@ module ArgValidation =
     /// Ensure the count of args is odd, which is currently the only valid shape.
     let private validateArgCount (args: string array) =
         match args.Length with
-        | 0 -> Error NoArgsPassed
+        | 0 -> Error ArgsMissing
         | l when Num.isEven l -> Error ArgCountInvalid
         | _ -> Ok ()
 

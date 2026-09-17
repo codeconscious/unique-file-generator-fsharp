@@ -15,7 +15,7 @@ module ArgTypes =
     let private tryParseIntInRange (floor, ceiling) text =
         text
         |> tryParseInRange (floor, ceiling)
-        |> Result.mapError (fun _ -> ParseNumberFailure (text, (floor, ceiling)))
+        |> Result.mapError (fun _ -> NumberParseFailure (text, (floor, ceiling)))
 
     type FileCount = private FileCount of int with
         static member val AllowedRange = 1, Int32.MaxValue
@@ -25,7 +25,7 @@ module ArgTypes =
             |> stripSeparators
             |> tryParseInRange FileCount.AllowedRange
             |> Result.bimap
-                (fun _ -> ParseNumberFailure (text, FileCount.AllowedRange))
+                (fun _ -> NumberParseFailure (text, FileCount.AllowedRange))
                 FileCount
 
         member this.Value = let (FileCount count) = this in count

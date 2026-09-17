@@ -43,7 +43,7 @@ let createOkArgs fileCount options =
 [<Fact>]
 let ``Appropriate error when no args`` () =
     let emptyArgs = [||]
-    let expected = Error NoArgsPassed
+    let expected = Error ArgsMissing
     let actual = validate emptyArgs
     Assert.Equal(expected, actual)
 
@@ -64,21 +64,21 @@ let ``Appropriate error when invalid arg count (second pair incomplete)`` () =
 [<Fact>]
 let ``Appropriate error when invalid file count`` () =
     let args = [| "notNumeric" |]
-    let expected = Error (ParseNumberFailure(args[0], (1, Int32.MaxValue)))
+    let expected = Error (NumberParseFailure(args[0], (1, Int32.MaxValue)))
     let actual = validate args
     Assert.Equal(expected, actual)
 
 [<Fact>]
 let ``Appropriate error when negative file count`` () =
     let args = [| "-1" |]
-    let expected = Error (ParseNumberFailure(args[0], (1, Int32.MaxValue)))
+    let expected = Error (NumberParseFailure(args[0], (1, Int32.MaxValue)))
     let actual = validate args
     Assert.Equal(expected, actual)
 
 [<Fact>]
 let ``Appropriate error when zero file count`` () =
     let args = [| "0" |]
-    let expected = Error (ParseNumberFailure(args[0], (1, Int32.MaxValue)))
+    let expected = Error (NumberParseFailure(args[0], (1, Int32.MaxValue)))
     let actual = validate args
     Assert.Equal(expected, actual)
 
