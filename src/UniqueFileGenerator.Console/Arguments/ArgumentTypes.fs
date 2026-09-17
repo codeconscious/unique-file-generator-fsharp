@@ -14,7 +14,7 @@ module ArgTypes =
 
     let private tryParseIntInRange (floor, ceiling) text =
         text
-        |> parseInRange (floor, ceiling)
+        |> tryParseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> ParseNumberFailure (text, (floor, ceiling)))
 
     type FileCount = private FileCount of int with
@@ -23,7 +23,7 @@ module ArgTypes =
         static member Create text : Result<FileCount, AppError> =
             text
             |> stripSeparators
-            |> parseInRange FileCount.AllowedRange
+            |> tryParseInRange FileCount.AllowedRange
             |> Result.bimap
                 (fun _ -> ParseNumberFailure (text, FileCount.AllowedRange))
                 FileCount
