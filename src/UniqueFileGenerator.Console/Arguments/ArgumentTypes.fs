@@ -149,4 +149,4 @@ module ArgTypes =
         |> Map.ofList
 
     let fileNameLength options =
-        (options.Prefix.Length + options.NameBaseLength + options.Extension.Length)
+        options.Prefix.Length + options.NameBaseLength + options.Extension.Length
