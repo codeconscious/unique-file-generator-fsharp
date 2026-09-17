@@ -8,7 +8,7 @@ open Printing
 module Help =
     let private helpFlag = "--help"
 
-    let wasRequested (args: string array) =
+    let isRequested (args: string array) =
         args.Length > 0 &&
         args[0].Trim().Equals(helpFlag, StringComparison.InvariantCultureIgnoreCase)
 
