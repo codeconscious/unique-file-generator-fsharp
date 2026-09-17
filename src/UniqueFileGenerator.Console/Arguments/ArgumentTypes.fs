@@ -33,8 +33,8 @@ module ArgTypes =
     type Prefix = private Prefix of string with
         static member val Default = String.Empty
 
-        static member Create text =
-            text
+        static member Create maybeText =
+            maybeText
             |> option id Prefix.Default
             |> Prefix
 
@@ -44,8 +44,8 @@ module ArgTypes =
         static member val AllowedRange = 1, 100
         static member val Default = 50
 
-        static member TryCreate text =
-            text
+        static member TryCreate maybeText =
+            maybeText
             |> option
                 (stripSeparators
                     >> String.trim
@@ -58,8 +58,8 @@ module ArgTypes =
     type Extension = private Extension of string with
         static member val Default = String.Empty
 
-        static member Create text =
-            text
+        static member Create maybeText =
+            maybeText
             |> option String.trim Extension.Default
             |> Extension
 
@@ -68,8 +68,8 @@ module ArgTypes =
     type OutputDirectory = private OutputDirectory of string with
         static member val Default = "output"
 
-        static member Create text =
-            text
+        static member Create maybeText =
+            maybeText
             |> option String.trim OutputDirectory.Default
             |> OutputDirectory
 
@@ -78,8 +78,8 @@ module ArgTypes =
     type Size = private Size of int option with
         static member val AllowedRange = 1, Int32.MaxValue
 
-        static member TryCreate text =
-            text
+        static member TryCreate maybeText =
+            maybeText
             |> Option.map (stripSeparators
                            >> String.trim
                            >> tryParseIntInRange Size.AllowedRange)
@@ -94,8 +94,8 @@ module ArgTypes =
         static member val AllowedRange = 0, Int32.MaxValue
         static member val Default = 0
 
-        static member TryCreate text =
-            text
+        static member TryCreate maybeText =
+            maybeText
             |> option
                 (stripSeparators
                     >> String.trim
