@@ -19,9 +19,7 @@ module ArgValidation =
             let isCorrectFormat (o: string) =
                 o.Length = 2 && o.StartsWith "-" && Char.IsLetter o[1]
 
-            keys
-            |> Seq.forall isCorrectFormat
-            |> not
+            keys |> Seq.forall isCorrectFormat |> not
 
         let hasUnknownOptionKey appOptions =
             let isUnknown appOption = flags |> Map.values |> Seq.contains appOption |> not

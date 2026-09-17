@@ -24,8 +24,9 @@ module ArgTypes =
             text
             |> stripSeparators
             |> parseInRange FileCount.AllowedRange
-            |> Result.map FileCount
-            |> Result.mapError (fun _ -> ParseNumberFailure (text, FileCount.AllowedRange))
+            |> Result.bimap
+                (fun _ -> ParseNumberFailure (text, FileCount.AllowedRange))
+                FileCount
 
         member this.Value = let (FileCount count) = this in count
 
