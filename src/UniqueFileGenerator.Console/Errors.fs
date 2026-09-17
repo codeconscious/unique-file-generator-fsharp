@@ -17,8 +17,7 @@ module Errors =
         | IoError of string
         | CancelledByUser
 
-    let errorMsg error =
-        match error with
+    let errorMsg = function
         | ArgsMissing -> "You must pass in at least one argument: the number of files to generate."
         | ArgCountInvalid -> "Invalid arguments. If you submit option flags, each must have a corresponding value."
         | MalformedFlags -> "Malformed option flag(s) found."
