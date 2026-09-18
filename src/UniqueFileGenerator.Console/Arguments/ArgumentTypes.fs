@@ -100,13 +100,7 @@ module ArgTypes =
 
         member this.Value = let (Delay length) = this in length
 
-    type AppOption =
-        | Prefix
-        | NameBaseLength
-        | Extension
-        | OutputDirectory
-        | Size
-        | Delay
+    type AppOption = Prefix | NameBaseLength | Extension | OutputDirectory | Size | Delay
 
     type Options =
         { Prefix: string
