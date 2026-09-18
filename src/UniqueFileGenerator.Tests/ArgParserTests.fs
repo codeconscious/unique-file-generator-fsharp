@@ -36,7 +36,7 @@ let defaultOptions =
                   | Error e -> failwith $"Unexpected parse error: {e}"}
 
 let createOkArgs fileCount options =
-    match FileCount.Create fileCount with
+    match FileCount.TryCreate fileCount with
     | Ok fc -> Ok <| Args.Create(fc, options)
     | Error _ -> failwith "Unexpected error in test setup!"
 

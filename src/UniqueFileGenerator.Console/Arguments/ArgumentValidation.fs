@@ -51,7 +51,7 @@ module ArgValidation =
         result {
             do! validateArgCount args
 
-            let! fileCount = FileCount.Create (Array.head args)
+            let! fileCount = FileCount.TryCreate (Array.head args)
             let! optionMap = toPairs (Array.tail args)
 
             let tryGetArg x = Map.tryFind flags[x] optionMap

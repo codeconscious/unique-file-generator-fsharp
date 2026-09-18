@@ -21,7 +21,7 @@ module ArgTypes =
     type FileCount = private FileCount of int with
         static member val AllowedRange = 1, Int32.MaxValue
 
-        static member Create text : Result<FileCount, AppError> =
+        static member TryCreate text : Result<FileCount, AppError> =
             text
             |> stripSeparatorsAndTrim
             |> tryParseInRange FileCount.AllowedRange
