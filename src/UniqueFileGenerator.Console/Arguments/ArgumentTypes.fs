@@ -25,7 +25,7 @@ module ArgTypes =
             text
             |> stripSeparatorsAndTrim
             |> tryParseInRange FileCount.AllowedRange
-            |> Result.bimap
+            |> bimap
                 (fun _ -> NumberParseFailure (text, FileCount.AllowedRange))
                 FileCount
 
@@ -111,9 +111,7 @@ module ArgTypes =
           Delay: int }
 
     type Args =
-        private
-            { fileCount: int
-              options: Options }
+        private { fileCount: int; options: Options }
 
         member x.FileCount = x.fileCount
         member x.Options = x.options
