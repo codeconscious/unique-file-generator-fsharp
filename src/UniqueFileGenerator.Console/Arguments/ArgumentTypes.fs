@@ -62,7 +62,7 @@ module ArgTypes =
             |> option String.trim Extension.Default
             |> Extension
 
-        member this.Value = let (Extension extension) = this in extension
+        member this.Value = let (Extension ext) = this in ext
 
     type OutputDirectory = private OutputDirectory of string with
         static member val Default = "output"
