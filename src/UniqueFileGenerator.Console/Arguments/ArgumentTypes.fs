@@ -59,7 +59,7 @@ module ArgTypes =
             |> option
                 (stripSeparatorsAndTrim >> tryParseInRange NameBaseLength.AllowedRange)
                 (Ok NameBaseLength.Default)
-            |> Result.map NameBaseLength
+            |> map NameBaseLength
 
         member this.Value = let (NameBaseLength length) = this in length
 

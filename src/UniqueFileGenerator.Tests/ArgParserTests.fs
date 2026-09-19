@@ -18,13 +18,19 @@ let validOptionValues =
           Delay, "5_000" ]
 
 let defaultOptions =
-    { Prefix = Prefix.Create None |> _.Value
+    { Prefix = Prefix.Create None
+                |> function
+                | Ok x ->  x.Value
+                | Error e -> failwith $"Unexpected parse error: {e}"
       NameBaseLength =
           NameBaseLength.TryCreate None
           |> function
               | Ok x -> x.Value
               | Error e -> failwith $"Unexpected parse error: {e}"
-      Extension = Extension.Create None |> _.Value
+      Extension = Extension.Create None
+                  |> function
+                  | Ok x ->  x.Value
+                  | Error e -> failwith $"Unexpected parse error: {e}"
       OutputDirectory = OutputDirectory.Create None |> _.Value
       Size = Size.TryCreate None
              |> function
@@ -379,4 +385,3 @@ module SupportedSeparators =
         let result = stripSeparatorsAndTrim text
 
         Assert.Equal("helloworld\ttestexample\nmore", result)
-
