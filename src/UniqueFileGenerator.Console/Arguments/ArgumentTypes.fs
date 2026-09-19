@@ -21,7 +21,7 @@ module ArgTypes =
 
     /// Determines whether a string contains characters invalid for filnames on this OS.
     let validateChars text =
-        let isInvalid ch = Array.contains ch ([|'!'; '.'|])
+        let isInvalid ch = Array.contains ch (Path.GetInvalidPathChars())
         let invalidChars = text |> filter isInvalid |> String.toList
         match invalidChars with
         | [] -> Ok text
