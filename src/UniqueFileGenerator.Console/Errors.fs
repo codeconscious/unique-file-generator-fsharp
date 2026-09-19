@@ -1,6 +1,7 @@
 namespace UniqueFileGenerator.Console
 
 open Utilities
+open CCFSharpUtils.Text
 
 module Errors =
 
@@ -11,6 +12,7 @@ module Errors =
         | UnknownFlags
         | DuplicateFlags
         | NumberParseFailure of Input: string * AllowedRange: (int * int)
+        | InvalidChars of Chars: char list
         | DirectoryMissing of string
         | DriveSpaceConfirmationFailure
         | DriveSpaceInsufficient of Needed: string * Actual: string
@@ -25,6 +27,10 @@ module Errors =
         | DuplicateFlags -> "Duplicate option flag(s) found. Each can only be used once."
         | NumberParseFailure (input, (floor, ceiling)) ->
             $"The number \"%s{input}\" is out of bounds. Enter an integer between %s{Num.Format floor} and %s{Num.Format ceiling}, inclusive."
+        | InvalidChars chars ->
+            sprintf "Found %s invalid for file names on this system: \"%s\"."
+                (String.pluralizeSWithCount "character" chars.Length)
+                (chars |> List.map string |> String.concat "\", \"")
         | DirectoryMissing dirName -> $"Directory \"%s{dirName}\" was not found."
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
         | DriveSpaceInsufficient (needed, actual) ->

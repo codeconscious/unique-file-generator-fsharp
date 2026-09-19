@@ -55,7 +55,7 @@ module ArgValidation =
             let! optionMap = toPairs (Array.tail args)
 
             let tryGetArg x = Map.tryFind flags[x] optionMap
-            let  p = Prefix.Create (tryGetArg Prefix)
+            let! p = Prefix.Create (tryGetArg Prefix)
             let! b = NameBaseLength.TryCreate (tryGetArg NameBaseLength)
             let  e = Extension.Create (tryGetArg Extension)
             let  o = OutputDirectory.Create (tryGetArg OutputDirectory)

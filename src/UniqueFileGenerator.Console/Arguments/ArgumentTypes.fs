@@ -3,6 +3,7 @@ namespace UniqueFileGenerator.Console
 open Errors
 open Utilities
 open System
+open System.IO
 open FSharpPlus
 open CCFSharpUtils.Text
 
@@ -17,6 +18,14 @@ module ArgTypes =
         text
         |> tryParseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> NumberParseFailure (text, (floor, ceiling)))
+
+    /// Determines whether a string contains characters invalid for filnames on this OS.
+    let validateChars text =
+        let isInvalid ch = Array.contains ch ([|'!'; '.'|])
+        let invalidChars = text |> filter isInvalid |> String.toList
+        match invalidChars with
+        | [] -> Ok text
+        | _  -> Error (InvalidChars invalidChars)
 
     type FileCount = private FileCount of int with
         static member val AllowedRange = 1, Int32.MaxValue
@@ -35,9 +44,9 @@ module ArgTypes =
         static member val Default = String.Empty
 
         static member Create maybeText =
-            maybeText
-            |> option id Prefix.Default
-            |> Prefix
+            match maybeText with
+            | None -> Ok (Prefix Prefix.Default)
+            | Some text -> text |> validateChars |> Result.map Prefix
 
         member this.Value = let (Prefix prefix) = this in prefix
 
