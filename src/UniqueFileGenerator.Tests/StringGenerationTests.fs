@@ -56,8 +56,8 @@ module FileNames =
         Assert.Equal<string list>(generated, fileNames)
 
     [<Fact>]
-    let ``Generates filenames with a prefix and no extension`` () =
-        let prefix = "@@"
+    let ``Generates filenames with a prefix (respecting spaces) and no extension`` () =
+        let prefix = "  @@  "
         let extension = String.Empty
         let generated = generateMultiple 10 10
 
