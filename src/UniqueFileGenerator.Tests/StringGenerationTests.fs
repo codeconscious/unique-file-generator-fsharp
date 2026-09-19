@@ -3,6 +3,7 @@ module StringGenerationTests
 open UniqueFileGenerator.Console.StringGeneration
 open System
 open Xunit
+open FSharpPlus.Operators
 
 module Strings =
     [<Fact>]
@@ -11,7 +12,7 @@ module Strings =
         let count = 222
         let generated = generateMultiple itemLength count
 
-        Assert.True(generated |> Array.forall (fun x -> x.Length = itemLength))
+        Assert.True(generated |> List.forall (fun x -> x.Length = itemLength))
         Assert.True(generated.Length = count)
 
     [<Fact>]
@@ -28,7 +29,7 @@ module Strings =
         let count = 222
         let generated = generateMultiple itemLength count
 
-        Assert.True(generated |> Array.forall (fun x -> x.Length = itemLength))
+        Assert.True(generated |> List.forall (fun x -> x.Length = itemLength))
         Assert.True(generated.Length = count)
 
     [<Fact>]
@@ -38,7 +39,7 @@ module Strings =
 
     [<Fact>]
     let ``Throws with negative item length`` () =
-        Assert.Throws<ArgumentException>(fun () ->
+        Assert.Throws<ArgumentOutOfRangeException>(fun () ->
             (generateMultiple -1 5000) :> obj)
 
 module FileNames =
@@ -50,21 +51,21 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
+            |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
-        Assert.Equal<string[]>(generated, fileNames)
+        Assert.Equal<string list>(generated, fileNames)
 
     [<Fact>]
-    let ``Generates filenames with a prefix and no extension`` () =
-        let prefix = "@@"
+    let ``Generates filenames with a prefix (respecting spaces) and no extension`` () =
+        let prefix = "  @@  "
         let extension = String.Empty
         let generated = generateMultiple 10 10
 
         let fileNames =
             generated
-            |> Array.map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
+            |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
-        Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
+        Assert.True(fileNames |> List.forall (fun x -> x.StartsWith prefix))
 
     [<Fact>]
     let ``Generates filenames with an extension and no prefix`` () =
@@ -74,9 +75,9 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
+            |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
-        Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))
+        Assert.True(fileNames |> List.forall (fun x -> x.EndsWith extension))
 
     [<Fact>]
     let ``Generates filenames with a prefix and extension args`` () =
@@ -86,7 +87,7 @@ module FileNames =
 
         let fileNames =
             generated
-            |> Array.map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
+            |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
-        Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
-        Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))
+        Assert.True(fileNames |> List.forall (fun x -> x.StartsWith prefix))
+        Assert.True(fileNames |> List.forall (fun x -> x.EndsWith extension))

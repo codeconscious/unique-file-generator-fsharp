@@ -8,6 +8,7 @@ open Io
 open FsToolkit.ErrorHandling
 
 module Main =
+
     type ExitCode =
         | Success = 0
         | Error = 1
@@ -16,7 +17,7 @@ module Main =
     let main rawArgs =
         let watch = Startwatch.Library.Watch()
 
-        let run (rawArgs: string array) =
+        let run rawArgs =
             result {
                 let! args = validate rawArgs
                 do! verifyDirectory args.Options.OutputDirectory
@@ -26,7 +27,7 @@ module Main =
                 return spaceNeeded
             }
 
-        if Help.wasRequested rawArgs then
+        if Help.isRequested rawArgs then
             Help.print ()
             ExitCode.Success
         else
@@ -35,7 +36,7 @@ module Main =
                 printLine $"Done after %s{watch.ElapsedFriendly}. Used approximately %s{spaceUsed} of drive space."
                 ExitCode.Success
             | Error e ->
-                printError <| getMessage e
+                printError <| errorMsg e
                 Help.suggest ()
                 ExitCode.Error
         |> int

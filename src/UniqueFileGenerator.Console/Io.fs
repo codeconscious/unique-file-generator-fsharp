@@ -8,25 +8,28 @@ open Utilities
 open System
 open System.IO
 open System.Threading
+open FSharpPlus.Operators
+open CCFSharpUtils.Operators
+open CCFSharpUtils.Text
 
 module Io =
     let verifyDirectory dir =
-        match Directory.Exists dir with
-        | true -> Ok ()
-        | false -> Error (DirectoryMissing dir)
+        if Directory.Exists dir
+        then Ok ()
+        else Error (DirectoryMissing dir)
 
-    let private formatBytes (bytes: int64) =
-        let kilobyte = 1024L
-        let megabyte = kilobyte * 1024L
-        let gigabyte = megabyte * 1024L
-        let terabyte = gigabyte * 1024L
+    let private formatBytes bytes =
+        let kb = 1024L
+        let mb = kb * 1024L
+        let gb = mb * 1024L
+        let tb = gb * 1024L
 
         match bytes with
-        | _ when bytes >= terabyte -> sprintf "%s TB" ((float bytes / float terabyte) |> formatFloat)
-        | _ when bytes >= gigabyte -> sprintf "%s GB" ((float bytes / float gigabyte) |> formatFloat)
-        | _ when bytes >= megabyte -> sprintf "%s MB" ((float bytes / float megabyte) |> formatFloat)
-        | _ when bytes >= kilobyte -> sprintf "%s KB" ((float bytes / float kilobyte) |> formatFloat)
-        | _ -> sprintf "%s bytes" (bytes |> formatInt64)
+        | _ when bytes >= tb -> sprintf "%s TB" ((float bytes / float tb) |> Num.Format)
+        | _ when bytes >= gb -> sprintf "%s GB" ((float bytes / float gb) |> Num.Format)
+        | _ when bytes >= mb -> sprintf "%s MB" ((float bytes / float mb) |> Num.Format)
+        | _ when bytes >= kb -> sprintf "%s KB" ((float bytes / float kb) |> Num.Format)
+        | _ -> sprintf "%s bytes" (bytes |> Num.Format)
 
     let verifyDriveSpace (args: Args) =
         let driveSpaceToKeepAvailable = 536_870_912L // 0.5 GB
@@ -41,17 +44,17 @@ module Io =
         let confirmContinueDespiteLargeSize availableSpace : bool =
             let ratio = float neededSpace / float availableSpace
             let isLargeRatio = ratio > warningRatio
+            let yesAnswers = [| "y"; "yes" |]
 
             let confirm () =
                 Console.Write(
                     sprintf "This operation requires %s, which is %s%% of remaining drive space. Continue? (Y/n)  "
                         (neededSpace |> formatBytes)
-                        (ratio * 100.0 |> formatFloat))
+                        (ratio * 100.0 |> Num.Format))
 
                 let reply = Console.ReadLine().Trim()
 
-                [| "y"; "yes" |]
-                |> Array.exists (fun yesAnswer -> reply.Equals(yesAnswer, StringComparison.InvariantCultureIgnoreCase))
+                Array.exists (String.equalIgnoreCase reply) yesAnswers
 
             if isLargeRatio
             then confirm ()
@@ -75,7 +78,7 @@ module Io =
         with
             | e -> Error (IoError $"%s{e.Message}")
 
-    let private createFile directory fileName (contents: string) =
+    let private writeFile directory fileName (contents: string) =
         try
             let path = Path.Combine(directory, fileName)
             File.WriteAllText(path, contents)
@@ -83,7 +86,7 @@ module Io =
         with
             | e -> Error $"%s{e.Message}"
 
-    let generateFiles (args: Args) =
+    let generateFiles (args: Args) : unit =
         let count, prefix, baseLength, ext, outputDir, size, delay =
             args.FileCount,
             args.Options.Prefix,
@@ -96,17 +99,13 @@ module Io =
         let generateFileName baseName =
             toFileName { Prefix = prefix; Base = baseName; Ext = ext }
 
-        let sleep (ms: int) x =
-            Thread.Sleep ms
-            x
-
         let writeFile fileName =
             fileName
             |> generateFileContent size
-            |> createFile outputDir fileName
-            |> sleep delay
+            |> writeFile outputDir fileName
+            |-- (fun _ -> Thread.Sleep delay)
             |> printResult
 
         generateMultiple baseLength count
-        |> Array.map generateFileName
-        |> Array.iter writeFile
+        |> map generateFileName
+        |> iter writeFile
