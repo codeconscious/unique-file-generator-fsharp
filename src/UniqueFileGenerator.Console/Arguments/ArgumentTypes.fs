@@ -44,9 +44,8 @@ module ArgTypes =
         static member val Default = String.Empty
 
         static member Create maybeText =
-            match maybeText with
-            | Some text -> validateChars text
-            | None -> Ok Prefix.Default
+            maybeText
+            |> option validateChars (Ok Prefix.Default)
             |> map Prefix
 
         member this.Value = let (Prefix prefix) = this in prefix
@@ -68,9 +67,8 @@ module ArgTypes =
         static member val Default = String.Empty
 
         static member Create maybeText =
-            match maybeText with
-            | Some text -> text |> validateChars |> map String.trim
-            | None -> Ok Extension.Default
+            maybeText
+            |> option (validateChars >> map String.trim) (Ok Extension.Default)
             |> map Extension
 
         member this.Value = let (Extension ext) = this in ext
