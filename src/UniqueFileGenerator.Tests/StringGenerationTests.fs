@@ -12,7 +12,7 @@ module Strings =
         let count = 222
         let generated = generateMultiple itemLength count
 
-        Assert.True(generated |> Array.forall (fun x -> x.Length = itemLength))
+        Assert.True(generated |> List.forall (fun x -> x.Length = itemLength))
         Assert.True(generated.Length = count)
 
     [<Fact>]
@@ -29,7 +29,7 @@ module Strings =
         let count = 222
         let generated = generateMultiple itemLength count
 
-        Assert.True(generated |> Array.forall (fun x -> x.Length = itemLength))
+        Assert.True(generated |> List.forall (fun x -> x.Length = itemLength))
         Assert.True(generated.Length = count)
 
     [<Fact>]
@@ -53,7 +53,7 @@ module FileNames =
             generated
             |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
-        Assert.Equal<string[]>(generated, fileNames)
+        Assert.Equal<string list>(generated, fileNames)
 
     [<Fact>]
     let ``Generates filenames with a prefix and no extension`` () =
@@ -65,7 +65,7 @@ module FileNames =
             generated
             |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
-        Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
+        Assert.True(fileNames |> List.forall (fun x -> x.StartsWith prefix))
 
     [<Fact>]
     let ``Generates filenames with an extension and no prefix`` () =
@@ -77,7 +77,7 @@ module FileNames =
             generated
             |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
-        Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))
+        Assert.True(fileNames |> List.forall (fun x -> x.EndsWith extension))
 
     [<Fact>]
     let ``Generates filenames with a prefix and extension args`` () =
@@ -89,5 +89,5 @@ module FileNames =
             generated
             |> map (fun x -> toFileName { Prefix = prefix; Base = x; Ext = extension })
 
-        Assert.True(fileNames |> Array.forall (fun x -> x.StartsWith prefix))
-        Assert.True(fileNames |> Array.forall (fun x -> x.EndsWith extension))
+        Assert.True(fileNames |> List.forall (fun x -> x.StartsWith prefix))
+        Assert.True(fileNames |> List.forall (fun x -> x.EndsWith extension))

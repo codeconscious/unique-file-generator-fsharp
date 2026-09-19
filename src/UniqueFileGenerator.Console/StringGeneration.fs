@@ -20,11 +20,11 @@ module StringGeneration =
 
     let private generateSingle (length: int) : string =
         let sb = SB length
-        Array.init length (fun _ -> sb.Append charBank[rnd.Next charBank.Length]) |> ignore
+        List.init length (fun _ -> sb.Append charBank[rnd.Next charBank.Length]) |> ignore
         sb.ToString()
 
-    let generateMultiple eachLength count : string array =
-        Array.init count (fun _ -> generateSingle eachLength)
+    let generateMultiple eachLength count : string list =
+        List.init count (fun _ -> generateSingle eachLength)
 
     // TODO: Consider returning an actual file object.
     let toFileName parts : string =
