@@ -6,8 +6,8 @@ open CCFSharpUtils
 open CCFSharpUtils.Text
 
 module StringGeneration =
-    type FileNameParts =
-        { Prefix: string; Base: string; Ext: string }
+
+    type FileNameParts = { Prefix: string; Base: string; Ext: string }
 
     let private charBank = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -23,7 +23,7 @@ module StringGeneration =
 
     // TODO: Consider returning an actual file object.
     let toFileName parts : string =
-        let sanitizedExtension =
+        let sanitizedExt =
             match parts.Ext.Trim() with
             | ext when String.hasNoText ext -> String.Empty
             | ext when ext.StartsWith '.' -> ext
@@ -32,7 +32,7 @@ module StringGeneration =
         String.Concat(
             parts.Prefix.Trim(),
             parts.Base,
-            sanitizedExtension)
+            sanitizedExt)
 
     let generateFileContent sizeInBytes fallback : string =
         sizeInBytes |> option generateSingle fallback
