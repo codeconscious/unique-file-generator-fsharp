@@ -3,6 +3,7 @@ namespace UniqueFileGenerator.Console
 open Errors
 open Utilities
 open System
+open System.IO
 open FSharpPlus
 open CCFSharpUtils.Text
 
@@ -17,6 +18,14 @@ module ArgTypes =
         text
         |> tryParseInRange (floor, ceiling)
         |> Result.mapError (fun _ -> NumberParseFailure (text, (floor, ceiling)))
+
+    /// Determines whether a string contains characters invalid for filnames on this OS.
+    let validateChars text =
+        let isInvalid ch = Array.contains ch (Path.GetInvalidPathChars())
+        let invalidChars = text |> filter isInvalid |> String.toList
+        match invalidChars with
+        | [] -> Ok text
+        | _  -> Error (InvalidChars invalidChars)
 
     type FileCount = private FileCount of int with
         static member val AllowedRange = 1, Int32.MaxValue
@@ -36,8 +45,8 @@ module ArgTypes =
 
         static member Create maybeText =
             maybeText
-            |> option id Prefix.Default
-            |> Prefix
+            |> option validateChars (Ok Prefix.Default)
+            |> map Prefix
 
         member this.Value = let (Prefix prefix) = this in prefix
 
@@ -50,7 +59,7 @@ module ArgTypes =
             |> option
                 (stripSeparatorsAndTrim >> tryParseInRange NameBaseLength.AllowedRange)
                 (Ok NameBaseLength.Default)
-            |> Result.map NameBaseLength
+            |> map NameBaseLength
 
         member this.Value = let (NameBaseLength length) = this in length
 
@@ -59,8 +68,8 @@ module ArgTypes =
 
         static member Create maybeText =
             maybeText
-            |> option String.trim Extension.Default
-            |> Extension
+            |> option (validateChars >> map String.trim) (Ok Extension.Default)
+            |> map Extension
 
         member this.Value = let (Extension ext) = this in ext
 
