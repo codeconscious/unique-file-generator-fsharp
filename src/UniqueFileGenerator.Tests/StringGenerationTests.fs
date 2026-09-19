@@ -39,7 +39,7 @@ module Strings =
 
     [<Fact>]
     let ``Throws with negative item length`` () =
-        Assert.Throws<ArgumentException>(fun () ->
+        Assert.Throws<ArgumentOutOfRangeException>(fun () ->
             (generateMultiple -1 5000) :> obj)
 
 module FileNames =
