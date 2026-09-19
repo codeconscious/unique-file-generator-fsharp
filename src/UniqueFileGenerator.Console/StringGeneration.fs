@@ -2,6 +2,7 @@ namespace UniqueFileGenerator.Console
 
 open System
 open FSharpPlus
+open CCFSharpUtils
 open CCFSharpUtils.Text
 
 module StringGeneration =
@@ -15,10 +16,12 @@ module StringGeneration =
         |> map string
         |> String.concat String.Empty
 
-    let private rnd = Random()
+    let private rnd = Random.Shared
 
-    let private generateSingle length : string =
-        String(Array.init length (fun _ -> charBank[rnd.Next(charBank.Length)]))
+    let private generateSingle (length: int) : string =
+        let sb = SB length
+        Array.init length (fun _ -> sb.Append charBank[rnd.Next charBank.Length]) |> ignore
+        sb.ToString()
 
     let generateMultiple eachLength count : string array =
         Array.init count (fun _ -> generateSingle eachLength)
