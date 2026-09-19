@@ -7,14 +7,9 @@ open CCFSharpUtils.Text
 
 module StringGeneration =
     type FileNameParts =
-        { Prefix: string
-          Base: string
-          Ext: string }
+        { Prefix: string; Base: string; Ext: string }
 
-    let private charBank =
-        [ 'A' .. 'Z' ] @ [ 'a' .. 'z' ] @ [ '0' .. '9' ]
-        |> map string
-        |> String.concat String.Empty
+    let private charBank = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
     let private rnd = Random.Shared
 
@@ -32,7 +27,7 @@ module StringGeneration =
             match parts.Ext.Trim() with
             | ext when String.hasNoText ext -> String.Empty
             | ext when ext.StartsWith '.' -> ext
-            | ext -> $".%s{ext}"
+            | ext -> $".{ext}"
 
         String.Concat(
             parts.Prefix.Trim(),
