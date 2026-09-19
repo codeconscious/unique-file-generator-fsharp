@@ -27,10 +27,10 @@ module StringGeneration =
             match parts.Ext.Trim() with
             | ext when String.hasNoText ext -> String.Empty
             | ext when ext.StartsWith '.' -> ext
-            | ext -> $".{ext}"
+            | ext -> $".%s{ext}"
 
         String.Concat(
-            parts.Prefix.Trim(),
+            parts.Prefix,
             parts.Base,
             sanitizedExt)
 
