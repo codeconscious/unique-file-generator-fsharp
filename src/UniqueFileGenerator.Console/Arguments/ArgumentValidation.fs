@@ -1,75 +1,64 @@
 namespace UniqueFileGenerator.Console
 
-open UniqueFileGenerator.Console
-open System
-open Errors
-open FsToolkit.ErrorHandling
 open ArgTypes
+open Errors
+open System
+open CCFSharpUtils
+open FsToolkit.ErrorHandling
 
 module ArgValidation =
-    let private verifyArgCount (args: string array) =
-        let isEven i = i % 2 = 0
-
+    /// Ensure the count of args is odd, which is currently the only valid shape.
+    let private validateArgCount (args: string array) =
         match args.Length with
-        | 0 -> Error NoArgsPassed
-        | l when isEven l -> Error ArgCountInvalid
+        | 0 -> Error ArgsMissing
+        | l when Num.isEven l -> Error ArgCountInvalid
         | _ -> Ok ()
 
-    let private toPairs (argPairs: string array) =
+    let private validateOptionArgs (optionMap: Map<string, string>) =
+        let hasMalformedOptionKey keys =
+            let isCorrectFormat (o: string) =
+                o.Length = 2 && o.StartsWith "-" && Char.IsLetter o[1]
+
+            keys |> Seq.forall isCorrectFormat |> not
+
+        let hasUnknownOptionKey appOptions =
+            let isUnknown appOption = flags |> Map.values |> Seq.contains appOption |> not
+            appOptions |> Seq.exists isUnknown
+
+        match optionMap.Keys with
+        | keys when hasMalformedOptionKey keys -> Error MalformedFlags
+        | keys when hasUnknownOptionKey keys   -> Error UnknownFlags
+        | _ -> Ok optionMap
+
+    let private toPairs (args: string array) =
         let hasDuplicate xs =
             let originalLength = Seq.length xs
             let uniqueLength = xs |> Set.ofSeq |> Set.count
             originalLength <> uniqueLength
 
-        argPairs
-        |> Array.chunkBySize 2 // Will throw if array length is odd!
-        |> Array.map (fun x -> x[0].ToLowerInvariant(), x[1])
+        args
+        |> Array.chunkBySize 2
+        |> Array.map (fun pair -> pair[0].ToLowerInvariant(), pair[1])
         |> fun pairs ->
-            match pairs |> Array.map fst |> hasDuplicate with
-            | true -> Error DuplicateFlags
-            | false -> Ok (Map.ofArray pairs)
-
-    let private verifyOptionArgs (optionPairs: Map<string, string>) =
-        let hasMalformedOption optionPairs =
-            let isCorrectFormat (o: string) =
-                o.Length = 2 &&
-                o.StartsWith "-" &&
-                Char.IsLetter o[1]
-
-            optionPairs
-            |> Seq.forall isCorrectFormat
-            |> not
-
-        let hasUnsupportedOption options =
-            let isUnsupported option =
-                flags
-                |> Map.values
-                |> Seq.contains option
-                |> not
-
-            options
-            |> Seq.exists isUnsupported
-
-        match optionPairs with
-        | o when o.Keys |> hasMalformedOption -> Error MalformedFlags
-        | o when o.Keys |> hasUnsupportedOption -> Error UnsupportedFlags
-        | _ -> Ok ()
+            // Check for duplicates here because conversion to a map will
+            // silently use only the last duplicate (though that is apparently
+            // undocumented behavior with a chance of changing in the future).
+            if hasDuplicate (Array.map fst pairs)
+            then Error DuplicateFlags
+            else validateOptionArgs (Map.ofArray pairs)
 
     let validate args =
         result {
-            do! verifyArgCount args
-            let fileCountArg, optionArgs = args[0], args[1..]
+            do! validateArgCount args
 
-            let! count = FileCount.Create fileCountArg
+            let! fileCount = FileCount.TryCreate (Array.head args)
+            let! optionMap = toPairs (Array.tail args)
 
-            let! optionArgPairs = optionArgs |> toPairs
-            do! verifyOptionArgs optionArgPairs
-            let tryGetArg x = optionArgPairs |> Map.tryFind flags[x]
-
-            let p = Prefix.Create (tryGetArg Prefix)
+            let tryGetArg x = Map.tryFind flags[x] optionMap
+            let  p = Prefix.Create (tryGetArg Prefix)
             let! b = NameBaseLength.TryCreate (tryGetArg NameBaseLength)
-            let e = Extension.Create (tryGetArg Extension)
-            let o = OutputDirectory.Create (tryGetArg OutputDirectory)
+            let  e = Extension.Create (tryGetArg Extension)
+            let  o = OutputDirectory.Create (tryGetArg OutputDirectory)
             let! s = Size.TryCreate (tryGetArg Size)
             let! d = Delay.TryCreate (tryGetArg Delay)
 
@@ -81,5 +70,5 @@ module ArgValidation =
                   Size = s.Value
                   Delay = d.Value }
 
-            return Args.Create(count, options)
+            return Args.Create(fileCount, options)
         }

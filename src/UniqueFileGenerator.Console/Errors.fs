@@ -3,32 +3,32 @@ namespace UniqueFileGenerator.Console
 open Utilities
 
 module Errors =
-    type ErrorType =
-        | NoArgsPassed
+
+    type AppError =
+        | ArgsMissing
         | ArgCountInvalid
         | MalformedFlags
-        | UnsupportedFlags
+        | UnknownFlags
         | DuplicateFlags
-        | ParseNumberFailure of Arg: string * AllowedRange: (int * int)
+        | NumberParseFailure of Input: string * AllowedRange: (int * int)
         | DirectoryMissing of string
         | DriveSpaceConfirmationFailure
         | DriveSpaceInsufficient of Needed: string * Actual: string
         | IoError of string
         | CancelledByUser
 
-    let getMessage error =
-        match error with
-        | NoArgsPassed -> "You must pass in at least one argument: the number of files to generate."
-        | ArgCountInvalid -> "Invalid argument count."
-        | MalformedFlags -> "Malformed flag(s) found."
-        | UnsupportedFlags -> "Unsupported flag(s) found."
+    let errorMsg = function
+        | ArgsMissing -> "You must pass in at least one argument: the number of files to generate."
+        | ArgCountInvalid -> "Invalid arguments. If you submit option flags, each must have a corresponding value."
+        | MalformedFlags -> "Malformed option flag(s) found."
+        | UnknownFlags -> "Unknown option flag(s) found."
         | DuplicateFlags -> "Duplicate option flag(s) found. Each can only be used once."
-        | ParseNumberFailure (x, (f, c)) ->
-            $"Could not parse \"%s{x}\" to an integer between %s{formatInt f} and %s{formatInt c}, inclusive."
-        | DirectoryMissing e -> $"Directory \"%s{e}\" was not found."
+        | NumberParseFailure (input, (floor, ceiling)) ->
+            $"The number \"%s{input}\" is out of bounds. Enter an integer between %s{Num.Format floor} and %s{Num.Format ceiling}, inclusive."
+        | DirectoryMissing dirName -> $"Directory \"%s{dirName}\" was not found."
         | DriveSpaceConfirmationFailure -> "Could not confirm available drive space."
         | DriveSpaceInsufficient (needed, actual) ->
-            $"Insufficient drive space. Though %s{needed} is necessary, only %s{actual} is available."
-        | IoError e -> $"IO error: %s{e}"
-        | CancelledByUser -> "Cancelled."
+            $"Insufficient drive space: %s{needed} is necessary, but only %s{actual} is available."
+        | IoError msg -> $"IO error: %s{msg}"
+        | CancelledByUser -> "Cancelled by the user."
 
