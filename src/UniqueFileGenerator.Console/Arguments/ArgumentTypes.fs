@@ -20,12 +20,13 @@ module ArgTypes =
         |> Result.mapError (fun _ -> NumberParseFailure (text, (floor, ceiling)))
 
     /// Determines whether a string contains characters invalid for filnames on this OS.
-    let validateChars text =
-        let isInvalid ch = Array.contains ch (Path.GetInvalidPathChars())
-        let invalidChars = text |> filter isInvalid |> String.toList
-        match invalidChars with
-        | [] -> Ok text
-        | _  -> Error (InvalidChars invalidChars)
+    let validateChars (text: string) =
+        let invalidChars = Path.GetInvalidFileNameChars() |> Set.ofArray
+        let isInvalidChar ch = Set.contains ch invalidChars
+        let rejectedChars = filter isInvalidChar text
+        if String.hasNoText rejectedChars
+            then Ok text
+            else Error (rejectedChars |> String.toList |> InvalidChars)
 
     type FileCount = private FileCount of int with
         static member val AllowedRange = 1, Int32.MaxValue
