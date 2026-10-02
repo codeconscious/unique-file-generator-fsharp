@@ -32,8 +32,8 @@ module ArgValidation =
 
     let private toPairs (args: string array) =
         let hasDuplicate xs =
-            let originalLength = Seq.length xs
-            let uniqueLength = xs |> Set.ofSeq |> Set.count
+            let originalLength = Array.length xs
+            let uniqueLength = xs |> Set.ofArray |> Set.count
             originalLength <> uniqueLength
 
         args
